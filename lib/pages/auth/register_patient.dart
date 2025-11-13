@@ -19,10 +19,10 @@ class RegisterPatientPage extends StatefulWidget {
 class _RegisterPatientPageState extends State<RegisterPatientPage>
     with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _firstName = TextEditingController();
-  final TextEditingController _lastName = TextEditingController();
-  final TextEditingController _email = TextEditingController();
-  final TextEditingController _password = TextEditingController();
+  final TextEditingController _firstName   = TextEditingController();
+  final TextEditingController _lastName    = TextEditingController();
+  final TextEditingController _email       = TextEditingController();
+  final TextEditingController _password    = TextEditingController();
   final TextEditingController _phoneNumber = TextEditingController();
 
   bool _showErrors = false;

@@ -5,6 +5,7 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:university_project/core/config/app_config.dart';
 import 'package:university_project/pages/patient/my_appointments_page.dart';
 import '../../core/config/theme.dart';
+import '../components/chat_page.dart';
 import 'book_appointment_page.dart';
 import 'messages_page.dart';
 import 'profile_patient.dart';
@@ -30,6 +31,7 @@ class _HomePatientPageState extends State<HomePatientPage>
 
   Future<void> fetchPatientName() async {
     final url = Uri.parse(patientMe);
+
     final response = await http.get(url, headers: {
       'Authorization': 'Bearer ${widget.token}',
     });
@@ -70,7 +72,7 @@ class _HomePatientPageState extends State<HomePatientPage>
   }
   List<Widget> get _pages => [
     _buildDashboard(context),
-     MessagesPage(),
+     ChatsListPage(),
     MyAppointmentsPage(token: widget.token),
     ProfilePatientPage(token: widget.token),
   ];
@@ -310,15 +312,14 @@ class _HomePatientPageState extends State<HomePatientPage>
     );
   }
 
-  // --------------------------- دائرة ضبابية ---------------------------
   Widget _buildBlurCircle(Color color) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(60),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
         child: Container(
-          width: 120,
-          height: 120,
+          width: 100,
+          height: 100,
           color: color.withOpacity(0.4),
         ),
       ),

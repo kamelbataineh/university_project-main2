@@ -61,7 +61,6 @@ class _PatientLoginPageState extends State<PatientLoginPage> with SingleTickerPr
         final resBody = jsonDecode(resBodyStr);
         final token = resBody["access_token"] ?? "";
 
-        // 🟢 إضافة هذه السطور المهمة
         final patientData = resBody["patient_data"] ?? {};
         final firstName = patientData["first_name"] ?? "";
         final lastName = patientData["last_name"] ?? "";

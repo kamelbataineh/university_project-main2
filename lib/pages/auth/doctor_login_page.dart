@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:university_project/core/config/theme.dart';
 import 'package:university_project/pages/doctor/doctor_intro_page.dart';
-import '../auth/register_doctor.dart';
+import '../../core/config/app_config.dart';
 import '../doctor/home_doctor.dart';
+import 'package:http/http.dart' as http;
 
 class LoginDoctorPage extends StatefulWidget {
   const LoginDoctorPage({Key? key}) : super(key: key);
@@ -35,14 +37,47 @@ class _LoginDoctorPageState extends State<LoginDoctorPage> with SingleTickerProv
     super.dispose();
   }
 
-  // مجرد تصميم، لا يتصل بالداتا
-  void _loginDoctor() {
+  void _loginDoctor() async {
     if (!_formKey.currentState!.validate()) return;
+
     setState(() => loading = true);
-    Future.delayed(Duration(seconds: 1), () {
+
+    try {
+      final body = jsonEncode({
+        "email": _email.text.trim(),
+        "password": _password.text.trim(),
+      });
+
+      final response = await http.post(
+        Uri.parse(doctorLogin),
+        headers: {'Content-Type': 'application/json'},
+        body: body,
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        // أخذ التوكن و id الدكتور
+        final token = data['access_token'];
+        final doctorId = data['doctor_id'];
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => HomeDoctorPage(token: token),
+          ),
+        );
+      } else {
+        final message = data['detail'] ?? 'حدث خطأ، حاول مرة أخرى';
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(message)));
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('خطأ في الاتصال بالخادم')));
+    } finally {
       setState(() => loading = false);
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomeDoctorPage(token: "demo", doctorId: 1)));
-    });
+    }
   }
 
   Widget neumorphicTextField({required TextEditingController controller, required String hint, required IconData icon, bool obscure = false, String? Function(String?)? validator}) {
@@ -60,7 +95,7 @@ class _LoginDoctorPageState extends State<LoginDoctorPage> with SingleTickerProv
         controller: controller,
         obscureText: obscure,
         validator: validator,
-        style: TextStyle(color: AppTheme.doctorPrimary),
+        style: TextStyle(color: AppTheme.doctorText),
         decoration: InputDecoration(
           prefixIcon: Icon(icon, color:AppTheme.doctorIcon),
           hintText: hint,

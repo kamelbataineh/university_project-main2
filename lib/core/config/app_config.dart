@@ -34,25 +34,28 @@ const patientMeUpdate             = baseUrl + "patients/me_update";
 /////
 ////
 ///
-// قائمة الأطباء
-const  AppointmentsListDoctors = baseUrl +"appointments/doctors";
-// حجز موعد
-const  AppointmentsBook = baseUrl + "appointments/book";
+// ==================== Appointments API ====================
 
-// إلغاء موعد
-const  AppointmentsCancel =  baseUrl +"appointments/cancel";
+// 🧑‍⚕ قائمة الأطباء
+const AppointmentsListDoctors = baseUrl + "appointments/doctors";
 
-// مواعيد المريض
-const  AppointmentsMy =  baseUrl +"appointments/my-appointments";
+// 📅 حجز موعد جديد
+const AppointmentsBook = baseUrl + "appointments/book";
 
-// مواعيد الطبيب
-const  AppointmentsDoctor = baseUrl + "appointments/doctor-appointments";
+// ❌ إلغاء الموعد
+const AppointmentsCancel = baseUrl + "appointments/cancel"; // لاحقًا ستضيف /{appointment_id} عند الاستدعاء
 
-// موافقة أو رفض الموعد (Doctor)
-const  AppointmentsApprove =  baseUrl +"appointments/approve";
+// 🧍‍♂ مواعيد المريض
+const AppointmentsMy = baseUrl + "appointments/my-appointments";
 
-// الأوقات المتاحة للطبيب
-const  AppointmentsAvailableSlots =  baseUrl +"appointments/available-slots";
+// 🧑‍⚕ مواعيد الطبيب
+const AppointmentsDoctor = baseUrl + "appointments/doctor-appointments";
+
+// 🩺 موافقة أو رفض الموعد (Doctor)
+const AppointmentsApprove = baseUrl + "appointments/approve"; // لاحقًا ستضيف /{appointment_id} عند الاستدعاء
+
+// 🕓 عرض الأوقات المتاحة للطبيب
+const AppointmentsDoctorAvailable = baseUrl + "appointments/available-slots"; // لاحقًا ستضيف /{doctor_id}?date=yyyy-mm-dd
 
 
 
