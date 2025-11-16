@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:university_project/pages/components/chats_list_page.dart';
 import '../upload/upload_image.dart';
 import '../upload/upload_page.dart';
 import 'doctor_appointments_page.dart';
@@ -10,8 +11,9 @@ import '../../core/config/theme.dart';
 
 class HomeDoctorPage extends StatefulWidget {
   final String token;
+  final String userId;
 
-  const HomeDoctorPage({Key? key, required this.token}) : super(key: key);
+  const HomeDoctorPage({Key? key, required this.token ,required this.userId}) : super(key: key);
 
   @override
   State<HomeDoctorPage> createState() => _HomeDoctorPageState();
@@ -33,7 +35,7 @@ class _HomeDoctorPageState extends State<HomeDoctorPage> with SingleTickerProvid
 
     _pages.addAll([
       _buildDashboard(),
-      ChatsListPage(),
+      ChatsListPage(userId:widget.userId, token:  widget.token,),
       UploadPage(),
       DoctorAppointmentsPage(token: widget.token),
       ProfileDoctorPage(token: widget.token),

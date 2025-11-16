@@ -1,45 +1,59 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import '../../core/config/app_config.dart';
+import 'chat_page.dart'; // رابط صفحة المحادثة
 
-class ChatPage extends StatefulWidget {
-  final String name;
-  const ChatPage({required this.name, Key? key}) : super(key: key);
+class ChatsListPage extends StatefulWidget {
+  final String userId;
+  final String token;
+
+  const ChatsListPage({required this.userId, required this.token, Key? key}) : super(key: key);
 
   @override
-  State<ChatPage> createState() => _ChatPageState();
+  State<ChatsListPage> createState() => _ChatsListPageState();
 }
 
-class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
-  final TextEditingController _controller = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
-  List<Map<String, String>> messages = [
-    {"sender": "other", "text": "Hello! How can I help you today?", "time": "10:30 AM"},
-    {"sender": "me", "text": "Hi! I have a question about my appointment.", "time": "10:31 AM"},
-  ];
+class _ChatsListPageState extends State<ChatsListPage> {
+  List<Map<String, dynamic>> chats = [];
+  bool isLoading = true;
 
-  void sendMessage() {
-    if (_controller.text.trim().isEmpty) return;
-    setState(() {
-      messages.add({
-        "sender": "me",
-        "text": _controller.text.trim(),
-        "time": DateFormat('hh:mm a').format(DateTime.now()),
-      });
-      _controller.clear();
-    });
-    Future.delayed(const Duration(milliseconds: 200), () {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent + 100,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
+  @override
+  void initState() {
+    super.initState();
+    fetchChats();
+  }
+
+  Future<void> fetchChats() async {
+    try {
+      print("Sending token: ${widget.token}");
+      final response = await http.get(
+        Uri.parse(chatList),
+        headers: {
+          'Authorization': 'Bearer ${widget.token}', // ✅ استخدم التوكن الحقيقي
+        },
       );
-    });
+      print("Sending token: ${widget.token}");
+
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          chats = data.map((e) => e as Map<String, dynamic>).toList();
+          isLoading = false;
+        });
+      } else {
+        setState(() => isLoading = false);
+      }
+    } catch (e) {
+      print("Error fetching chats: $e");
+      setState(() => isLoading = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // خلفية متدرجة تشبه React
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -51,163 +65,96 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
         child: SafeArea(
           child: Column(
             children: [
-              // ====== AppBar شفافة ======
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.4),
-                  border: const Border(
-                    bottom: BorderSide(color: Colors.white38),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  "المحادثات",
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.pink.shade600,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.pink.shade100.withOpacity(0.3),
-                      blurRadius: 10,
-                      offset: const Offset(0, 3),
-                    )
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    // زر الرجوع
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back_ios_new, color: Colors.pinkAccent),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                    CircleAvatar(
-                      backgroundColor: Colors.purpleAccent.withOpacity(0.8),
-                      child: Text(
-                        widget.name[0].toUpperCase(),
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(widget.name,
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                        const Text("Online",
-                            style: TextStyle(fontSize: 12, color: Colors.grey)),
-                      ],
-                    ),
-                  ],
                 ),
               ),
-
-              // ====== الرسائل ======
               Expanded(
-                child: ListView.builder(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.all(12),
-                  itemCount: messages.length,
+                child: isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : ListView.builder(
+                  itemCount: chats.length,
                   itemBuilder: (context, index) {
-                    final msg = messages[index];
-                    final isMe = msg["sender"] == "me";
-                    return AnimatedContainer(
-                      duration: const Duration(milliseconds: 250),
-                      curve: Curves.easeInOut,
-                      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                    final chat = chats[index];
+                    final lastMessage = chat["lastMessage"] ?? "";
+
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ChatPage(
+                              name: chat["chat_with"],
+                              userId: widget.userId,
+                              otherId: chat["chat_with_id"],
+                              token: widget.token,
+                            ),
+                          ),
+                        );
+                      },
                       child: Container(
-                        margin: const EdgeInsets.symmetric(vertical: 5),
-                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
-                        constraints: const BoxConstraints(maxWidth: 280),
+                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                        padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          gradient: isMe
-                              ? const LinearGradient(
-                            colors: [Color(0xFFF472B6), Color(0xFFE11D48)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          )
-                              : null,
-                          color: isMe ? null : Colors.white.withOpacity(0.6),
+                          color: Colors.white.withOpacity(0.6),
+                          borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 6,
-                              offset: const Offset(2, 3),
+                              color: Colors.pink.shade100.withOpacity(0.2),
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
                             )
                           ],
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Row(
                           children: [
-                            Text(
-                              msg["text"]!,
-                              style: TextStyle(
-                                color: isMe ? Colors.white : Colors.grey[800],
-                                fontSize: 15,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Align(
-                              alignment: Alignment.bottomRight,
+                            CircleAvatar(
+                              radius: 25,
+                              backgroundColor: Colors.pink.shade300,
                               child: Text(
-                                msg["time"]!,
-                                style: TextStyle(
-                                  color: isMe ? Colors.pink.shade100 : Colors.grey,
-                                  fontSize: 10,
+                                chat["chat_with"][0],
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    chat["chat_with"],
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    lastMessage,
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Icon(Icons.chat_bubble_outline, color: Colors.pink.shade300),
                           ],
                         ),
                       ),
                     );
                   },
-                ),
-              ),
-
-              // ====== شريط الإدخال ======
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.4),
-                  border: const Border(top: BorderSide(color: Colors.white38)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.pink.shade100.withOpacity(0.2),
-                      blurRadius: 10,
-                      offset: const Offset(0, -2),
-                    )
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    // زر المرفقات
-                    IconButton(
-                      icon: const Icon(Icons.attach_file, color: Colors.purpleAccent),
-                      onPressed: () {},
-                    ),
-
-                    // مربع الكتابة
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.6),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: TextField(
-                          controller: _controller,
-                          decoration: const InputDecoration(
-                            hintText: "اكتب رسالة...",
-                            border: InputBorder.none,
-                            contentPadding:
-                            EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                          ),
-                          minLines: 1,
-                          maxLines: 5,
-                        ),
-                      ),
-                    ),
-
-                    // زر الإرسال
-                    IconButton(
-                      icon: const Icon(Icons.send_rounded, color: Colors.pinkAccent),
-                      onPressed: sendMessage,
-                    ),
-                  ],
                 ),
               ),
             ],

@@ -5,7 +5,9 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:university_project/core/config/app_config.dart';
 import 'package:university_project/pages/patient/my_appointments_page.dart';
 import '../../core/config/theme.dart';
+import '../auth/doctors_list_page.dart';
 import '../components/chat_page.dart';
+import '../components/chats_list_page.dart';
 import 'book_appointment_page.dart';
 import 'messages_page.dart';
 import 'profile_patient.dart';
@@ -72,9 +74,11 @@ class _HomePatientPageState extends State<HomePatientPage>
   }
   List<Widget> get _pages => [
     _buildDashboard(context),
-     ChatsListPage(),
+     ChatsListPage(userId: userId, token: widget.token),
     MyAppointmentsPage(token: widget.token),
+    DoctorsListPage(token: widget.token, userId: userId, ),
     ProfilePatientPage(token: widget.token),
+
   ];
 
   void _onItemTapped(int index) => setState(() => _selectedIndex = index);
@@ -94,6 +98,8 @@ class _HomePatientPageState extends State<HomePatientPage>
               ? 'Messages'
               : _selectedIndex == 2
               ? 'My appointments'
+              : _selectedIndex == 3
+              ? 'list doctor'
               : 'Personal profile',
           style:  TextStyle(
               fontWeight: FontWeight.bold, color: Colors.white, fontSize: 18),
@@ -161,7 +167,8 @@ class _HomePatientPageState extends State<HomePatientPage>
               Expanded(child: _buildNavItem(Icons.home_outlined, 'Home', 0)),
               Expanded(child: _buildNavItem(Icons.message_outlined, 'Messages', 1)),
               Expanded(child: _buildNavItem(Icons.calendar_today_outlined, 'Appointments', 2)),
-              Expanded(child: _buildNavItem(Icons.person_outline, ' Personal profile', 3)),
+              Expanded(child: _buildNavItem(Icons.h_mobiledata, 'list doctor', 3)),
+              Expanded(child: _buildNavItem(Icons.person_outline, ' Personal profile', 4)),
             ],
           ),
         ),

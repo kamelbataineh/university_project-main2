@@ -22,7 +22,7 @@ class _CreateAdminPageState extends State<CreateAdminPage> {
 
     try {
       final response = await http.post(
-        Uri.parse(adminCreate),
+        Uri.parse(adminLogin),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "email": _email.text,

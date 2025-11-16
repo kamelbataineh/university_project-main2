@@ -25,7 +25,7 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
   }
 
   Future<void> fetchMyAppointments() async {
-    final url = Uri.parse(AppointmentsMy);
+    final url = Uri.parse(myAppointmentsUrl);
     try {
       final res = await http.get(url, headers: {
         "Authorization": "Bearer ${widget.token}",
@@ -47,7 +47,7 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
   }
 
   Future<void> requestCancel(String appointmentId) async {
-    final url = Uri.parse(AppointmentsCancel + appointmentId);
+    final url = Uri.parse(cancelAppointmentUrl + appointmentId);
     try {
       final res = await http.post(
         url,

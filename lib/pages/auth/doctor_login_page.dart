@@ -64,7 +64,7 @@ class _LoginDoctorPageState extends State<LoginDoctorPage> with SingleTickerProv
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => HomeDoctorPage(token: token),
+            builder: (_) => HomeDoctorPage(token: token, userId: doctorId),
           ),
         );
       } else {

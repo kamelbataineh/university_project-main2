@@ -1,17 +1,22 @@
 //  localhost
 const baseUrl                     = "http://10.0.2.2:8000/";
+const baseUrl1                     = "http://10.0.2.2:8000";
+
+
+const String chatSend       = baseUrl + "chat/send";
+const String chatList       = baseUrl + "chat/list";
+const String chatMessages   = baseUrl + "chat/messages/";      // + otherId
+const String chatUploadFile = baseUrl + "chat/upload_file/";   // + otherId
+
+
+
 
 
 
 // ---------- Admin ----------
-const adminCreate = baseUrl + "admin/create";
 const adminLogin  = baseUrl + "admin/login";
 const adminCheck  = baseUrl + "admin/check";
 
-// ---------- Doctors Management ----------
-const pendingDoctors   = baseUrl + "admin/pending-doctors";
-const approveDoctor    = baseUrl + "admin/approve-doctor/"; // لاحظ: لازم تضيف ID بعد الرابط
-const rejectDoctor     = baseUrl + "admin/reject-doctor/";  // لاحظ: لازم تضيف ID بعد الرابط
 
 //  (Doctor)
 const doctorRegister              = baseUrl + "doctors/register";
@@ -20,6 +25,10 @@ const doctorLogout                = baseUrl + "doctors/logout";
 const doctorUpdate                = baseUrl + "doctors/update";
 const doctorMe                    = baseUrl + "doctors/me";
 const doctorCV                    = baseUrl + "uploads/cv_files/";
+
+
+const String getAllDoctorsUrl =  baseUrl + "doctors/all";
+const String getDoctorByIdUrl =  baseUrl +"doctors/";
 
 //  (User)
 const patientRegister             = baseUrl + "patients/register";
@@ -35,29 +44,15 @@ const patientMeUpdate             = baseUrl + "patients/me_update";
 ////
 ///
 // ==================== Appointments API ====================
-
-// 🧑‍⚕ قائمة الأطباء
-const AppointmentsListDoctors = baseUrl + "appointments/doctors";
-
-// 📅 حجز موعد جديد
-const AppointmentsBook = baseUrl + "appointments/book";
-
-// ❌ إلغاء الموعد
-const AppointmentsCancel = baseUrl + "appointments/cancel"; // لاحقًا ستضيف /{appointment_id} عند الاستدعاء
-
-// 🧍‍♂ مواعيد المريض
-const AppointmentsMy = baseUrl + "appointments/my-appointments";
-
-// 🧑‍⚕ مواعيد الطبيب
-const AppointmentsDoctor = baseUrl + "appointments/doctor-appointments";
-
-// 🩺 موافقة أو رفض الموعد (Doctor)
-const AppointmentsApprove = baseUrl + "appointments/approve"; // لاحقًا ستضيف /{appointment_id} عند الاستدعاء
-
-// 🕓 عرض الأوقات المتاحة للطبيب
-const AppointmentsDoctorAvailable = baseUrl + "appointments/available-slots"; // لاحقًا ستضيف /{doctor_id}?date=yyyy-mm-dd
-
-
+const String doctorsListUrl = baseUrl + "appointments/doctors";
+const String bookAppointmentUrl = baseUrl + "appointments/book";
+const String cancelAppointmentUrl = baseUrl + "appointments/cancel"; // لاحقًا /{id}
+const String myAppointmentsUrl = baseUrl + "appointments/my-appointments";
+const String availableSlotsUrl = baseUrl + "appointments/available-slots"; // لاحقًا /{doctor_id}?date=yyyy-mm-dd
+const String approveAppointmentUrl = baseUrl+ "appointments/approve";
+// لاحقًا /{appointment_id}?approve=true
+const String doctorAppointmentsUrl = baseUrl + "appointments/doctor-appointments";
+const String completeAppointmentUrl =      baseUrl + "appointments/complete"; // لاحظ نفس اسم endpoint
 
 //
 //const String AppointmentsDoctors  = baseUrl + "appointments/doctors";                // جلب قائمة الدكاترة

@@ -31,82 +31,57 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
   @override
   void initState() {
     super.initState();
+    print("🔹 initState called");
     fetchDoctors();
   }
-
-  // -------------------- جلب الأطباء --------------------
+// ===================== إضافة في _BookAppointmentPageState =====================
+  // 🩺 جلب قائمة الأطباء من السيرفر
   Future<void> fetchDoctors() async {
+    setState(() => isLoading = true);
     try {
-      final url = Uri.parse(AppointmentsListDoctors);
-      final res = await http.get(url, headers: {
-        'Authorization': 'Bearer ${widget.token}',
-        'Content-Type': 'application/json',
-      });
+      final response = await http.get(
+        Uri.parse(doctorsListUrl),
+        headers: {'Authorization': 'Bearer ${widget.token}'},
+      );
 
-      if (res.statusCode == 200) {
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
         setState(() {
-          doctors = json.decode(utf8.decode(res.bodyBytes));
+          doctors = data.map((doc) => {
+            'id': doc['id'] ?? doc['_id'],
+            'name': doc['first_name'] + " " + doc['last_name'],
+            'specialty': doc['specialty'] ?? ""
+          }).toList();
         });
       } else {
-        print("⚠️ Error fetching doctors: ${res.statusCode}");
+        print("❌ Failed to fetch doctors: ${response.body}");
       }
     } catch (e) {
-      print("❌ Exception while fetching doctors: $e");
+      print("❌ Error fetching doctors: $e");
+    } finally {
+      setState(() => isLoading = false);
     }
   }
 
-  // -------------------- اختيار التاريخ --------------------
+  // 📅 اختيار التاريخ
   Future<void> pickDate() async {
-    if (selectedDoctorId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('اختر الطبيب أولاً')),
-      );
-      return;
-    }
-
-    if (doctors.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('لا يوجد أطباء متاحون')),
-      );
-      return;
-    }
-
-    final doctorList = doctors.where((d) => d['id'].toString() == selectedDoctorId).toList();
-    if (doctorList.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('الطبيب غير موجود')),
-      );
-      return;
-    }
     final now = DateTime.now();
-    DateTime firstDate = now.add(const Duration(days: 1));
-
-// ضبط ليكون أول يوم مسموح
-    while (![7, 1, 2, 3, 4].contains(firstDate.weekday)) {
-      firstDate = firstDate.add(const Duration(days: 1));
-    }
-
-    final lastDate = now.add(const Duration(days: 30));
-
     final picked = await showDatePicker(
       context: context,
-      initialDate: firstDate,
-      firstDate: firstDate,
-      lastDate: lastDate,
-      selectableDayPredicate: (date) {
-        return [7, 1, 2, 3, 4].contains(date.weekday);
-      },
+      initialDate: now,
+      firstDate: now,
+      lastDate: now.add(const Duration(days: 60)),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: Colors.pink.shade400,
-              surface: Colors.white,
+              primary: Colors.pinkAccent, // لون الأزرار
+              onPrimary: Colors.white,
+              onSurface: Colors.black87,
             ),
           ),
           child: child!,
         );
-
       },
     );
 
@@ -116,118 +91,88 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
         selectedTime = null;
         availableTimes = [];
       });
-      await updateAvailableTimes();
+      fetchAvailableTimes();
     }
   }
 
-  // -------------------- جلب الأوقات المتاحة --------------------
-  Future<void> updateAvailableTimes() async {
+  // ⏰ جلب الأوقات المتاحة للطبيب
+  Future<void> fetchAvailableTimes() async {
     if (selectedDoctorId == null || selectedDate == null) return;
 
-    setState(() => isLoading = true);
-
+    final dateStr = "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2,'0')}-${selectedDate!.day.toString().padLeft(2,'0')}";
     try {
-      final dateStr = DateFormat('yyyy-MM-dd').format(selectedDate!);
-      final uri = Uri.parse("$AppointmentsDoctorAvailable/$selectedDoctorId")
-          .replace(queryParameters: {"date": dateStr});
+      final response = await http.get(
+        Uri.parse('$availableSlotsUrl/$selectedDoctorId?date=$dateStr'),
+        headers: {'Authorization': 'Bearer ${widget.token}'},
+      );
 
-      final res = await http.get(uri, headers: {
-        'Authorization': 'Bearer ${widget.token}',
-        'Content-Type': 'application/json',
-      });
-
-      print("Fetch available times status: ${res.statusCode}");
-      print("Fetch available times body: ${res.body}");
-
-      if (res.statusCode == 200) {
-        final decoded = json.decode(res.body);
-        if (decoded is List) {
-          final times = decoded.map((e) => e.toString()).toList();
-          setState(() {
-            availableTimes = times;
-            selectedTime = null;
-          });
-        } else {
-          print("⚠️ Response not a List");
-          setState(() {
-            availableTimes = [];
-            selectedTime = null;
-          });
-        }
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          availableTimes = List<String>.from(data);
+        });
       } else {
-        print("⚠️ Error fetching available times: ${res.statusCode}");
-        setState(() => availableTimes = []);
+        print("❌ Failed to fetch slots: ${response.body}");
       }
     } catch (e) {
-      print("❌ Exception fetching times: $e");
-      setState(() => availableTimes = []);
-    } finally {
-      setState(() => isLoading = false);
+      print("❌ Error fetching slots: $e");
     }
   }
 
-  // -------------------- حجز الموعد --------------------
+  // ✅ حجز الموعد
   Future<void> bookAppointment() async {
-    if (selectedDoctorId == null ||
-        selectedDate == null ||
-        selectedTime == null ||
-        reasonController.text.isEmpty) {
+    if (selectedDoctorId == null || selectedDate == null || selectedTime == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('يرجى تعبئة جميع الحقول')),
+        const SnackBar(content: Text("رجاءً اختر الطبيب والتاريخ والوقت")),
       );
       return;
     }
 
-    setState(() => isLoading = true);
+    final dateTime = DateTime(
+      selectedDate!.year,
+      selectedDate!.month,
+      selectedDate!.day,
+      int.parse(selectedTime!.split(":")[0]),
+      int.parse(selectedTime!.split(":")[1]),
+    );
 
     try {
-      final timeParts = selectedTime!.split(':');
-      final dateTime = DateTime(
-        selectedDate!.year,
-        selectedDate!.month,
-        selectedDate!.day,
-        int.parse(timeParts[0]),
-        int.parse(timeParts[1]),
+      final response = await http.post(
+        Uri.parse(bookAppointmentUrl),
+        headers: {
+          'Authorization': 'Bearer ${widget.token}',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          "doctor_id": selectedDoctorId,
+          "date_time": dateTime.toIso8601String(),
+          "reason": reasonController.text
+        }),
       );
 
-      final isoDateTime = dateTime.toIso8601String().split('.').first;
-
-      // إرسال البيانات كـ query parameters وليس body
-      final uri = Uri.parse(AppointmentsBook).replace(queryParameters: {
-        "doctor_id": selectedDoctorId!,
-        "date_time": isoDateTime,
-        "reason": reasonController.text
-      });
-
-      final res = await http.post(uri, headers: {
-        'Authorization': 'Bearer ${widget.token}',
-        'Content-Type': 'application/json',
-      });
-
-      print("Book appointment status: ${res.statusCode}");
-      print("Book appointment body: ${res.body}");
-
-      if (res.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('✅ تم الحجز بنجاح')),
+          const SnackBar(content: Text("تم حجز الموعد بنجاح 🌸")),
         );
-        Navigator.pop(context);
+        setState(() {
+          selectedDoctorId = null;
+          selectedDate = null;
+          selectedTime = null;
+          availableTimes = [];
+          reasonController.clear();
+        });
       } else {
-        final body = json.decode(res.body);
+        print("❌ Booking failed: ${response.body}");
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('خطأ في الحجز: ${body['detail'] ?? res.statusCode}')),
+          const SnackBar(content: Text("فشل في حجز الموعد")),
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('❌ خطأ: $e')),
-      );
-    } finally {
-      setState(() => isLoading = false);
+      print("❌ Error booking appointment: $e");
     }
   }
 
-  // -------------------- تصميم البطاقة --------------------
+  // -------------------- نيو مورفيزم كارد --------------------
   Widget neumorphicCard({required Widget child}) {
     return Container(
       decoration: BoxDecoration(
@@ -249,6 +194,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
 
   @override
   Widget build(BuildContext context) {
+    print("🔹 Building UI");
     return Scaffold(
       backgroundColor: const Color(0xFFFFF8F5),
       appBar: AppBar(
@@ -281,6 +227,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                 ))
                     .toList(),
                 onChanged: (val) {
+                  print("🔹 Doctor selected: $val");
                   setState(() {
                     selectedDoctorId = val;
                     selectedDate = null;
@@ -309,7 +256,10 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                   children: availableTimes.map((time) {
                     final isSelected = selectedTime == time;
                     return GestureDetector(
-                      onTap: () => setState(() => selectedTime = time),
+                      onTap: () {
+                        print("🔹 Time selected: $time");
+                        setState(() => selectedTime = time);
+                      },
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
