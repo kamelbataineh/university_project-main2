@@ -28,7 +28,7 @@ class _DoctorIntroPageState extends State<DoctorIntroPage> {
     },
     {
       "title": "Please Note",
-      "subtitle": "After uploading your CV, it will be reviewed within 1–2 hours, and you’ll receive an approval email once accepted.",
+      "subtitle": "After uploading your CV, it will be reviewed within 48 hours, and you’ll receive an approval email once accepted.",
       "icon": Icons.watch_later,
       "gradient": [Colors.teal.shade400, Colors.green.shade500],
     },

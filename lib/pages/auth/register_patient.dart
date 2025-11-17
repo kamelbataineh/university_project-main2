@@ -24,6 +24,9 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
   final TextEditingController _email       = TextEditingController();
   final TextEditingController _password    = TextEditingController();
   final TextEditingController _phoneNumber = TextEditingController();
+  bool _obscure = true;
+
+
 
   bool _showErrors = false;
   bool loading = false;
@@ -143,7 +146,9 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
     required IconData icon,
     bool obscure = false,
     String? Function(String?)? validator,
-  }) {
+    Widget? suffixIcon,     // ← اضف هذا السطر فقط
+  })
+    {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -165,6 +170,7 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
               contentPadding: EdgeInsets.symmetric(vertical: 16),
               prefixIcon: Icon(icon, color: Colors.pink.shade200),
               hintText: hint,
+              suffixIcon: suffixIcon,
               hintStyle: TextStyle(color: Colors.grey),
               border: InputBorder.none,
               errorStyle:  TextStyle(height: 0),
@@ -345,15 +351,27 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
                       val!.isEmpty ? 'Enter phone number' : null,
                     ),
                      SizedBox(height: 20),
-                    neumorphicTextField(
-                      controller: _password,
-                      hint: "Password",
-                      icon: Icons.lock,
-                      obscure: true,
-                      validator: (val) =>
-                      val!.isEmpty ? 'Enter password' : null,
-                    ),
-                     SizedBox(height: 30),
+
+                neumorphicTextField(
+                controller: _password,
+                hint: "Password",
+                icon: Icons.lock,
+                obscure: _obscure,
+                validator: (val) => val!.isEmpty ? 'Enter password' : null,
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscure ? Icons.visibility_off : Icons.visibility,
+                    color: Colors.pink.shade300,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscure = !_obscure;
+                    });
+                  },
+                ),
+              ),
+
+              SizedBox(height: 30),
                     SizedBox(
                       width: double.infinity,
                       height: 50,

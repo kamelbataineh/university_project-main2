@@ -26,12 +26,15 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
   final TextEditingController _phoneNumber = TextEditingController();
+  bool _obscure = true;
+
+
 
   bool loading = false;
   bool _showErrors = false;
   late AnimationController _iconController;
 
-  File? _cvFile; // 📎 ملف السيرة الذاتية
+  File? _cvFile;
   final ImagePicker _picker = ImagePicker();
 
   @override
@@ -215,6 +218,7 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
     required IconData icon,
     bool obscure = false,
     String? Function(String?)? validator,
+    Widget? suffixIcon,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -248,6 +252,7 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
             decoration: InputDecoration(
               prefixIcon: Icon(icon, color:AppTheme.doctorIcon),
               hintText: hint,
+              suffixIcon: suffixIcon,
               hintStyle: TextStyle(color: Colors.grey),
               border: InputBorder.none,
               errorStyle: const TextStyle(height: 0),
@@ -426,13 +431,28 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                         validator: (val) =>
                         val!.isEmpty ? 'Enter phone number' : null),
                     const SizedBox(height: 20),
+
+
                     neumorphicTextField(
-                        controller: _password,
-                        hint: "Password",
-                        icon: Icons.lock,
-                        obscure: true,
-                        validator: (val) =>
-                        val!.isEmpty ? 'Enter password' : null),
+                      controller: _password,
+                      hint: "Password",
+                      icon: Icons.lock,
+                      obscure: _obscure,
+                      validator: (val) => val!.isEmpty ? 'Enter password' : null,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscure ? Icons.visibility_off : Icons.visibility,
+                          color: Colors.indigo.shade200,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscure = !_obscure;
+                          });
+                        },
+                      ),
+                    ),
+
+
                     const SizedBox(height: 20),
 
                     // 📎 زر رفع السيرة الذاتية

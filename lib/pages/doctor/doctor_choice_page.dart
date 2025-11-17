@@ -36,7 +36,7 @@ class _DoctorChoicePageState extends State<DoctorChoicePage>
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.pink.shade400),
+          icon: Icon(Icons.arrow_back, color: Colors.indigo.shade400),
           onPressed: () => Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (_) => LandingPage()),

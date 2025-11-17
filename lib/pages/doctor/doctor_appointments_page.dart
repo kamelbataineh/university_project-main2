@@ -277,9 +277,9 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
         TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(text: "المؤكدة/المنجزة"),
-            Tab(text: "المعلقة"),
-            Tab(text: "طلبات الإلغاء"),
+            Tab(text: "Confirmed/completed"),
+            Tab(text: "Outstanding"),
+            Tab(text: "Cancellation requests"),
           ],
         ),
         Expanded(

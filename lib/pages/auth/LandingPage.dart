@@ -38,9 +38,9 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
 
   List<Map<String, dynamic>> introPages = [
     {
-      "title": "Welcome to MediCare Future", // مرحبًا بك في الأمل
-      "subtitle": "A platform to empower cancer patients with AI-assisted insights under doctor supervision.",
-      // منصة لتمكين مرضى السرطان من الحصول على تحليلات مدعومة بالذكاء الصناعي تحت إشراف الطبيب.
+      "title": "Welcome to MediCare Future",
+      "subtitle": "A platform to empower breast cancer patients with AI-assisted insights under doctor supervision.",
+
       "icon": Icons.favorite,
       "gradient": [
         Colors.pink.shade400,

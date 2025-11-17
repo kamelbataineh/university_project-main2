@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../../core/config/app_config.dart';
-import 'chat_page.dart'; // رابط صفحة المحادثة
+import 'chat_page.dart';
 
 class ChatsListPage extends StatefulWidget {
   final String userId;
@@ -30,7 +30,7 @@ class _ChatsListPageState extends State<ChatsListPage> {
       final response = await http.get(
         Uri.parse(chatList),
         headers: {
-          'Authorization': 'Bearer ${widget.token}', // ✅ استخدم التوكن الحقيقي
+          'Authorization': 'Bearer ${widget.token}',
         },
       );
       print("Sending token: ${widget.token}");

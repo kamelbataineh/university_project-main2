@@ -31,7 +31,7 @@ class DoctorProfilePage extends StatelessWidget {
           shape:
           RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding:  EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -41,35 +41,35 @@ class DoctorProfilePage extends StatelessWidget {
                     backgroundColor: Colors.pink.shade400,
                     child: Text(
                       fullName[0],
-                      style: const TextStyle(
+                      style:  TextStyle(
                           fontSize: 40,
                           color: Colors.white,
                           fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
-                Text("Full Name: $fullName",
+                 SizedBox(height: 20),
+                Text("Dr. $fullName",
                     style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 10),
+                     TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                 SizedBox(height: 10),
                 Text("Email: ${doctor["email"]}",
-                    style: const TextStyle(fontSize: 16)),
-                const SizedBox(height: 10),
+                    style:  TextStyle(fontSize: 16)),
+                 SizedBox(height: 10),
                 Text("Phone: ${doctor["phone_number"]}",
-                    style: const TextStyle(fontSize: 16)),
-                const SizedBox(height: 10),
-                Text("Approved: ${doctor["is_approved"] ? "Yes" : "No"}",
-                    style: const TextStyle(fontSize: 16)),
-                const SizedBox(height: 10),
-                Text("CV File:",
-                    style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 5),
-                Text(
-                  doctor["cv_url"] ?? "Not uploaded",
-                  style: const TextStyle(fontSize: 14, color: Colors.blue),
-                ),
+                    style:  TextStyle(fontSize: 16)),
+                // // const SizedBox(height: 10),
+                // // Text("Approved: ${doctor["is_approved"] ? "Yes" : "No"}",
+                //     style: const TextStyle(fontSize: 16)),
+                 SizedBox(height: 10),
+              //   Text("CV File:",
+              //       style:
+              //       const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              //   const SizedBox(height: 5),
+              //   Text(
+              //     doctor["cv_url"] ?? "Not uploaded",
+              //     style: const TextStyle(fontSize: 14, color: Colors.blue),
+              //   ),
               ],
             ),
           ),
