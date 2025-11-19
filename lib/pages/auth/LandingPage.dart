@@ -4,6 +4,8 @@ import 'package:university_project/pages/auth/patient_login_page.dart';
 import 'package:university_project/pages/auth/register_patient.dart';
 import 'package:university_project/pages/doctor/doctor_choice_page.dart';
 
+import '../../core/config/app_font.dart';
+
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
 
@@ -94,13 +96,21 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
         Text(
           page["title"],
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+          style: AppFont.regular(
+            size: 28,
+            weight: FontWeight.w600,
+            color: Colors.pink,
+          ),
         ),
         SizedBox(height: 16),
         Text(
           page["subtitle"],
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+          style: AppFont.regular(
+            size: 16,
+            weight: FontWeight.w600,
+            color: Colors.grey,
+          ),
         ),
       ],
     );
@@ -165,11 +175,11 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
                       children:
                       [
 
-                        Text(
-                          "Get Started",
-                          style: TextStyle(
-                              fontSize: 28, fontWeight: FontWeight.bold),
-                        ),
+                        // Text(
+                        //   "Get Started",
+                        //   style: TextStyle(
+                        //       fontSize: 28, fontWeight: FontWeight.bold),
+                        // ),
                         SizedBox(height: 24),
                         SizedBox(
                           width: width > 600 ? width / 2 - 24 : width - 32,
@@ -229,18 +239,21 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
                                 Text(
                                   "Are you a doctor?",
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.indigo),
+                                  style: AppFont.regular(
+                                    size: 17,
+                                    weight: FontWeight.w800,
+                                    color: Colors.indigo,
+                                  ),
                                 ),
                                 SizedBox(height: 8),
                                 Text(
                                   "Join our platform to help patients and make a difference in healthcare!",
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      fontSize: 14, color: Colors.grey[700]),
-                                ),
+                                  style: AppFont.regular(
+                                    size: 14,
+                                    weight: FontWeight.w600,
+                                    color: Colors.grey[700]!,
+                                  ),)
                               ],
                             ),
                           ),
@@ -249,9 +262,11 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
                         Text(
                           'By continuing, you agree to our Terms of Service and Privacy Policy',
                           textAlign: TextAlign.center,
-                          style:
-                              TextStyle(color: Colors.grey[500], fontSize: 12),
-                        ),
+                          style: AppFont.regular(
+                            size: 12,
+                            weight: FontWeight.w600,
+                            color: Colors.grey[500]!,
+                          ), ),
                       ],
                     ),
                   );
@@ -345,17 +360,20 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
               ),
               SizedBox(height: 16),
               Text(title,
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      foreground: Paint()
-                        ..shader = LinearGradient(colors: gradient)
-                            .createShader(Rect.fromLTWH(0, 0, 200, 0)))),
+                style: AppFont.regular(
+                  size: 18,
+                  weight: FontWeight.w800,
+                  color: Colors.pinkAccent,
+                ),),
               SizedBox(height: 8),
               Text(description,
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey[700], fontSize: 12)),
-              SizedBox(height: 12),
+                style: AppFont.regular(
+                  size: 12,
+                  weight: FontWeight.w600,
+                  color: Colors.grey[700]!,
+                ),),
+                SizedBox(height: 12),
               ElevatedButton(
                 onPressed: onCreate,
                 style: ElevatedButton.styleFrom(
@@ -365,7 +383,11 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
                       borderRadius: BorderRadius.circular(20)),
                 ),
                 child: Text('   Create Account   ',
-                    style: TextStyle(color: Colors.white)),
+                  style: AppFont.regular(
+                    size: 13,
+                    weight: FontWeight.w600,
+                    color: Colors.white,
+                  ),),
               ),
               OutlinedButton(
                 onPressed: onLogin,
@@ -375,7 +397,12 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
                       borderRadius: BorderRadius.circular(20)),
                   backgroundColor: Colors.white.withOpacity(0.8),
                 ),
-                child: Text(' Login ', style: TextStyle(color: gradient[0])),
+                child: Text(' Login ',
+                  style: AppFont.regular(
+                    size: 13,
+                    weight: FontWeight.w600,
+                    color: gradient[0],
+                  ),),
               ),
             ],
           ),

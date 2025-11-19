@@ -1,15 +1,15 @@
 import 'dart:convert';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:university_project/core/config/app_config.dart';
 import 'package:university_project/pages/patient/my_appointments_page.dart';
+import '../../core/config/app_font.dart';
 import '../../core/config/theme.dart';
-import '../auth/doctors_list_page.dart';
-import '../components/chat_page.dart';
+import 'doctors_list_page.dart';
 import '../components/chats_list_page.dart';
 import 'book_appointment_page.dart';
-import 'messages_page.dart';
 import 'profile_patient.dart';
 import 'dart:ui';
 
@@ -101,9 +101,11 @@ class _HomePatientPageState extends State<HomePatientPage>
               : _selectedIndex == 3
               ? 'list doctor'
               : 'Personal profile',
-          style:  TextStyle(
-              fontWeight: FontWeight.bold, color: Colors.white, fontSize: 18),
-        ),
+          style: AppFont.regular(
+            size: 18,
+            weight: FontWeight.bold,
+            color: Colors.white,
+          ), ),
         actions: [
           IconButton(
             icon:  Icon(Icons.notifications, color: Colors.white),
@@ -200,7 +202,7 @@ class _HomePatientPageState extends State<HomePatientPage>
                 label,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: GoogleFonts.nunito(
                   fontSize: 12,
                   color: isSelected ? const Color(0xFFE91E63) : Colors.grey,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -242,22 +244,24 @@ class _HomePatientPageState extends State<HomePatientPage>
       padding: const EdgeInsets.all(20.0),
       child: SingleChildScrollView(
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(
-            'Welcome, $firstName $lastName ',
-            style: TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.bold,
-              foreground: Paint()
-                ..shader = LinearGradient(
-                  colors: [Colors.black,  Colors.pinkAccent.shade200
-                  ],
-                ).createShader(Rect.fromLTWH(0, 0, 200, 70)),
-            ),
+        Text(
+        'Welcome, $firstName $lastName',
+          style: GoogleFonts.nunito(
+            fontSize: 26,
+            fontWeight: FontWeight.bold,
+            foreground: Paint()
+              ..shader = LinearGradient(
+                colors: [Colors.black, Colors.pinkAccent.shade200],
+              ).createShader(Rect.fromLTWH(0, 0, 200, 70)),
           ),
+      ),
            SizedBox(height: 10),
           Text(
             'Manage your appointments, upload medical images, and view results easily.',
-            style: TextStyle(fontSize: 16, color: Colors.grey.shade700),
+            style: AppFont.regular(
+              size: 16,
+              color: Colors.grey.shade700,
+            ),
           ),
           const SizedBox(height: 30),
           GridView.builder(
@@ -301,12 +305,13 @@ class _HomePatientPageState extends State<HomePatientPage>
                       const SizedBox(height: 12),
                       Text(
                         feature["title"],
-                        style: const TextStyle(
+                        style: AppFont.regular(
+                          size: 16,
+                          weight: FontWeight.bold,
                           color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
                         ),
                       )
+
                     ],
                   ),
                 ),
@@ -334,4 +339,3 @@ class _HomePatientPageState extends State<HomePatientPage>
   }
 }
 
-// --------------------------- صفحة الرسائل ---------------------------

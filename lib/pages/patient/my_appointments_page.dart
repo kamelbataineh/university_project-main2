@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../../../core/config/app_config.dart';
+import '../../core/config/app_font.dart';
 import '../../core/config/theme.dart';
 
 
@@ -88,15 +89,20 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child:isLoading
-          ?  Center(child: CircularProgressIndicator(color:AppTheme.patientPrimary))
+      child: isLoading
+          ? Center(
+        child: CircularProgressIndicator(color: AppTheme.patientPrimary),
+      )
           : appointments.isEmpty
-          ?  Center(
+          ? Center(
         child: Text(
-          'No appointments at the moment ',
-          style: TextStyle(fontSize: 16, foreground: Paint()..shader = LinearGradient(
-            colors: [Colors.black, Colors.pinkAccent.shade200],
-          ).createShader(Rect.fromLTWH(0, 0, 200, 50)),fontWeight: FontWeight.w500),
+          'No appointments at the moment',
+          style: AppFont.regular(
+            size: 16,
+            weight: FontWeight.w500,
+            color: Colors.black87,
+          ),
+          textAlign: TextAlign.center,
         ),
       )
           : ListView.builder(
@@ -106,38 +112,59 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
           final appt = appointments[index];
           final status = appt['status'] ?? '-';
           final isPending = status == 'PendingCancellation';
+
           return Card(
             color: AppTheme.cardColor,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16)),
             elevation: 3,
             margin: const EdgeInsets.only(bottom: 16),
-            child: ListTile(
-              contentPadding: const EdgeInsets.all(16),
-              title: Text(
-                "👨‍⚕️ الطبيب: ${appt['doctor_name'] ?? '-'}",
-                style:  TextStyle(
-                  color:AppTheme.patientText,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
-              subtitle: Column(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("🕒 التاريخ: ${appt['date_time'] ?? '-'}",
-                      style:  TextStyle(color: AppTheme.patientText)),
-                  Text("📋 الحالة: $status",
-                      style: TextStyle(
-                          color: isPending ? Colors.orange : AppTheme.patientText,
-                          fontWeight: isPending ? FontWeight.bold : FontWeight.normal)),
-                  Text("📝 السبب: ${appt['reason'] ?? '-'}",
-                      style:  TextStyle(color: AppTheme.patientText)),
-                  const SizedBox(height: 10),
+                  Text(
+                    "👨‍⚕️ Doctor: ${appt['doctor_name'] ?? '-'}",
+                    style: AppFont.regular(
+                      size: 18,
+                      weight: FontWeight.w600,
+                      color: AppTheme.patientText,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    "🕒 Date: ${appt['date_time'] ?? '-'}",
+                    style: AppFont.regular(
+                      size: 14,
+                      color: AppTheme.patientText,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "📋 Status: $status",
+                    style: AppFont.regular(
+                      size: 14,
+                      weight:
+                      isPending ? FontWeight.w600 : FontWeight.w400,
+                      color: isPending ? Colors.orange : AppTheme.patientText,
+                    ),
+                  ),
+                   SizedBox(height: 4),
+                  Text(
+                    "📝 Reason: ${appt['reason'] ?? '-'}",
+                    style: AppFont.regular(
+                      size: 14,
+                      color: AppTheme.patientText,
+                    ),
+                  ),
+                   SizedBox(height: 10),
                   if (!isPending)
                     ElevatedButton.icon(
-                      onPressed: () => requestCancel(appt['appointment_id']),
+                      onPressed: () =>
+                          requestCancel(appt['appointment_id']),
                       icon: const Icon(Icons.cancel),
-                      label: const Text('طلب إلغاء الموعد'),
+                      label: const Text('Request Cancellation'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.redAccent,
                         foregroundColor: Colors.white,

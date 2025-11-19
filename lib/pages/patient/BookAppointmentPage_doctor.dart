@@ -6,23 +6,23 @@ import '../../core/config/app_config.dart';
 import '../../core/config/app_font.dart';
 import '../../core/config/theme.dart';
 
-class BookAppointmentPage extends StatefulWidget {
-  final String userId;
+class BookAppointmentPageDoctor extends StatefulWidget {
   final String token;
+  final String doctorId;
+  final String doctorName;
 
-  const BookAppointmentPage({
+  const BookAppointmentPageDoctor({
     super.key,
-    required this.userId,
     required this.token,
+    required this.doctorId,
+    required this.doctorName,
   });
 
   @override
-  State<BookAppointmentPage> createState() => _BookAppointmentPageState();
+  State<BookAppointmentPageDoctor> createState() => _BookAppointmentPageDoctorState();
 }
 
-class _BookAppointmentPageState extends State<BookAppointmentPage> {
-  List doctors = [];
-  String? selectedDoctorId;
+class _BookAppointmentPageDoctorState extends State<BookAppointmentPageDoctor> {
   DateTime? selectedDate;
   String? selectedTime;
   TextEditingController reasonController = TextEditingController();
@@ -32,39 +32,9 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
   @override
   void initState() {
     super.initState();
-    print("🔹 initState called");
-    fetchDoctors();
-  }
-// ===================== إضافة في _BookAppointmentPageState =====================
-  // 🩺 جلب قائمة الأطباء من السيرفر
-  Future<void> fetchDoctors() async {
-    setState(() => isLoading = true);
-    try {
-      final response = await http.get(
-        Uri.parse(doctorsListUrl),
-        headers: {'Authorization': 'Bearer ${widget.token}'},
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          doctors = data.map((doc) => {
-            'id': doc['id'] ?? doc['_id'],
-            'name': doc['first_name'] + " " + doc['last_name'],
-            'specialty': doc['specialty'] ?? ""
-          }).toList();
-        });
-      } else {
-        print("❌ Failed to fetch doctors: ${response.body}");
-      }
-    } catch (e) {
-      print("❌ Error fetching doctors: $e");
-    } finally {
-      setState(() => isLoading = false);
-    }
   }
 
-  // 📅 اختيار التاريخ
+  // اختيار التاريخ
   Future<void> pickDate() async {
     final now = DateTime.now();
     final picked = await showDatePicker(
@@ -76,7 +46,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: Colors.pinkAccent, // لون الأزرار
+              primary: Colors.pinkAccent,
               onPrimary: Colors.white,
               onSurface: Colors.black87,
             ),
@@ -96,14 +66,16 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
     }
   }
 
-  // ⏰ جلب الأوقات المتاحة للطبيب
+  // جلب الأوقات المتاحة
   Future<void> fetchAvailableTimes() async {
-    if (selectedDoctorId == null || selectedDate == null) return;
+    if (selectedDate == null) return;
 
-    final dateStr = "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2,'0')}-${selectedDate!.day.toString().padLeft(2,'0')}";
+    final dateStr =
+        "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(
+        2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}";
     try {
       final response = await http.get(
-        Uri.parse('$availableSlotsUrl/$selectedDoctorId?date=$dateStr'),
+        Uri.parse('$availableSlotsUrl/${widget.doctorId}?date=$dateStr'),
         headers: {'Authorization': 'Bearer ${widget.token}'},
       );
 
@@ -119,48 +91,24 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
       print("❌ Error fetching slots: $e");
     }
   }
+
   Future<void> bookAppointment() async {
-    if (selectedDoctorId == null || selectedDate == null || selectedTime == null) {
+    if (selectedDate == null || selectedTime == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please select doctor, date, and time")),
+        const SnackBar(content: Text("Please select date and time")),
       );
       return;
     }
 
+    final dateTime = DateTime(
+      selectedDate!.year,
+      selectedDate!.month,
+      selectedDate!.day,
+      int.parse(selectedTime!.split(":")[0]),
+      int.parse(selectedTime!.split(":")[1]),
+    );
+
     try {
-      // 1️⃣ جلب مواعيد المريض الحالية
-      final checkResponse = await http.get(
-        Uri.parse("$bookAppointmentUrl/my_appointments"),
-        headers: {
-          'Authorization': 'Bearer ${widget.token}',
-          'Content-Type': 'application/json',
-        },
-      );
-
-      List appointments = [];
-      if (checkResponse.statusCode == 200) {
-        appointments = jsonDecode(checkResponse.body);
-        // 2️⃣ منع أي حجز ثاني بغض النظر عن الوقت
-        if (appointments.any((app) => app['status'] != "Cancelled")) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("You already have an active appointment")),
-          );
-          return;
-        }
-      } else {
-        print("❌ Failed to check existing appointments: ${checkResponse.body}");
-      }
-
-      // 3️⃣ بناء التاريخ والوقت للحجز
-      final dateTime = DateTime(
-        selectedDate!.year,
-        selectedDate!.month,
-        selectedDate!.day,
-        int.parse(selectedTime!.split(":")[0]),
-        int.parse(selectedTime!.split(":")[1]),
-      );
-
-      // 4️⃣ إرسال طلب حجز الموعد
       final response = await http.post(
         Uri.parse(bookAppointmentUrl),
         headers: {
@@ -168,7 +116,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          "doctor_id": selectedDoctorId,
+          "doctor_id": widget.doctorId,
           "date_time": dateTime.toIso8601String(),
           "reason": reasonController.text,
         }),
@@ -179,7 +127,6 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
           const SnackBar(content: Text("Appointment booked successfully 🌸")),
         );
         setState(() {
-          selectedDoctorId = null;
           selectedDate = null;
           selectedTime = null;
           availableTimes = [];
@@ -199,8 +146,6 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
     }
   }
 
-
-  // -------------------- نيو مورفيزم كارد --------------------
   Widget neumorphicCard({required Widget child}) {
     return Container(
       decoration: BoxDecoration(
@@ -211,8 +156,10 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: const [
-          BoxShadow(color: Colors.black12, offset: Offset(4, 4), blurRadius: 10),
-          BoxShadow(color: Colors.white70, offset: Offset(-4, -4), blurRadius: 10),
+          BoxShadow(
+              color: Colors.black12, offset: Offset(4, 4), blurRadius: 10),
+          BoxShadow(
+              color: Colors.white70, offset: Offset(-4, -4), blurRadius: 10),
         ],
       ),
       padding: const EdgeInsets.all(16),
@@ -225,62 +172,63 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFFFF8F5),
       appBar: AppBar(
-        title:  Text(
+        title: Text(
           "Book Appointment",
-          style: AppFont.regular(size: 20, weight: FontWeight.w600, color: Colors.black87),
+          style: AppFont.regular(
+            size: 20,
+            weight: FontWeight.w600,
+            color: Colors.black87,
+          ),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: Colors.black87,
         centerTitle: true,
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator(color: Colors.pink))
-          : Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
         child: ListView(
           children: [
+            // 🩺 Card لاسم الدكتور
             neumorphicCard(
-              child: DropdownButtonFormField<String>(
-                decoration:  InputDecoration(
-                  labelText: "Select Doctor",
-                  labelStyle: AppFont.regular(size: 14, color: Colors.black),
-                  border: InputBorder.none,
-                ),
-                value: selectedDoctorId,
-                items: doctors
-                    .map((doc) => DropdownMenuItem<String>(
-                  value: doc['id'].toString(),
-                  child: Text(
-                    '${doc['name']} - ${doc['specialty'] ?? ''}',
-                    style: AppFont.regular(size: 14, weight: FontWeight.w400, color: Colors.black87),
+              child: Row(
+                children: [
+                  const Icon(Icons.person, color: Colors.pinkAccent),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      "Doctor: ${widget.doctorName}",
+                      style: AppFont.regular(
+                        size: 16,
+                        weight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
                   ),
-                ))
-                    .toList(),
-                onChanged: (val) {
-                  print("🔹 Doctor selected: $val");
-                  setState(() {
-                    selectedDoctorId = val;
-                    selectedDate = null;
-                    selectedTime = null;
-                    availableTimes = [];
-                  });
-                },
+                ],
               ),
             ),
             const SizedBox(height: 20),
+            // 📅 اختيار التاريخ
             neumorphicCard(
               child: ListTile(
                 title: Text(
-                  selectedDate == null ? "Select Date" : DateFormat('yyyy-MM-dd').format(selectedDate!),
-                  style: AppFont.regular(size: 14, weight: FontWeight.w500, color: Colors.black),
+                  selectedDate == null
+                      ? "Select Date"
+                      : DateFormat('yyyy-MM-dd').format(selectedDate!),
+                  style: AppFont.regular(
+                    size: 14,
+                    weight: FontWeight.w500,
+                    color: Colors.black,
+                  ),
                 ),
-
-                trailing:  Icon(Icons.calendar_today, color: Colors.pinkAccent),
+                trailing: const Icon(
+                    Icons.calendar_today, color: Colors.pinkAccent),
                 onTap: pickDate,
               ),
             ),
-             SizedBox(height: 20),
+            const SizedBox(height: 20),
+            // ⏰ الأوقات المتاحة
             if (availableTimes.isNotEmpty)
               neumorphicCard(
                 child: Wrap(
@@ -289,27 +237,31 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                   children: availableTimes.map((time) {
                     final isSelected = selectedTime == time;
                     return GestureDetector(
-                      onTap: () {
-                        print("🔹 Time selected: $time");
-                        setState(() => selectedTime = time);
-                      },
+                      onTap: () => setState(() => selectedTime = time),
                       child: AnimatedContainer(
-                        duration:  Duration(milliseconds: 200),
-                        padding:  EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        duration: const Duration(milliseconds: 200),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 10),
                         decoration: BoxDecoration(
-                          color: isSelected ? AppTheme.patientElevatedButtonbackgroundColor : Colors.white,
+                          color: isSelected
+                              ? AppTheme.patientElevatedButtonbackgroundColor
+                              : Colors.white,
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
-                              color: isSelected ? Colors.pinkAccent.withOpacity(0.4) : Colors.black12,
+                              color: isSelected
+                                  ? Colors.pinkAccent.withOpacity(0.4)
+                                  : Colors.black12,
                               blurRadius: 8,
-                              offset:  Offset(2, 2),
+                              offset: const Offset(2, 2),
                             ),
                           ],
                         ),
                         child: Text(
                           time,
-                          style: TextStyle(color: isSelected ? Colors.white : Colors.black87),
+                          style: TextStyle(
+                            color: isSelected ? Colors.white : Colors.black87,
+                          ),
                         ),
                       ),
                     );
@@ -317,10 +269,11 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                 ),
               ),
             const SizedBox(height: 20),
+            // 📝 سبب الزيارة
             neumorphicCard(
               child: TextField(
                 controller: reasonController,
-                decoration:  InputDecoration(
+                decoration: InputDecoration(
                   border: InputBorder.none,
                   labelText: "Reason for Visit",
                   hintText: "Describe your symptoms or reason for booking...",
@@ -330,22 +283,23 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                 maxLines: 3,
               ),
             ),
-             SizedBox(height: 30),
+            const SizedBox(height: 30),
+            // ✅ زر تأكيد الحجز
             GestureDetector(
               onTap: bookAppointment,
               child: Container(
-
                 height: 58,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      AppTheme.patientElevatedButtonbackgroundColor.withOpacity(0.9),
+                      AppTheme.patientElevatedButtonbackgroundColor.withOpacity(
+                          0.9),
                       AppTheme.patientElevatedButtonbackgroundColor
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  borderRadius: BorderRadius.circular(16), // حواف دائرية متوسطة
+                  borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.pinkAccent.withOpacity(0.4),
@@ -360,7 +314,6 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                     ),
                   ],
                 ),
-                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
                 alignment: Alignment.center,
                 child: Text(
                   "Confirm Booking",
@@ -372,9 +325,6 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 30),
-
-
           ],
         ),
       ),
