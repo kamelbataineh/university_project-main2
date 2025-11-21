@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'EditEmailPage.dart';
+import '../doctor/EditEmailPage.dart';
 
 class VerifyPasswordPage extends StatefulWidget {
   final String token;

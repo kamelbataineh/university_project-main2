@@ -176,17 +176,31 @@ class _HomePatientPageState extends State<HomePatientPage>
         ),
 
     );
-  }Widget _buildNavItem(IconData icon, String label, int index) {
+  }
+
+
+  Widget _buildNavItem(IconData icon, String label, int index) {
     final bool isSelected = _selectedIndex == index;
 
     return GestureDetector(
       onTap: () => setState(() => _selectedIndex = index),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+        duration: const Duration(milliseconds: 250),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white.withOpacity(0.3) : Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
+          color: isSelected
+              ? const Color(0xFFFFEEF3)  // وردي طبي ناعم
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: isSelected
+              ? [
+            BoxShadow(
+              color: const Color(0xFFFFC1D6).withOpacity(0.35),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            )
+          ]
+              : [],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -194,19 +208,21 @@ class _HomePatientPageState extends State<HomePatientPage>
             Icon(
               icon,
               size: 26,
-              color: isSelected ?  AppTheme.patientAppbar : Colors.grey,
+              color: isSelected
+                  ? const Color(0xFFE91E63)   // وردي طبي أنثوي
+                  : Colors.grey.shade500,
             ),
-            const SizedBox(height: 4),
-            Flexible(
-              child: Text(
-                label,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.nunito(
-                  fontSize: 12,
-                  color: isSelected ? const Color(0xFFE91E63) : Colors.grey,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                ),
+            const SizedBox(height: 5),
+            Text(
+              label,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.nunito(
+                fontSize: 12,
+                letterSpacing: 0.3,
+                color: isSelected
+                    ? const Color(0xFFE91E63)
+                    : Colors.grey.shade600,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
               ),
             ),
           ],
@@ -214,6 +230,7 @@ class _HomePatientPageState extends State<HomePatientPage>
       ),
     );
   }
+
 
   Widget _buildDashboard(BuildContext context) {
     final List<Map<String, dynamic>> features = [

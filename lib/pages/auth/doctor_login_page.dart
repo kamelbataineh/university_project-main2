@@ -7,7 +7,7 @@ import '../../core/config/app_config.dart';
 import '../doctor/home_doctor.dart';
 import 'package:http/http.dart' as http;
 
-import 'doctor_forgot_password_page.dart';
+import 'forgot_password_page.dart';
 
 class LoginDoctorPage extends StatefulWidget {
   const LoginDoctorPage({Key? key}) : super(key: key);

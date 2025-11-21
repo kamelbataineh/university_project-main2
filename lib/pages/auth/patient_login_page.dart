@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/config/app_config.dart';
 import '../../core/config/theme.dart';
 import '../patient/home_patient.dart';
+import 'forgot_password_page.dart';
 import 'register_patient.dart';
 
 class PatientLoginPage extends StatefulWidget {
@@ -284,7 +285,13 @@ class _PatientLoginPageState extends State<PatientLoginPage>
                         ],
                       ),
                       TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => ForgotPasswordPage()),
+                            );
+                          },
                           child: Text('Forgot Password?',
                               style: TextStyle(
                                   color: AppTheme.patientTextBotton))),

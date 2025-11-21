@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'VerifyOtpPage.dart';
+import '../auth/VerifyOtpPage.dart';
 
 class EditEmailPage extends StatefulWidget {
   final String token;
@@ -27,11 +27,11 @@ class _EditEmailPageState extends State<EditEmailPage> {
     await Future.delayed(Duration(seconds: 1));
     setState(() => _isLoading = false);
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-          builder: (_) => VerifyOtpPage(token: widget.token, )),
-    );
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //       builder: (_) => VerifyOtpPage(token: widget.token, )),
+    // );
   }
 
   @override
@@ -56,11 +56,11 @@ class _EditEmailPageState extends State<EditEmailPage> {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => VerifyOtpPage(token: widget.token, )),
-                );
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(
+                //       builder: (_) => VerifyOtpPage(token: widget.token, )),
+                // );
               },
               child: _isLoading
                   ? CircularProgressIndicator(color: Colors.white)

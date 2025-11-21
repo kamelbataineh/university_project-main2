@@ -7,6 +7,8 @@ import 'package:university_project/pages/auth/LandingPage.dart';
 import 'package:university_project/pages/auth/patient_login_page.dart';
 import 'package:university_project/pages/auth/register_doctor.dart';
 import '../../core/config/app_font.dart';
+import '../patient/patient_verify_otp_page.dart';
+import 'VerifyOtpPage.dart';
 import 'doctor_login_page.dart';
 import 'package:http/http.dart' as http;
 import '../../core/config/app_config.dart';
@@ -78,22 +80,83 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
     return utf8.decode(bytes.sublist(0, i));
   }
 
+  //
+  // Future<void> registerPatient() async {
+  //   if (!_formKey.currentState!.validate()) return;
+  //
+  //   setState(() => loading = true);
+  //
+  //   // ==================== قص الباسورد قبل الإرسال ====================
+  //   final passwordToSend = truncateUtf8(_password.text.trim(), 72);
+  //
+  //   final Map<String, dynamic> data = {
+  //     "username": _email.text.trim(),
+  //     "email": _email.text.trim(),
+  //     "first_name": _firstName.text.trim(),
+  //     "last_name": _lastName.text.trim(),
+  //     "password": passwordToSend,  // ← استخدم النسخة المقصوصة
+  //     "role": "patient",
+  //     "phone_number": _phoneNumber.text.trim(),
+  //   };
+  //
+  //   try {
+  //     final response = await http.post(
+  //       Uri.parse("${baseUrl}patients/register"),
+  //       headers: {"Content-Type": "application/json"},
+  //       body: jsonEncode(data),
+  //     );
+  //
+  //     final resBody = jsonDecode(response.body);
+  //
+  //     if (response.statusCode == 200 || response.statusCode == 201) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(
+  //           backgroundColor: Colors.green,
+  //           content: Text(
+  //               "Welcome ${_firstName.text.trim()} ${_lastName.text.trim()}! Registration has been successfully completed"),
+  //         ),
+  //       );
+  //
+  //       Future.delayed(const Duration(seconds: 2), () {
+  //         Navigator.pushReplacement(
+  //           context,
+  //           MaterialPageRoute(builder: (_) => PatientLoginPage()),
+  //         );
+  //       });
+  //     } else {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(
+  //           backgroundColor: Colors.redAccent,
+  //           content: Text(resBody["detail"] ?? "Registration failed"),
+  //         ),
+  //       );
+  //     }
+  //   } catch (e) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         backgroundColor: Colors.redAccent,
+  //         content: Text("Connection to the server failed: $e"),
+  //       ),
+  //     );
+  //   } finally {
+  //     setState(() => loading = false);
+  //   }
+  // }
 
-  Future<void> registerPatient() async {
-    if (!_formKey.currentState!.validate()) return;
+  Future<void> sendOtpAndGoToVerification() async {
+    if (!_formKey.currentState!.validate()) {
+      setState(() => _showErrors = true);
+      return;
+    }
 
     setState(() => loading = true);
-
-    // ==================== قص الباسورد قبل الإرسال ====================
-    final passwordToSend = truncateUtf8(_password.text.trim(), 72);
 
     final Map<String, dynamic> data = {
       "username": _email.text.trim(),
       "email": _email.text.trim(),
       "first_name": _firstName.text.trim(),
       "last_name": _lastName.text.trim(),
-      "password": passwordToSend,  // ← استخدم النسخة المقصوصة
-      "role": "patient",
+      "password": truncateUtf8(_password.text.trim(), 72),
       "phone_number": _phoneNumber.text.trim(),
     };
 
@@ -104,23 +167,16 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
         body: jsonEncode(data),
       );
 
-      final resBody = jsonDecode(response.body);
+      final resBody = jsonDecode(utf8.decode(response.bodyBytes));
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: Colors.green,
-            content: Text(
-                "Welcome ${_firstName.text.trim()} ${_lastName.text.trim()}! Registration has been successfully completed"),
+        // انتقل لصفحة OTP
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => PatientVerifyOtpPage(email: _email.text.trim()),
           ),
         );
-
-        Future.delayed(const Duration(seconds: 2), () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => PatientLoginPage()),
-          );
-        });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -140,7 +196,6 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
       setState(() => loading = false);
     }
   }
-
 
   void _showRoleDialog() {
     showDialog(
@@ -461,7 +516,7 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
                       width: double.infinity,
                       height: 50,
                       child: ElevatedButton(
-                        onPressed: loading ? null : registerPatient,
+                        onPressed: loading ? null : sendOtpAndGoToVerification,
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
                               AppTheme.patientElevatedButtonbackgroundColor,
