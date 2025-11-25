@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:university_project/pages/auth/FullScreenImagePage.dart';
+import 'package:university_project/pages/patient/EditPatientProfilePage.dart';
 import 'dart:convert';
 import '../../core/config/app_config.dart';
 import '../../core/config/theme.dart';
@@ -11,14 +13,11 @@ class ProfilePatientPage extends StatefulWidget {
   @override
   _ProfilePatientPageState createState() => _ProfilePatientPageState();
 }
+const baseUrl = "http://10.0.2.2:8000/";
 
 class _ProfilePatientPageState extends State<ProfilePatientPage> {
   Map<String, dynamic>? patientData;
   bool isLoading = true;
-  bool isEditing = false;
-  String editingField = '';
-  TextEditingController controller1 = TextEditingController();
-  TextEditingController controller2 = TextEditingController();
 
   @override
   void initState() {
@@ -36,112 +35,30 @@ class _ProfilePatientPageState extends State<ProfilePatientPage> {
         isLoading = false;
       });
     } else {
-      setState(() {
-        isLoading = false;
-      });
+      setState(() => isLoading = false);
       print('Error: ${response.body}');
     }
   }
 
-  Future<void> _updateField(String field, String currentValue,
-      {String? secondField, String? secondValue}) async {
-    controller1.text = currentValue;
-    if (secondField != null && secondValue != null) controller2.text = secondValue;
-
-    setState(() {
-      isEditing = true;
-      editingField = field;
-    });
-  }
-
-  Future<void> _saveField() async {
-    if (patientData == null) return;
-    Map<String, String> body = {editingField: controller1.text};
-    if (editingField == "name") {
-      body = {"first_name": controller1.text, "last_name": controller2.text};
-    }
-
-    final url = Uri.parse(patientMeUpdate);
-    final response = await http.put(
-      url,
-      headers: {
-        'Authorization': 'Bearer ${widget.token}',
-        'Content-Type': 'application/json'
-      },
-      body: json.encode(body),
-    );
-
-    if (response.statusCode == 200) {
-      fetchPatientProfile();
-      setState(() {
-        isEditing = false;
-      });
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("حدث خطأ، حاول لاحقاً")),
-      );
-    }
-  }
-
-  Widget neumorphicInput({required String label, required TextEditingController controller, IconData? icon}) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(25),
-        gradient: const LinearGradient(
-          colors: [Colors.white, Color(0xFFF0F0F0)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        boxShadow: const [
-          BoxShadow(color: Colors.grey, offset: Offset(6, 6), blurRadius: 10),
-          BoxShadow(color: Colors.white, offset: Offset(-6, -6), blurRadius: 10),
-        ],
-      ),
-      child: TextField(
-        controller: controller,
-        decoration: InputDecoration(
-          prefixIcon: icon != null ? Icon(icon, color: Colors.pink) : null,
-          labelText: label,
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
-        ),
-      ),
-    );
-  }
-
   Widget profileCard({required String title, required String value, IconData? icon, required VoidCallback onEdit}) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(25),
-        gradient: const LinearGradient(
-          colors: [Color(0xFFEDEDED), Color(0xFFF5F5F5)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        borderRadius: BorderRadius.circular(20),
+        color: const Color(0xFFF5F5F5),
         boxShadow: const [
-          BoxShadow(color: Colors.grey, offset: Offset(6, 6), blurRadius: 10),
-          BoxShadow(color: Colors.white, offset: Offset(-6, -6), blurRadius: 10),
+          BoxShadow(color: Colors.grey, offset: Offset(3, 3), blurRadius: 6),
+          BoxShadow(color: Colors.white, offset: Offset(-3, -3), blurRadius: 6),
         ],
       ),
       child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
         leading: icon != null
-            ? Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: LinearGradient(colors: [
-              Colors.pinkAccent.shade200,
-              Colors.pinkAccent.shade200
-            ],),          ),
-          child: Icon(icon, color: Colors.white),
-        )
+            ? Icon(icon, color: AppTheme.patientIcon)
             : null,
-        title: Text(title),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(value),
-        trailing: IconButton(icon:  Icon(Icons.edit, color:AppTheme.patientIcon), onPressed: onEdit),
       ),
     );
   }
@@ -149,7 +66,6 @@ class _ProfilePatientPageState extends State<ProfilePatientPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // backgroundColor: const Color(0xFFEDEDED),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : patientData == null
@@ -159,82 +75,112 @@ class _ProfilePatientPageState extends State<ProfilePatientPage> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              const SizedBox(height: 30),
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(colors: [
-                    Colors.pinkAccent.shade200,
-                    Colors.pinkAccent.shade200
-                  ],
-                  begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+              const SizedBox(height: 40),
+              Stack(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => FullScreenImagePage(
+                            imageUrl: "$baseUrl${patientData!['profile_image_url']}",
+                          ),
+                        ),
+                      );
+                    },
+                    child: CircleAvatar(
+                      radius: 55,
+                      backgroundColor: Colors.blue.shade100,
+                      backgroundImage: patientData!['profile_image_url'] != null
+                          ? NetworkImage("${baseUrl}${patientData!['profile_image_url']}?t=${DateTime.now().millisecondsSinceEpoch}")
+                          : null,
+
+                      child: (patientData!['profile_image_url'] == null ||
+                          patientData!['profile_image_url'].isEmpty)
+                          ? const Icon(Icons.person_outline, size: 70, color: Colors.blue)
+                          : null,
+                    ),
+                  )
+,
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => EditPatientProfilePage(patientData: patientData!, token:widget.token)
+                            ));
+                      },
+                      child: CircleAvatar(
+                        radius: 15,
+                        backgroundColor: Colors.white,
+                        child: Icon(Icons.edit, size: 18, color: Colors.blue),
+                      ),
+                    ),
                   ),
-                  boxShadow: [
-                    BoxShadow(color: Colors.pinkAccent.withOpacity(0.4), blurRadius: 20, offset: const Offset(0, 10)),
-                  ],
-                ),
-                child: const Icon(Icons.person, size: 70, color: Colors.white),
+                ],
+              ),
+              const SizedBox(height: 12),
+              // الاسم
+              Text(
+                "${patientData!['first_name']} ${patientData!['last_name']}",
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 20),
+              // الكروت
               profileCard(
-                title: "Name",
-                value: "${patientData!['first_name']} ${patientData!['last_name']}",
-                icon: Icons.person,
-                onEdit: () => _updateField("name", patientData!['first_name'], secondField: "last_name", secondValue: patientData!['last_name']),
+                title: "Email",
+                value: patientData!['email'],
+                icon: Icons.mail,
+                onEdit: () {}, // هنا رابط تعديل
               ),
-              profileCard(title: "Email", value: patientData!['email'], icon: Icons.mail, onEdit: () => _updateField("email", patientData!['email'])),
-              // profileCard(title: "Username", value: patientData!['username'], icon: Icons.person, onEdit: () => _updateField("username", patientData!['username'])),
-              profileCard(title: "Phone", value: patientData!['phone_number'], icon: Icons.phone, onEdit: () => _updateField("phone_number", patientData!['phone_number'])),
+              profileCard(
+                title: "Phone",
+                value: patientData!['phone_number'],
+                icon: Icons.phone,
+                onEdit: () {},
+              ),
               const SizedBox(height: 30),
-              ElevatedButton.icon(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.patientAppbar,
-                  padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                ),
-                icon:  Icon(Icons.logout, color: Colors.white),
-                label:  Text('Logout', style: TextStyle(color: Colors.white, fontSize: 16)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.patientAppbar,
+                      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    ),
+                    icon: const Icon(Icons.logout, color: Colors.white),
+                    label: const Text('Logout', style: TextStyle(color: Colors.white, fontSize: 16)),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => EditPatientProfilePage(patientData: patientData!, token: widget.token),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.patientAppbar,
+                      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    ),
+                    icon: const Icon(Icons.edit, color: Colors.white),
+                    label: const Text('Edit', style: TextStyle(color: Colors.white, fontSize: 16)),
+                  ),
+                ],
               ),
               const SizedBox(height: 30),
             ],
           ),
         ),
       ),
-      // 🔹 Edit Modal
-      floatingActionButton: isEditing
-          ? FloatingActionButton(
-        backgroundColor: Colors.white.withOpacity(0.9),
-        onPressed: () {},
-        child: Dialog(
-          insetPadding: const EdgeInsets.all(16),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text("Edit ${editingField == 'name' ? 'Name' : editingField}", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 10),
-                neumorphicInput(label: editingField == 'name' ? 'First Name' : editingField, controller: controller1, icon: Icons.person),
-                if (editingField == 'name')
-                  neumorphicInput(label: 'Last Name', controller: controller2, icon: Icons.person),
-                const SizedBox(height: 15),
-                Row(
-                  children: [
-                    Expanded(child: ElevatedButton(onPressed: () => setState(() => isEditing = false), child: const Text("Cancel"))),
-                    const SizedBox(width: 10),
-                    Expanded(child: ElevatedButton(onPressed: _saveField, child: const Text("Save"))),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      )
-          : null,
     );
   }
 }

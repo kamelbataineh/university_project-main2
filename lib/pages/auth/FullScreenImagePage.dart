@@ -12,7 +12,12 @@ class FullScreenImagePage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white), // اللون الأبيض
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
+
       body: Center(
         child: InteractiveViewer(
           panEnabled: true,

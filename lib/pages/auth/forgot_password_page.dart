@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/config/app_config.dart';
 import 'VerifyOtpPage.dart'; // تأكد من تعريف baseUrl1 هنا
 
@@ -14,6 +15,19 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final _emailController = TextEditingController();
   bool loading = false;
 
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedEmail();
+  }
+
+  void _loadSavedEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedEmail = prefs.getString("saved_email") ?? "";
+    setState(() {
+      _emailController.text = savedEmail;
+    });
+  }
   Future<void> _sendOtp() async {
     if (_emailController.text.isEmpty) return;
 
@@ -26,7 +40,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         body: jsonEncode({'email': _emailController.text.trim()}),
       );
 
-      final data = jsonDecode(response.body);
+      final resBodyStr = utf8.decode(response.bodyBytes);
+      final data = jsonDecode(resBodyStr);
 
       if (response.statusCode == 200) {
         // الانتقال لصفحة التحقق من OTP مع تمرير البريد

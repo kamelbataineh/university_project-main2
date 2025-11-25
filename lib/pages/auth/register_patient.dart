@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:university_project/core/config/theme.dart';
 import 'package:university_project/pages/auth/LandingPage.dart';
@@ -174,9 +175,17 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => PatientVerifyOtpPage(email: _email.text.trim()),
+            builder: (_) => PatientVerifyOtpPage(
+              email: _email.text.trim(),
+              firstName: _firstName.text.trim(),
+              lastName: _lastName.text.trim(),
+              password: truncateUtf8(_password.text.trim(), 72),
+              phoneNumber: _phoneNumber.text.trim(),
+              username: _email.text.trim(), // عادة username = email
+            ),
           ),
         );
+
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -253,7 +262,7 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
             controller: controller,
             obscureText: obscure,
             validator: validator,
-            onChanged: onChanged, // ← اضف هذا السطر
+            onChanged: onChanged,
             style: TextStyle(color: Colors.pink.shade900),
             decoration: InputDecoration(
               contentPadding: EdgeInsets.symmetric(vertical: 16),
@@ -263,7 +272,13 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
               hintStyle: TextStyle(color: Colors.grey),
               border: InputBorder.none,
               errorStyle: TextStyle(height: 0),
+
             ),
+            inputFormatters: [
+              LengthLimitingTextInputFormatter(maxLength ),
+            ],
+
+
           ),
         ),
         Builder(
@@ -447,47 +462,96 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
                           val!.isEmpty ? 'Enter phone number' : null,
                     ),
                     SizedBox(height: 20),
-                  neumorphicTextField(
-                    controller: _password,
-                    hint: "Password",
-                    icon: Icons.lock,
-                    obscure: _obscure,
-                    validator: (val) {
-                      if (val!.isEmpty) return 'Enter password';
-                      if (val.length > 20) return 'Password cannot exceed 20 characters';                      if (!hasMinLength(val)) return 'Password must be at least 8 characters';
-                      if (!hasNumber(val)) return 'Password must contain at least one number';
-                      if (!hasSpecialChar(val)) return 'Password must contain at least one special character';
-                      return null;
-                    },
-                    onChanged: (val) {
-                      setState(() {
-                        _showPasswordRequirements = val.isNotEmpty;
-                      });
-                    },
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscure ? Icons.visibility_off : Icons.visibility,
-                        color: Colors.pink.shade300,
-                      ),
-                      onPressed: () {
+                    neumorphicTextField(
+                      controller: _password,
+                      hint: "Password",
+                      icon: Icons.lock,
+                      obscure: _obscure,
+                      validator: (val) {
+                        if (val!.isEmpty) return 'Enter password';
+                        if (val.length > 20) return 'Password cannot exceed 20 characters';
+                        if (!hasMinLength(val)) return 'Password must be at least 8 characters';
+                        if (!hasNumber(val)) return 'Password must contain at least one number';
+                        if (!hasSpecialChar(val)) return 'Password must contain at least one special character';
+                        return null;
+                      },
+                      onChanged: (val) {
                         setState(() {
-                          _obscure = !_obscure;
+                          _showPasswordRequirements = val.isNotEmpty;
                         });
                       },
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscure ? Icons.visibility_off : Icons.visibility,
+                          color: Colors.pink.shade300,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscure = !_obscure;
+                          });
+                        },
+                      ),
+                      maxLength: 20,
                     ),
-                    maxLength: 20, // ← اضف هذا السطر
-                  ),
+
+                  //   neumorphicTextField(
+                  //   controller: _password,
+                  //   hint: "Password",
+                  //   icon: Icons.lock,
+                  //   obscure: _obscure,
+                  //   validator: (val) {
+                  //     if (val!.isEmpty) return 'Enter password';
+                  //     if (val.length > 20) return 'Password cannot exceed 20 characters';                      if (!hasMinLength(val)) return 'Password must be at least 8 characters';
+                  //     if (!hasNumber(val)) return 'Password must contain at least one number';
+                  //     if (!hasSpecialChar(val)) return 'Password must contain at least one special character';
+                  //     return null;
+                  //   },
+                  //   onChanged: (val) {
+                  //     setState(() {
+                  //       _showPasswordRequirements = val.isNotEmpty;
+                  //     });
+                  //   },
+                  //   suffixIcon: IconButton(
+                  //     icon: Icon(
+                  //       _obscure ? Icons.visibility_off : Icons.visibility,
+                  //       color: Colors.pink.shade300,
+                  //     ),
+                  //     onPressed: () {
+                  //       setState(() {
+                  //         _obscure = !_obscure;
+                  //       });
+                  //     },
+                  //   ),
+                  //   maxLength: 20, // ← اضف هذا السطر
+                  // ),
 
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         SizedBox(height: 8),
                         if (_showPasswordRequirements) ...[
-                          _buildPasswordRequirement("At least 8 characters", hasMinLength(_password.text)),
-                          _buildPasswordRequirement("Contains a number", hasNumber(_password.text)),
-                          _buildPasswordRequirement("Contains a special character", hasSpecialChar(_password.text)),
+                          _buildPasswordRequirement(
+                            "At least 8 characters",
+                            hasMinLength(_password.text),
+                          ),
+                          _buildPasswordRequirement(
+                            "Contains letters and numbers",
+                            _password.text.contains(RegExp(r'[A-Za-z]')) && hasNumber(_password.text),
+                          ),
+                          _buildPasswordRequirement(
+                            "Contains at least one special character",
+                            hasSpecialChar(_password.text),
+                          ),
+                          // لو بدك شرط رابع، مثلاً "Letters, numbers or symbols"
+                          _buildPasswordRequirement(
+                            "Contains letters, numbers or symbols",
+                            _password.text.contains(RegExp(r'[A-Za-z]')) ||
+                                hasNumber(_password.text) ||
+                                hasSpecialChar(_password.text),
+                          ),
                           SizedBox(height: 2),
                         ],
+
                       ],
                     ),
 
@@ -509,7 +573,7 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
                         });
                       },
                     ),
-                    maxLength: 20, // ← اضف هذا السطر
+                    maxLength: 20,
                   ),
                     SizedBox(height: 30),
                     SizedBox(
@@ -557,10 +621,20 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
                           "Already have an account?",
                         ),
                         TextButton(
-                          onPressed: () => Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => PatientLoginPage())),
+                          onPressed: () =>Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => PatientVerifyOtpPage(
+                                email: _email.text.trim(),
+                                firstName: _firstName.text.trim(),
+                                lastName: _lastName.text.trim(),
+                                password: truncateUtf8(_password.text.trim(), 72),
+                                phoneNumber: _phoneNumber.text.trim(),
+                                username: _email.text.trim(), // عادة username = email
+                              ),
+                            ),
+
+                            ),
                           child: Text(
                             'Login',
                             style: TextStyle(color: AppTheme.patientTextBotton),

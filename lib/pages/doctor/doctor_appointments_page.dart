@@ -24,7 +24,7 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     fetchAppointments();
-    timer = Timer.periodic(const Duration(seconds: 10), (_) => fetchAppointments());
+    timer = Timer.periodic(const Duration(minutes: 100), (_) => fetchAppointments());
   }
 
   @override

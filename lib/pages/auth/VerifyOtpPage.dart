@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -15,6 +16,34 @@ class VerifyOtpPage extends StatefulWidget {
 class _VerifyOtpPageState extends State<VerifyOtpPage> {
   final _otpController = TextEditingController();
   bool loading = false;
+  bool canResend = true;
+  int countdown = 60;
+  Timer? _timer;
+
+  @override
+  void dispose() {
+    _otpController.dispose();
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void startCountdown() {
+    setState(() {
+      canResend = false;
+      countdown = 60;
+    });
+
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        if (countdown > 0) {
+          countdown--;
+        } else {
+          canResend = true;
+          timer.cancel();
+        }
+      });
+    });
+  }
 
   Future<void> _verifyOtp() async {
     if (_otpController.text.isEmpty) return;
@@ -31,7 +60,8 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
         }),
       );
 
-      final data = jsonDecode(response.body);
+      final resBodyStr = utf8.decode(response.bodyBytes);
+      final data = jsonDecode(resBodyStr);
 
       if (response.statusCode == 200) {
         Navigator.pushReplacement(
@@ -43,6 +73,37 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
       } else {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(data['detail'] ?? 'OTP failed')));
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Connection error')));
+    } finally {
+      setState(() => loading = false);
+    }
+  }
+
+  Future<void> _resendOtp() async {
+    if (!canResend) return;
+
+    setState(() => loading = true);
+
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl1/patients/send_otp'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': widget.email}),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('OTP resent to ${widget.email}')),
+        );
+        startCountdown(); // ⬅️ بدء العد بعد الإرسال
+      } else {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(data['detail'] ?? 'Failed to resend OTP')));
       }
     } catch (e) {
       ScaffoldMessenger.of(context)
@@ -70,6 +131,13 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
               child: loading
                   ? CircularProgressIndicator(color: Colors.white)
                   : Text('Verify'),
+            ),
+            SizedBox(height: 20),
+            TextButton(
+              onPressed: canResend ? _resendOtp : null,
+              child: canResend
+                  ? Text('Resend OTP')
+                  : Text('Resend in $countdown s'),
             ),
           ],
         ),

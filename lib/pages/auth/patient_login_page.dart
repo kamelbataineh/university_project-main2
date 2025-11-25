@@ -32,6 +32,7 @@ class _PatientLoginPageState extends State<PatientLoginPage>
     _iconController =
         AnimationController(vsync: this, duration: Duration(seconds: 2))
           ..repeat(reverse: true);
+    _loadSavedEmail();
   }
 
   @override
@@ -41,6 +42,14 @@ class _PatientLoginPageState extends State<PatientLoginPage>
     _iconController.dispose();
     super.dispose();
   }
+  void _loadSavedEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedEmail = prefs.getString("saved_email") ?? "";
+    setState(() {
+      _email.text = savedEmail;
+    });
+  }
+
 
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
@@ -84,7 +93,7 @@ class _PatientLoginPageState extends State<PatientLoginPage>
         await prefs.setString("token", token);
         await prefs.setString("first_name", firstName);
         await prefs.setString("last_name", lastName);
-
+        await prefs.setString("saved_email", input);
         // رسالة الترحيب
         String nameMessage;
         if (firstName.isNotEmpty && lastName.isNotEmpty) {

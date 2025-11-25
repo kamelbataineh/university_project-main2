@@ -2,12 +2,27 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/config/app_config.dart';
 import '../auth/patient_login_page.dart';
-
 class PatientVerifyOtpPage extends StatefulWidget {
   final String email;
-  const PatientVerifyOtpPage({required this.email, Key? key}) : super(key: key);
+  final String firstName;
+  final String lastName;
+  final String password;
+  final String phoneNumber;
+  final String username;
+
+  const PatientVerifyOtpPage({
+    required this.email,
+    required this.firstName,
+    required this.lastName,
+    required this.password,
+    required this.phoneNumber,
+    required this.username,
+    Key? key
+  }) : super(key: key);
+
 
   @override
   State<PatientVerifyOtpPage> createState() => _PatientVerifyOtpPageState();
@@ -33,7 +48,7 @@ class _PatientVerifyOtpPageState extends State<PatientVerifyOtpPage> {
 
   void startTimer() {
     setState(() {
-      remainingSeconds = 120;
+      remainingSeconds = 60;
     });
     _timer?.cancel();
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
@@ -63,6 +78,9 @@ class _PatientVerifyOtpPageState extends State<PatientVerifyOtpPage> {
       final resBody = jsonDecode(utf8.decode(response.bodyBytes));
 
       if (response.statusCode == 200) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString("saved_email", widget.email);
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Registration confirmed ✅")),
         );
@@ -84,24 +102,44 @@ class _PatientVerifyOtpPageState extends State<PatientVerifyOtpPage> {
       setState(() => loading = false);
     }
   }
-
   Future<void> resendOtp() async {
+    print("🔹 Start resending OTP for: ${widget.email}");
     setState(() => loading = true);
+
+    final Map<String, dynamic> data = {
+      "username": widget.username,
+      "email": widget.email,
+      "first_name": widget.firstName,
+      "last_name": widget.lastName,
+      "password": widget.password,
+      "phone_number": widget.phoneNumber,
+    };
+
     try {
       final response = await http.post(
         Uri.parse("${baseUrl}patients/register"),
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"email": widget.email}),
+        body: jsonEncode(data),
       );
 
       final resBody = jsonDecode(utf8.decode(response.bodyBytes));
+      print("📥 Server response for resend OTP: $resBody");
+
+      String message = "OTP sent again ✅";
+
+      if (resBody["detail"] is List) {
+        message = resBody["detail"].map((e) => e["msg"]).join(", ");
+      } else if (resBody["detail"] is String) {
+        message = resBody["detail"];
+      }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(resBody["detail"] ?? "OTP sent again ✅")),
+        SnackBar(content: Text(message)),
       );
 
-      startTimer(); // إعادة تشغيل العداد بعد الإرسال
+      startTimer();
     } catch (e) {
+      print("❌ Exception during resending OTP: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Failed to resend OTP: $e")),
       );
@@ -109,6 +147,7 @@ class _PatientVerifyOtpPageState extends State<PatientVerifyOtpPage> {
       setState(() => loading = false);
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
