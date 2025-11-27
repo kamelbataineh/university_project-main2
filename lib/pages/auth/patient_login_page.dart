@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/config/app_config.dart';
+import '../../core/config/app_font.dart';
 import '../../core/config/theme.dart';
 import '../patient/home_patient.dart';
 import 'forgot_password_page.dart';
@@ -233,18 +235,26 @@ class _PatientLoginPageState extends State<PatientLoginPage>
             SizedBox(height: 16),
             Text(
               'User Login',
-              style: TextStyle(
+              style: GoogleFonts.nunito(
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
                 foreground: Paint()
                   ..shader = LinearGradient(
-                          colors: [Colors.pink.shade200, Colors.pink.shade400])
-                      .createShader(Rect.fromLTWH(0, 0, 200, 0)),
+                    colors: [Colors.pink.shade200, Colors.pink.shade400],
+                  ).createShader(Rect.fromLTWH(0, 0, 200, 0)),
               ),
             ),
+
             SizedBox(height: 8),
-            Text('Welcome back! Sign in to continue',
-                style: TextStyle(color: Colors.grey.shade600)),
+
+            Text(
+              'Welcome back! Sign in to continue',
+              style: AppFont.regular(
+                size: 16,
+                color: Colors.grey.shade600,
+              ),
+            ),
+
             SizedBox(height: 24),
             Form(
               key: _formKey,

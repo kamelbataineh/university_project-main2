@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:university_project/core/config/theme.dart';
 import 'package:university_project/pages/doctor/doctor_intro_page.dart';
 import '../../core/config/app_config.dart';
+import '../../core/config/app_font.dart';
 import '../doctor/home_doctor.dart';
 import 'package:http/http.dart' as http;
 
@@ -181,19 +183,29 @@ class _LoginDoctorPageState extends State<LoginDoctorPage>
             SizedBox(height: 16),
             Text(
               'Doctor Login',
-              style: TextStyle(
+              style: GoogleFonts.nunito(
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
                 foreground: Paint()
-                  ..shader = LinearGradient(colors: [
-                    Colors.indigo.shade200,
-                    Colors.indigo.shade400
-                  ]).createShader(Rect.fromLTWH(0, 0, 200, 0)),
+                  ..shader = LinearGradient(
+                    colors: [
+                      Colors.indigo.shade200,
+                      Colors.indigo.shade400
+                    ],
+                  ).createShader(Rect.fromLTWH(0, 0, 200, 0)),
               ),
             ),
+
             SizedBox(height: 8),
-            Text('Welcome back! Sign in to continue',
-                style: TextStyle(color: Colors.grey.shade600)),
+
+            Text(
+              'Welcome back! Sign in to continue',
+              style: AppFont.regular(
+                size: 14,
+                color: Colors.grey.shade600,
+              ),
+            ),
+
             SizedBox(height: 24),
             Form(
               key: _formKey,
@@ -246,10 +258,15 @@ class _LoginDoctorPageState extends State<LoginDoctorPage>
                                   builder: (_) => ForgotPasswordPage()),
                             );
                           },
-                          child: Text('Forgot Password?',
-                              style:
-                                  TextStyle(color: AppTheme.doctorTextBotton))),
-                    ],
+                          child:Text(
+                            'Forgot Password?',
+                            style: AppFont.regular(
+                              color: AppTheme.doctorTextBotton,
+                              size: 14
+                                ,weight: FontWeight.bold
+                            ),
+                          ),)
+                        ],
                   ),
                   SizedBox(height: 16),
                   SizedBox(
@@ -275,16 +292,27 @@ class _LoginDoctorPageState extends State<LoginDoctorPage>
                   SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("Don't have an account? "),
-                      TextButton(
-                        onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => DoctorIntroPage())),
-                        child: Text('Register',
-                            style: TextStyle(color: AppTheme.doctorTextBotton)),
+                    children: [Text(
+                      "Don't have an account? ",
+                      style: AppFont.regular(
+                        size: 14,
+                        color: Colors.black, // ممكن تغيّري اللون حسب التصميم
                       ),
+                    ),
+
+                      TextButton(
+                onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => DoctorIntroPage())),
+                child: Text(
+                  'Register',
+                  style: AppFont.regular(
+                    color: AppTheme.doctorTextBotton,
+                    size: 14,
+                    weight: FontWeight.bold// ممكن تحددي الحجم حسب التصميم
+                  ),
+                ),
+              ),
                     ],
                   ),
                 ],

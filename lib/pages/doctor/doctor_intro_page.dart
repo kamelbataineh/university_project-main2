@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:university_project/core/config/theme.dart';
+import '../../core/config/app_font.dart';
 import '../auth/register_doctor.dart';
 
 class DoctorIntroPage extends StatefulWidget {
@@ -62,16 +63,32 @@ class _DoctorIntroPageState extends State<DoctorIntroPage> {
           child: Icon(page["icon"], color: Colors.white, size: 60),
         ),
         const SizedBox(height: 32),
-        Text(page["title"],
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            page["title"],
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+            style: AppFont.regular(
+              size: 26,
+              weight: FontWeight.bold,
+            ),
+          ),
+        ),
+
         const SizedBox(height: 16),
+
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Text(page["subtitle"],
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16, color: Colors.grey[700])),
+          child: Text(
+            page["subtitle"],
+            textAlign: TextAlign.center,
+            style: AppFont.regular(
+              size: 16,
+              color: Colors.grey,
+            ),
+          ),
         ),
+
       ],
     );
   }
@@ -123,10 +140,15 @@ class _DoctorIntroPageState extends State<DoctorIntroPage> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                   minimumSize: const Size(double.infinity, 50),
                 ),
-                child: const Text(
+                child: Text(
                   "Register Now",
-                  style: TextStyle(color: Colors.white, fontSize: 18),
+                  style: AppFont.regular(
+                    size: 18,
+                    color: Colors.white,
+                    weight: FontWeight.bold,
+                  ),
                 ),
+
               ),
             )
           ],

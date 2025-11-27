@@ -10,6 +10,7 @@ import 'package:university_project/pages/auth/doctor_login_page.dart';
 import 'package:university_project/pages/auth/register_patient.dart';
 import 'package:university_project/pages/doctor/doctor_choice_page.dart';
 import '../../core/config/app_config.dart';
+import '../../core/config/app_font.dart';
 
 class RegisterDoctorPage extends StatefulWidget {
   const RegisterDoctorPage({Key? key}) : super(key: key);
@@ -26,8 +27,8 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
   final TextEditingController _phoneNumber = TextEditingController();
+  final TextEditingController _confirmPassword  = TextEditingController();
   bool _obscure = true;
-
 
 
   bool loading = false;
@@ -218,7 +219,7 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
     required IconData icon,
     bool obscure = false,
     String? Function(String?)? validator,
-    Widget? suffixIcon,
+    Widget? suffixIcon,  int? maxLength,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -389,10 +390,11 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                    Spacer(),
                   Text(
                     'Doctor Registration',
-                    style: TextStyle(
-                        color: Colors.indigo.shade400,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold),
+                  style: AppFont.regular(
+                      size: 22,
+                      weight: FontWeight.bold,
+                      color: Colors.indigo.shade400,
+                    ),
                   ),
                   const Spacer(flex: 2),
                 ],
@@ -438,6 +440,7 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                       hint: "Password",
                       icon: Icons.lock,
                       obscure: _obscure,
+                      maxLength: 20, // الحد الأقصى 20 حرف
                       validator: (val) => val!.isEmpty ? 'Enter password' : null,
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -454,6 +457,32 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
 
 
                     const SizedBox(height: 20),
+                    neumorphicTextField(
+                      controller: _confirmPassword,
+                      hint: "Confirm Password",
+                      icon: Icons.lock_outline,
+                      obscure: _obscure,
+                      maxLength: 20, // الحد الأقصى 20 حرف
+                      validator: (val) {
+                        if (val == null || val.isEmpty) return 'Confirm your password';
+                        if (val != _password.text) return 'Passwords do not match';
+                        return null;
+                      },
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscure ? Icons.visibility_off : Icons.visibility,
+                          color: Colors.indigo.shade200,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscure = !_obscure;
+                          });
+                        },
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
 
                     // 📎 زر رفع السيرة الذاتية
                     ElevatedButton.icon(
@@ -464,10 +493,14 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                             borderRadius: BorderRadius.circular(20)),
                       ),
                       icon: const Icon(Icons.upload_file, color: Colors.white),
-                      label: Text(
+                      label:Text(
                         _cvFile == null ? "Upload CV (PDF/Image)" : "CV Selected ✅",
-                        style: const TextStyle(color: Colors.white, fontSize: 16),
+                        style: AppFont.regular(
+                          size: 16,
+                          color: Colors.white,
+                        ),
                       ),
+
                     ),
 
                     const SizedBox(height: 20),
@@ -486,13 +519,16 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                                   borderRadius: BorderRadius.circular(20)),
                             ),
                             child: loading
-                                ? const CircularProgressIndicator(
+                                ?  CircularProgressIndicator(
                                 color: Colors.white)
-                                : const Text('Register',
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white)),
+                                :  Text(
+                              'Register',
+                              style: AppFont.regular(
+                                size: 18,
+                                weight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -503,15 +539,27 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text("Already have an account?"),
+                        Text(
+                          "Already have an account?",
+                          style: AppFont.regular(
+                            size: 14,
+                            color: Colors.black, // ممكن تغيّري اللون حسب التصميم
+                          ),
+                        ),
                         TextButton(
                           onPressed: () => Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                   builder: (_) => const LoginDoctorPage())),
-                          child: Text('Login',
-                              style: TextStyle(
-                                  color:AppTheme.doctorTextBotton)),
+                          child: Text(
+                            'Login',
+                            style: AppFont.regular(
+                              size: 14,
+                              weight: FontWeight.bold,
+                              color: AppTheme.doctorTextBotton,
+                            ),
+                          ),
+
                         ),
                       ],
                     ),

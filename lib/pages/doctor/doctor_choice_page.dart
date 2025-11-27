@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:university_project/core/config/theme.dart';
+import '../../core/config/app_font.dart';
 import 'doctor_intro_page.dart';
 import '../auth/doctor_login_page.dart';
 import '../auth/LandingPage.dart';
@@ -91,12 +92,14 @@ class _DoctorChoicePageState extends State<DoctorChoicePage>
               SizedBox(height: 32),
               Text(
                 "Welcome to MediCare",
-                style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.doctorText),
+                style: AppFont.regular(
+                  size: 28,
+                  weight: FontWeight.bold,
+                  color: AppTheme.doctorText,
+                ),
                 textAlign: TextAlign.center,
               ),
+
               const SizedBox(height: 40),
               SizedBox(
                 width: double.infinity,
@@ -115,9 +118,15 @@ class _DoctorChoicePageState extends State<DoctorChoicePage>
                         borderRadius: BorderRadius.circular(20)),
                     minimumSize: const Size(double.infinity, 50),
                   ),
-                  child: const Text("Login",
-                      style: TextStyle(fontSize: 18, color: Colors.white)),
+                  child: Text(
+                  "Login",
+                  style: AppFont.regular(
+                    size: 18,
+                    color: Colors.white,
+                    weight: FontWeight.bold,
+                  ),
                 ),
+              ),
               ),
               const SizedBox(height: 20),
               SizedBox(
@@ -137,10 +146,16 @@ class _DoctorChoicePageState extends State<DoctorChoicePage>
                         borderRadius: BorderRadius.circular(20)),
                     minimumSize: const Size(double.infinity, 50),
                   ),
-                  child: const Text("Register",
-                      style: TextStyle(fontSize: 18, color: Colors.white)),
+                  child:Text(
+                    "Register",
+                    style: AppFont.regular(
+                      size: 18,
+                      color: Colors.white,
+                      weight: FontWeight.w400, // نفس الافتراضي، فيك تشيله إذا بدك
+                    ),
+                  ),
+                )
                 ),
-              ),
             ],
           ),
         ),

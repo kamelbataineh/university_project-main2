@@ -415,12 +415,13 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
                   Spacer(),
                   Text(
                     'User Registration',
-                    style: TextStyle(
+                    style: AppFont.regular(
+                      size: 22,
+                      weight: FontWeight.bold,
                       color: AppTheme.patientAppbar,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
                     ),
                   ),
+
                   Spacer(flex: 2),
                 ],
               ),
@@ -619,7 +620,12 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
                       children: [
                         Text(
                           "Already have an account?",
+                          style: AppFont.regular(
+                            size: 14,
+                            color: Colors.black, // ممكن تغيّري اللون حسب التصميم
+                          ),
                         ),
+
                         TextButton(
                           onPressed: () =>Navigator.pushReplacement(
                             context,
@@ -637,8 +643,13 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
                             ),
                           child: Text(
                             'Login',
-                            style: TextStyle(color: AppTheme.patientTextBotton),
+                            style: AppFont.regular(
+                              color: AppTheme.patientTextBotton,
+                              size: 14,
+                              weight: FontWeight.bold// ممكن تحددي الحجم حسب التصميم
+                            ),
                           ),
+
                         ),
                         SizedBox(height: 22),
                       ],
@@ -663,11 +674,12 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
         SizedBox(width: 6),
         Text(
           text,
-          style: TextStyle(
+          style: AppFont.regular(
+            size: 13,
             color: fulfilled ? Colors.green : Colors.red,
-            fontSize: 13,
           ),
         ),
+
       ],
     );
   }
