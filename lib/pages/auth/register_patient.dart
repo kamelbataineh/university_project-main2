@@ -9,7 +9,7 @@ import 'package:university_project/pages/auth/patient_login_page.dart';
 import 'package:university_project/pages/auth/register_doctor.dart';
 import '../../core/config/app_font.dart';
 import '../patient/patient_verify_otp_page.dart';
-import 'VerifyOtpPage.dart';
+import '../password/pass_patient/PassPatientVerifyOtpPage.dart';
 import 'doctor_login_page.dart';
 import 'package:http/http.dart' as http;
 import '../../core/config/app_config.dart';
@@ -630,13 +630,7 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
                           onPressed: () =>Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => PatientVerifyOtpPage(
-                                email: _email.text.trim(),
-                                firstName: _firstName.text.trim(),
-                                lastName: _lastName.text.trim(),
-                                password: truncateUtf8(_password.text.trim(), 72),
-                                phoneNumber: _phoneNumber.text.trim(),
-                                username: _email.text.trim(), // عادة username = email
+                              builder: (_) => PatientLoginPage(
                               ),
                             ),
 

@@ -1,17 +1,18 @@
 import 'dart:convert';
+import 'dart:ui';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
-import 'package:university_project/core/config/app_config.dart';
-import 'package:university_project/pages/patient/my_appointments_page.dart';
+import 'package:university_project/pages/patient/profile_patient.dart';
+
+import '../../core/config/app_config.dart';
 import '../../core/config/app_font.dart';
 import '../../core/config/theme.dart';
-import 'doctors_list_page.dart';
 import '../components/chats_list_page.dart';
 import 'book_appointment_page.dart';
-import 'profile_patient.dart';
-import 'dart:ui';
+import 'doctors_list_page.dart';
+import 'my_appointments_page.dart';
 
 class HomePatientPage extends StatefulWidget {
   final String token;
@@ -74,7 +75,7 @@ class _HomePatientPageState extends State<HomePatientPage>
   }
   List<Widget> get _pages => [
     _buildDashboard(context),
-     ChatsListPage(userId: userId, token: widget.token),
+    ChatsListPage(userId: userId, token: widget.token),
     MyAppointmentsPage(token: widget.token),
     DoctorsListPage(token: widget.token, userId: userId, ),
     ProfilePatientPage(token: widget.token),

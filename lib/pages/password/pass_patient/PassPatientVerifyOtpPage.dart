@@ -2,18 +2,24 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import '../../core/config/app_config.dart';
-import 'reset_password_page.dart';
+import '../../../core/config/app_config.dart';
+import 'PatientResetPasswordPage.dart';
 
-class VerifyOtpPage extends StatefulWidget {
+class PassPatientVerifyOtpPage extends StatefulWidget {
   final String email;
-  VerifyOtpPage({required this.email});
+  final bool fromProfile;
+
+  PassPatientVerifyOtpPage({
+    required this.email,
+    this.fromProfile = false,
+  });
 
   @override
-  _VerifyOtpPageState createState() => _VerifyOtpPageState();
+  _PassPatientVerifyOtpPageState createState() =>
+      _PassPatientVerifyOtpPageState();
 }
 
-class _VerifyOtpPageState extends State<VerifyOtpPage> {
+class _PassPatientVerifyOtpPageState extends State<PassPatientVerifyOtpPage> {
   final _otpController = TextEditingController();
   bool loading = false;
   bool canResend = true;
@@ -25,6 +31,16 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
     _otpController.dispose();
     _timer?.cancel();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    // إرسال OTP مباشرة أول ما يدخل المستخدم الصفحة
+    Future.microtask(() {
+      _resendOtp();
+    });
   }
 
   void startCountdown() {
@@ -67,12 +83,15 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => ResetPasswordPage(email: widget.email),
+            builder: (_) => PatientResetPasswordPage(
+              email: widget.email,
+              fromProfile: widget.fromProfile, // ⬅️ important
+            ),
           ),
         );
       } else {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(data['detail'] ?? 'OTP failed')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(data['detail'] ?? 'OTP failed')));
       }
     } catch (e) {
       ScaffoldMessenger.of(context)
@@ -102,8 +121,8 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
         );
         startCountdown(); // ⬅️ بدء العد بعد الإرسال
       } else {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(data['detail'] ?? 'Failed to resend OTP')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(data['detail'] ?? 'Failed to resend OTP')));
       }
     } catch (e) {
       ScaffoldMessenger.of(context)

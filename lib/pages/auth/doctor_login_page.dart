@@ -9,7 +9,7 @@ import '../../core/config/app_font.dart';
 import '../doctor/home_doctor.dart';
 import 'package:http/http.dart' as http;
 
-import 'forgot_password_page.dart';
+import '../password/pass_patient/PatientForgotPasswordPage.dart';
 
 class LoginDoctorPage extends StatefulWidget {
   const LoginDoctorPage({Key? key}) : super(key: key);

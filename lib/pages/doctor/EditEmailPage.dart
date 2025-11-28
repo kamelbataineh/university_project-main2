@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../auth/VerifyOtpPage.dart';
+import '../password/pass_patient/PassPatientVerifyOtpPage.dart';
 
 class EditEmailPage extends StatefulWidget {
   final String token;

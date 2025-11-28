@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
 import 'package:http_parser/http_parser.dart';
 
-import '../auth/VerifyPasswordPage.dart';
+import '../password/VerifyPasswordPage.dart';
 
 const baseUrl = "http://10.0.2.2:8000/";
 
@@ -160,27 +160,27 @@ class _EditDoctorProfilePageState extends State<EditDoctorProfilePage> {
   }
 
   Widget _buildField(String label, String field) {
-    // حالة خاصية Email
-    if (field == 'email') {
-      return Card(
-        elevation: 3,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: ListTile(
-          title: Text(label),
-          subtitle: Text(widget.doctorData[field]?.toString() ?? 'Not added'),
-          trailing: Icon(Icons.edit_outlined, color: Colors.blue),
-          onTap: () {
-            // الانتقال إلى صفحة التحقق من كلمة السر
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => VerifyPasswordPage(token: widget.token),
-              ),
-            );
-          },
-        ),
-      );
-    }
+    // // حالة خاصية Email
+    // if (field == 'email') {
+    //   return Card(
+    //     elevation: 3,
+    //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    //     child: ListTile(
+    //       title: Text(label),
+    //       subtitle: Text(widget.doctorData[field]?.toString() ?? 'Not added'),
+    //       trailing: Icon(Icons.edit_outlined, color: Colors.blue),
+    //       onTap: () {
+    //         // الانتقال إلى صفحة التحقق من كلمة السر
+    //         Navigator.push(
+    //           context,
+    //           MaterialPageRoute(
+    //             builder: (_) => VerifyPasswordPage(token: widget.token),
+    //           ),
+    //         );
+    //       },
+    //     ),
+    //   );
+    // }
 
     // الحقول الخاصة Dropdown
     if (field == 'gender' || field == 'specialization') {

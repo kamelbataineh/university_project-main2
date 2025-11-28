@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../core/config/app_config.dart';
-import 'VerifyOtpPage.dart'; // تأكد من تعريف baseUrl1 هنا
+import '../../../core/config/app_config.dart';
+import 'PassPatientVerifyOtpPage.dart'; // تأكد من تعريف baseUrl1 هنا
 
 // ================== Forgot Password Page ==================
 class ForgotPasswordPage extends StatefulWidget {
@@ -48,7 +48,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => VerifyOtpPage(email: _emailController.text.trim()),
+            builder: (_) => PassPatientVerifyOtpPage(email: _emailController.text.trim()),
           ),
         );
       } else {

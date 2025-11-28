@@ -8,7 +8,7 @@ import '../../core/config/app_config.dart';
 import '../../core/config/app_font.dart';
 import '../../core/config/theme.dart';
 import '../patient/home_patient.dart';
-import 'forgot_password_page.dart';
+import '../password/pass_patient/PatientForgotPasswordPage.dart';
 import 'register_patient.dart';
 
 class PatientLoginPage extends StatefulWidget {

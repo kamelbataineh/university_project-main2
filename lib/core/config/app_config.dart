@@ -3,14 +3,12 @@ const baseUrl                     = "http://10.0.2.2:8000/";
 const baseUrl1                     = "http://10.0.2.2:8000";
 
 
-const String chatSend       = baseUrl + "chat/send";
-const String chatList       = baseUrl + "chat/list";
-const String chatMessages   = baseUrl + "chat/messages/";      // + otherId
-const String chatUploadFile = baseUrl + "chat/upload_file/";   // + otherId
 
 
-
-
+const String chatMessages = "$baseUrl1/chat/messages/";
+const String chatSend = "$baseUrl1/chat/send";
+const String chatUploadFile = "$baseUrl1/chat/upload_file/";
+const String chatList = "$baseUrl1/chat/list";
 
 
 // ---------- Admin ----------

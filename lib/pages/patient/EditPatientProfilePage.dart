@@ -5,6 +5,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
+import 'package:university_project/pages/patient/patient_verify_otp_page.dart';
+
+import '../password/pass_patient/PassPatientVerifyOtpPage.dart';
 
 const baseUrl = "http://10.0.2.2:8000/";
 
@@ -252,7 +255,21 @@ class _EditPatientProfilePageState extends State<EditPatientProfilePage> {
               child: ListTile(
                 title: const Text("Change Password"),
                 trailing: const Icon(Icons.lock_outline, color: Colors.blue),
-                onTap: () {},
+                onTap: () {
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PassPatientVerifyOtpPage(
+                          email: widget.patientData['email'],
+                          fromProfile: true,  // ⬅️ الجديد
+                        ),
+                      ),
+                    );
+
+
+                },
+
               ),
             ),
           ],
