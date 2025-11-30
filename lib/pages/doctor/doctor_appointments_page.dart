@@ -36,15 +36,10 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
   Future<void> handleCancellation(Map app, {required bool approve}) async {
     final appointmentId = app['appointment_id'];
 
-    Uri url = Uri.parse("$baseUrl1/appointments/cancel/approve/$appointmentId")
-        .replace(queryParameters: {"approve": approve.toString()});
-    // await http.post(
-    //   Uri.parse("http://127.0.0.1:8000/appointments/cancel/${appt['appointment_id']}"),
-    //   headers: {
-    //     'Authorization': 'Bearer $token',
-    //     'Content-Type': 'application/json',
-    //   },
-    // );
+    Uri url = Uri.parse("$baseUrl1/appointments/cancel/$appointmentId")
+        .replace(queryParameters: {
+      "approve": approve.toString(),
+    });
 
     try {
       final res = await http.post(
@@ -62,14 +57,16 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(approve
-                ? "تم الموافقة على إلغاء الحجز"
-                : "تم رفض طلب الإلغاء"),
+            content: Text(
+              approve
+                  ? "تم الموافقة على إلغاء الحجز"
+                  : "تم رفض طلب الإلغاء",
+            ),
           ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("حدث خطأ")),
+          SnackBar(content: Text("❌ خطأ في الطلب: ${res.statusCode}")),
         );
       }
     } catch (e) {
@@ -78,6 +75,7 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
       );
     }
   }
+
 
   // ------------------ جلب المواعيد ------------------
   Future<void> fetchAppointments() async {
