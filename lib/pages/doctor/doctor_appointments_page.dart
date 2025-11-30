@@ -33,6 +33,51 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
     _tabController.dispose();
     super.dispose();
   }
+  Future<void> handleCancellation(Map app, {required bool approve}) async {
+    final appointmentId = app['appointment_id'];
+
+    Uri url = Uri.parse("$baseUrl1/appointments/cancel/approve/$appointmentId")
+        .replace(queryParameters: {"approve": approve.toString()});
+    // await http.post(
+    //   Uri.parse("http://127.0.0.1:8000/appointments/cancel/${appt['appointment_id']}"),
+    //   headers: {
+    //     'Authorization': 'Bearer $token',
+    //     'Content-Type': 'application/json',
+    //   },
+    // );
+
+    try {
+      final res = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${widget.token}',
+        },
+      );
+
+      if (res.statusCode == 200) {
+        setState(() {
+          app['status'] = approve ? "Cancelled" : "Rejected";
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(approve
+                ? "تم الموافقة على إلغاء الحجز"
+                : "تم رفض طلب الإلغاء"),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("حدث خطأ")),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("❌ خطأ: $e")),
+      );
+    }
+  }
 
   // ------------------ جلب المواعيد ------------------
   Future<void> fetchAppointments() async {
@@ -108,6 +153,8 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
           displayStatus = "في انتظار موافقة الدكتور";
         }
 
+
+
         return Card(
           margin: const EdgeInsets.all(10),
           child: Padding(
@@ -121,20 +168,26 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
                 if(reason != "-") Text('السبب: $reason', style: const TextStyle(color: Colors.grey)),
                 const SizedBox(height: 10),
 
-                // ------------------ أزرار حسب الحالة ------------------
                 Row(
                   children: [
+                    if (app['status'] == 'Completed')
+                      IconButton(
+                        onPressed: () => deleteAppointment(app['appointment_id']),
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        tooltip: "حذف الموعد",
+                      ),
+
                     if (app['status'] == "Pending") ...[
                       ElevatedButton(
-                        onPressed: () => handleApproval(app, approve: true, index: index),
+                        onPressed: () => handleApproval(app, approve: true),
                         style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                        child:  const Text("موافقة"),
+                        child: const Text("موافقة"),
                       ),
                       const SizedBox(width: 10),
                       ElevatedButton(
-                        onPressed: () => handleApproval(app, approve: false, index: index),
+                        onPressed: () => handleApproval(app, approve: false),
                         style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                        child:  const Text("رفض"),
+                        child: const Text("رفض"),
                       ),
                     ] else if (app['status'] == "Confirmed") ...[
                       ElevatedButton(
@@ -142,9 +195,37 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
                         style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
                         child: const Text("تم الإنجاز"),
                       ),
+                      const SizedBox(width: 10),
+                      ElevatedButton(
+                        onPressed: () => handleApproval(app, revert: true),
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                        child: const Text("إعادة إلى Pending"),
+                      ),
+                    ] else if (app['status'] == "Rejected") ...[
+                      ElevatedButton(
+                        onPressed: () => handleApproval(app, revert: true),
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                        child: const Text("إعادة إلى Pending"),
+                      ),
                     ],
+                    // ===================== أزرار الموافقة على طلب إلغاء الحجز =====================
+                    if (app['status'] == "PendingCancellation") ...[
+                      ElevatedButton(
+                        onPressed: () => handleCancellation(app, approve: true),
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                        child: const Text("موافقة على الإلغاء"),
+                      ),
+                      const SizedBox(width: 10),
+                      ElevatedButton(
+                        onPressed: () => handleCancellation(app, approve: false),
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                        child: const Text("رفض الإلغاء"),
+                      ),
+                    ],
+
                   ],
                 ),
+
               ],
             ),
           ),
@@ -152,32 +233,43 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
       },
     );
   }
-
-  // ------------------ التعامل مع الموافقة/الرفض ------------------
-  Future<void> handleApproval(Map app, {required bool approve, required int index}) async {
+  Future<void> handleApproval(Map app, {bool? approve, bool revert = false}) async {
     final appointmentId = app['appointment_id'];
-    final url = Uri.parse("$baseUrl1/appointments/approve/$appointmentId?approve=$approve");
+
+    // بناء الـ URL مع Query Parameters
+    Map<String, String> queryParams = {};
+    if (approve != null) queryParams['approve'] = approve.toString();
+    queryParams['revert'] = revert.toString();
+
+    Uri url = Uri.parse("$baseUrl1/appointments/approve/$appointmentId")
+        .replace(queryParameters: queryParams);
 
     try {
-      final res = await http.post(url,
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ${widget.token}',
-          });
+      final res = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${widget.token}',
+        },
+      );
 
       if (res.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(approve ? "تمت الموافقة" : "تم الرفض")),
+          SnackBar(
+              content: Text(revert
+                  ? "تمت إعادة الموعد إلى Pending"
+                  : (approve == true ? "تمت الموافقة" : "تم الرفض"))),
         );
 
         setState(() {
-          if (approve) {
+          if (revert) {
+            app['status'] = "Pending";
+          } else if (approve == true) {
             app['status'] = "Confirmed";
           } else {
-            app['status'] = "PendingCancellation";
+            app['status'] = "Rejected"; // أو "PendingCancellation" حسب الـ API
           }
         });
-
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("حدث خطأ")),
@@ -209,10 +301,7 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
         setState(() {
           app['status'] = "Completed";
         });
-
-        // حذف تلقائي بعد 30 دقيقة
-        Future.delayed(const Duration(minutes: 30), () => deleteAppointment(app['appointment_id']));
-
+        // سيتم الحذف تلقائيًا بعد أسبوع داخل checkAndDeleteAppointments
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("حدث خطأ")),
@@ -224,6 +313,7 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
       );
     }
   }
+
 
   // ------------------ حذف الموعد ------------------
   Future<void> deleteAppointment(String appointmentId) async {
@@ -246,8 +336,8 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
     }
   }
 
-  // ------------------ فحص المواعيد المنتهية ------------------
   void checkAndDeleteAppointments() {
+    final now = DateTime.now();
     for (var app in appointments) {
       DateTime? dateTime;
       try {
@@ -255,15 +345,17 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
       } catch (_) {}
 
       if (dateTime != null) {
-        if (app['status'] == 'Completed') {
-          final deleteTime = dateTime.add(const Duration(minutes: 30));
-          if (DateTime.now().isAfter(deleteTime)) {
-            deleteAppointment(app['appointment_id']);
-          }
-        } else if (app['status'] == 'Confirmed') {
-          if (DateTime.now().isAfter(dateTime)) {
+        if (app['status'] == 'Confirmed' && now.isAfter(dateTime)) {
+          // الموعد انتهى → علمه كمكتمل
+          setState(() {
             app['status'] = 'Completed';
-            markCompleted(app, 0);
+          });
+          markCompleted(app, 0); // سيتم حذف الموعد بعد أسبوع تلقائيًا
+        } else if (app['status'] == 'Completed') {
+          // الموعد مكتمل → حذف بعد أسبوع
+          final deleteTime = dateTime.add(const Duration(days: 7));
+          if (now.isAfter(deleteTime)) {
+            deleteAppointment(app['appointment_id']);
           }
         }
       }

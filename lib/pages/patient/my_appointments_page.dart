@@ -48,7 +48,7 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
   }
 
   Future<void> requestCancel(String appointmentId) async {
-    final url = Uri.parse(cancelAppointmentUrl + appointmentId);
+    final url = Uri.parse('$cancelAppointmentUrl/$appointmentId');
     try {
       final res = await http.post(
         url,
@@ -174,6 +174,56 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
                         ),
                       ),
                     ),
+                  // ...
+                  SizedBox(height: 10),
+
+// الحالات المختلفة حسب حالة الموعد
+                  if (status == 'Cancelled' || status == 'Rejected') ...[
+                    // زر سلة للحذف
+                    IconButton(
+                      onPressed: () {
+                        // هنا تضيف دالة الحذف من القائمة المحلية فقط أو من السيرفر إذا عندك API
+                        setState(() {
+                          appointments.removeAt(index);
+                        });
+                      },
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      tooltip: 'حذف الموعد',
+                    ),
+                  ] else if (status == 'Confirmed') ...[
+                    // زر طلب إلغاء فقط إذا تمت الموافقة
+                    ElevatedButton.icon(
+                      onPressed: () => requestCancel(appt['appointment_id']),
+                      icon: const Icon(Icons.cancel),
+                      label: const Text('Request Cancellation'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.redAccent,
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(double.infinity, 45),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ] else if (status == 'Pending' || status == 'PendingCancellation') ...[
+                    // يمكنك إضافة رسالة فقط إذا الانتظار
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.orange[100],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Text(
+                        'بانتظار موافقة الدكتور على الإلغاء',
+                        style: TextStyle(
+                          color: Colors.orange,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+
                 ],
               ),
             ),

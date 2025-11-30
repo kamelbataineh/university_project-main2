@@ -33,14 +33,14 @@ class _BookAppointmentPageDoctorState extends State<BookAppointmentPageDoctor> {
   void initState() {
     super.initState();
   }
-
-  // اختيار التاريخ
   Future<void> pickDate() async {
     final now = DateTime.now();
+    final tomorrow = now.add(const Duration(days: 1)); // البداية من الغد
+
     final picked = await showDatePicker(
       context: context,
-      initialDate: now,
-      firstDate: now,
+      initialDate: tomorrow,
+      firstDate: tomorrow, // ممنوع اليوم
       lastDate: now.add(const Duration(days: 60)),
       builder: (context, child) {
         return Theme(
@@ -65,6 +65,7 @@ class _BookAppointmentPageDoctorState extends State<BookAppointmentPageDoctor> {
       fetchAvailableTimes();
     }
   }
+
 
   // جلب الأوقات المتاحة
   Future<void> fetchAvailableTimes() async {
@@ -93,6 +94,27 @@ class _BookAppointmentPageDoctorState extends State<BookAppointmentPageDoctor> {
   }
 
   Future<void> bookAppointment() async {
+    // تحقق من وجود موعد مسبق
+    final existingAppointmentsResponse = await http.get(
+      Uri.parse(myAppointmentsUrl),
+      headers: {"Authorization": "Bearer ${widget.token}"},
+    );
+
+    final existingAppointments = existingAppointmentsResponse.statusCode == 200
+        ? json.decode(existingAppointmentsResponse.body)
+        : [];
+
+    if (existingAppointments.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("You already have an appointment booked."),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return; // يمنع الحجز
+    }
+
+    // متابعة الحجز
     if (selectedDate == null || selectedTime == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please select date and time")),
@@ -145,6 +167,7 @@ class _BookAppointmentPageDoctorState extends State<BookAppointmentPageDoctor> {
       );
     }
   }
+
 
   Widget neumorphicCard({required Widget child}) {
     return Container(

@@ -44,7 +44,7 @@ const patientMeUpdate             = baseUrl + "patients/me_update";
 // ==================== Appointments API ====================
 const String doctorsListUrl = baseUrl + "appointments/doctors";
 const String bookAppointmentUrl = baseUrl + "appointments/book";
-const String cancelAppointmentUrl = baseUrl + "appointments/cancel"; // لاحقًا /{id}
+const String cancelAppointmentUrl =baseUrl+ "appointments/cancel";
 const String myAppointmentsUrl = baseUrl + "appointments/my-appointments";
 const String availableSlotsUrl = baseUrl + "appointments/available-slots"; // لاحقًا /{doctor_id}?date=yyyy-mm-dd
 const String approveAppointmentUrl = baseUrl+ "appointments/approve";

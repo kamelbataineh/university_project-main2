@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:university_project/pages/components/chats_list_page.dart';
+import '../auth/LandingPage.dart';
 import '../upload/upload_image.dart';
 import '../upload/upload_page.dart';
 import 'doctor_appointments_page.dart';
@@ -224,8 +225,12 @@ class _HomeDoctorPageState extends State<HomeDoctorPage> with SingleTickerProvid
           IconButton(
             icon: const Icon(Icons.notifications),
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('No notifications yet')),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => LandingPage()
+
+                ),
               );
             },
           ),
