@@ -303,7 +303,6 @@ class _EditDoctorProfilePageState extends State<EditDoctorProfilePage> {
 
             _buildField('First Name', 'first_name'),
             _buildField('Last Name', 'last_name'),
-            _buildField('Email', 'email'),
             _buildField('Phone Number', 'phone_number'),
             _buildField('Specialization', 'specialization'),
             _buildField('Bio', 'bio'),

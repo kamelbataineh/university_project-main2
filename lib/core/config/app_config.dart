@@ -17,7 +17,7 @@ const adminCheck  = baseUrl + "admin/check";
 
 
 //  (Doctor)
-const doctorRegister              = baseUrl + "doctors/register";
+const doctorRegister              = baseUrl + "doctors/register-temp";
 const doctorLogin                 = baseUrl + "doctors/login";
 const doctorLogout                = baseUrl + "doctors/logout";
 const doctorUpdate                = baseUrl + "doctors/update";

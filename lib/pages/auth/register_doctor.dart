@@ -11,6 +11,7 @@ import 'package:university_project/pages/auth/register_patient.dart';
 import 'package:university_project/pages/doctor/doctor_choice_page.dart';
 import '../../core/config/app_config.dart';
 import '../../core/config/app_font.dart';
+import '../doctor/DoctorVerifyOtpPage.dart';
 
 class RegisterDoctorPage extends StatefulWidget {
   const RegisterDoctorPage({Key? key}) : super(key: key);
@@ -27,7 +28,7 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
   final TextEditingController _phoneNumber = TextEditingController();
-  final TextEditingController _confirmPassword  = TextEditingController();
+  final TextEditingController _confirmPassword = TextEditingController();
   bool _obscure = true;
 
 
@@ -60,10 +61,9 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
     return null;
   }
 
-  // ==== رفع ملف السيرة الذاتية ====
 
   Future<void> pickCV() async {
-    // يسمح بصيغ PDF + كل أنواع الصور
+    print("📌 Pick CV: Start");
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'],
@@ -74,6 +74,7 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
         _cvFile = File(result.files.single.path!);
       });
 
+      print("✅ CV Selected: ${result.files.single.name}");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("CV Selected: ${result.files.single.name}"),
@@ -81,7 +82,7 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
         ),
       );
     } else {
-      // المستخدم ألغى الاختيار
+      print("❌ No file selected");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("No file selected"),
@@ -90,12 +91,17 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
       );
     }
   }
-  // ==== تسجيل دكتور جديد مع رفع CV ====
-  // ==== تسجيل دكتور جديد مع رفع CV ====
+
   Future<void> registerDoctor() async {
-    if (!_formKey.currentState!.validate()) return;
+    print("📌 Register Doctor: Start");
+
+    if (!_formKey.currentState!.validate()) {
+      print("❌ Form not valid");
+      return;
+    }
 
     if (_cvFile == null) {
+      print("❌ CV file is null");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Please upload your CV before submitting"),
@@ -109,65 +115,62 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
 
     try {
       final uri = Uri.parse(doctorRegister);
-      var request = http.MultipartRequest('POST', uri);
+      print("🌐 API URL: $uri");
 
-      // 🧾 نضيف البيانات النصية
-      request.fields['username'] = _email.text.trim();
+      var request = http.MultipartRequest('POST', uri);
+      final username = _email.text.trim().split('@')[0];
+      request.fields['username'] = username;
       request.fields['email'] = _email.text.trim();
       request.fields['first_name'] = _firstName.text.trim();
       request.fields['last_name'] = _lastName.text.trim();
       request.fields['password'] =
-          _password.text.trim().substring(0, min(_password.text.trim().length, 72));
+          _password.text.trim().substring(0, min(_password.text
+              .trim()
+              .length, 72));
       request.fields['role'] = "doctor";
       request.fields['phone_number'] = _phoneNumber.text.trim();
 
-      // 📎 نضيف ملف السيرة الذاتية
+      print("📄 Form fields:");
+      request.fields.forEach((key, value) => print(" - $key: $value"));
+
       request.files.add(
         await http.MultipartFile.fromPath('cv_file', _cvFile!.path),
       );
+      print("📎 CV file added: ${_cvFile!.path}");
 
-      // 🧠 إرسال الطلب
       final response = await request.send();
       final resBody = await response.stream.bytesToString();
+      print("🌐 Response status: ${response.statusCode}");
+      print("🌐 Response body: $resBody");
+
       final decoded = jsonDecode(resBody);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         String cvUrl = decoded["cv_url"] ?? "No CV URL returned";
+        print("✅ Registration successful, CV URL: $cvUrl");
 
-        // 🎉 عرض رسالة نجاح + رابط CV + تنبيه بالموافقة على الإيميل
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text("تم التسجيل بنجاح ✅"),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  "تم إرسال طلب التسجيل الخاص بك بنجاح بانتظار موافقة الإدارة.\n\n"
-                      "سيصلك إشعار على بريدك الإلكتروني فور الموافقة. 🌸",
-                  style: const TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 10),
-                Text("CV URL: $cvUrl",
-                    style: const TextStyle(color: Colors.blue, fontSize: 14)),
-              ],
+        // 🎯 الانتقال مباشرة إلى صفحة التحقق من OTP
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => DoctorVerifyOtpPage(
+              email: _email.text.trim(),
+              firstName: _firstName.text.trim(),
+              lastName: _lastName.text.trim(),
+              password: _password.text.trim(),
+              phoneNumber: _phoneNumber.text.trim(),
+              username: _email.text.trim().split('@')[0],
             ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const DoctorChoicePage()),
-                  );
-                },
-                child: const Text("حسناً"),
-              ),
-            ],
           ),
         );
-      }
-      else {
+
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("تم إرسال OTP إلى بريدك الإلكتروني ✅")),
+        );
+
+    } else {
+        print("❌ Registration failed: ${decoded["detail"]}");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: Colors.redAccent,
@@ -176,6 +179,7 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
         );
       }
     } catch (e) {
+      print("❌ Exception: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: Colors.redAccent,
@@ -184,6 +188,7 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
       );
     } finally {
       setState(() => loading = false);
+      print("📌 Register Doctor: End");
     }
   }
 
@@ -191,25 +196,27 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
   void _showRoleDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Choose another account type'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.person),
-              title: const Text('Patient'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => const RegisterPatientPage()),
-                );
-              },
+      builder: (context) =>
+          AlertDialog(
+            title: const Text('Choose another account type'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.person),
+                  title: const Text('Patient'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const RegisterPatientPage()),
+                    );
+                  },
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
@@ -219,7 +226,7 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
     required IconData icon,
     bool obscure = false,
     String? Function(String?)? validator,
-    Widget? suffixIcon,  int? maxLength,
+    Widget? suffixIcon, int? maxLength,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -249,9 +256,9 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
             controller: controller,
             obscureText: obscure,
             validator: validator,
-            style: TextStyle(color:AppTheme.doctorText ),
+            style: TextStyle(color: AppTheme.doctorText),
             decoration: InputDecoration(
-              prefixIcon: Icon(icon, color:AppTheme.doctorIcon),
+              prefixIcon: Icon(icon, color: AppTheme.doctorIcon),
               hintText: hint,
               suffixIcon: suffixIcon,
               hintStyle: TextStyle(color: Colors.grey),
@@ -282,6 +289,7 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
       ],
     );
   }
+
   //
   // Widget floatingDoctorIcon() {
   //   return SizedBox(
@@ -360,7 +368,8 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                         spreadRadius: 1),
                   ],
                 ),
-                child: Icon(Icons.medical_services, color: Colors.white, size: 40),
+                child: Icon(
+                    Icons.medical_services, color: Colors.white, size: 40),
               ),
             );
           },
@@ -368,6 +377,7 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -382,15 +392,16 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                 children: [
                   IconButton(
                     icon: Icon(Icons.arrow_back, color: Colors.indigo.shade400),
-                    onPressed: () => Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) =>  DoctorChoicePage())),
+                    onPressed: () =>
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => DoctorChoicePage())),
                   ),
-                   Spacer(),
+                  Spacer(),
                   Text(
                     'Doctor Registration',
-                  style: AppFont.regular(
+                    style: AppFont.regular(
                       size: 22,
                       weight: FontWeight.bold,
                       color: Colors.indigo.shade400,
@@ -440,8 +451,12 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                       hint: "Password",
                       icon: Icons.lock,
                       obscure: _obscure,
-                      maxLength: 20, // الحد الأقصى 20 حرف
-                      validator: (val) => val!.isEmpty ? 'Enter password' : null,
+                      maxLength: 20,
+                      // الحد الأقصى 20 حرف
+                      validator: (val) =>
+                      val!.isEmpty
+                          ? 'Enter password'
+                          : null,
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscure ? Icons.visibility_off : Icons.visibility,
@@ -462,10 +477,13 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                       hint: "Confirm Password",
                       icon: Icons.lock_outline,
                       obscure: _obscure,
-                      maxLength: 20, // الحد الأقصى 20 حرف
+                      maxLength: 20,
+                      // الحد الأقصى 20 حرف
                       validator: (val) {
-                        if (val == null || val.isEmpty) return 'Confirm your password';
-                        if (val != _password.text) return 'Passwords do not match';
+                        if (val == null || val.isEmpty)
+                          return 'Confirm your password';
+                        if (val != _password.text)
+                          return 'Passwords do not match';
                         return null;
                       },
                       suffixIcon: IconButton(
@@ -488,13 +506,16 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                     ElevatedButton.icon(
                       onPressed: pickCV,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.doctorElevatedButtonbackgroundColor,
+                        backgroundColor: AppTheme
+                            .doctorElevatedButtonbackgroundColor,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20)),
                       ),
                       icon: const Icon(Icons.upload_file, color: Colors.white),
-                      label:Text(
-                        _cvFile == null ? "Upload CV (PDF/Image)" : "CV Selected ✅",
+                      label: Text(
+                        _cvFile == null
+                            ? "Upload CV (PDF/Image)"
+                            : "CV Selected ✅",
                         style: AppFont.regular(
                           size: 16,
                           color: Colors.white,
@@ -514,14 +535,15 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                             style: ElevatedButton.styleFrom(
                               padding:
                               const EdgeInsets.symmetric(vertical: 16),
-                              backgroundColor: AppTheme.doctorElevatedButtonbackgroundColor,
+                              backgroundColor: AppTheme
+                                  .doctorElevatedButtonbackgroundColor,
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20)),
                             ),
                             child: loading
-                                ?  CircularProgressIndicator(
+                                ? CircularProgressIndicator(
                                 color: Colors.white)
-                                :  Text(
+                                : Text(
                               'Register',
                               style: AppFont.regular(
                                 size: 18,
@@ -543,14 +565,16 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                           "Already have an account?",
                           style: AppFont.regular(
                             size: 14,
-                            color: Colors.black, // ممكن تغيّري اللون حسب التصميم
+                            color: Colors
+                                .black, // ممكن تغيّري اللون حسب التصميم
                           ),
                         ),
                         TextButton(
-                          onPressed: () => Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => const LoginDoctorPage())),
+                          onPressed: () =>
+                              Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => const LoginDoctorPage())),
                           child: Text(
                             'Login',
                             style: AppFont.regular(

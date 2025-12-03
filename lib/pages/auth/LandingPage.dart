@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:university_project/pages/admin/admin_login_page.dart';
 import 'package:university_project/pages/auth/patient_login_page.dart';
 import 'package:university_project/pages/auth/register_patient.dart';
 import 'package:university_project/pages/doctor/doctor_choice_page.dart';
@@ -305,6 +306,41 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
           //     child: const Text("Next", style: TextStyle(color: Colors.white)),
           //   ),
           SizedBox(height: 24),
+          // نص دعائي للدكاترة
+          GestureDetector(
+            onTap: () =>  Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => AdminLoginPage())),
+            child: Container(
+              padding: EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(32),
+                gradient: LinearGradient(colors: [
+                  Colors.purple.shade100.withOpacity(0.3),
+                  Colors.indigo.shade100.withOpacity(0.3)
+                ]),
+                boxShadow: [
+                  BoxShadow(
+                      color: Colors.grey.shade200,
+                      blurRadius: 12,
+                      offset: Offset(8, 8)),
+                  BoxShadow(
+                      color: Colors.white,
+                      blurRadius: 12,
+                      offset: Offset(-8, -8)),
+                ],
+              ),
+              child: Column(
+                children: [
+
+                  Icon(Icons.medical_services,
+                      color: Colors.indigo, size: 36),
+                  SizedBox(height: 8),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

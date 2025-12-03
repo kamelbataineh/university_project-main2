@@ -543,13 +543,7 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
                             "Contains at least one special character",
                             hasSpecialChar(_password.text),
                           ),
-                          // لو بدك شرط رابع، مثلاً "Letters, numbers or symbols"
-                          _buildPasswordRequirement(
-                            "Contains letters, numbers or symbols",
-                            _password.text.contains(RegExp(r'[A-Za-z]')) ||
-                                hasNumber(_password.text) ||
-                                hasSpecialChar(_password.text),
-                          ),
+
                           SizedBox(height: 2),
                         ],
 
