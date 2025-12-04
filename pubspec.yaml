@@ -46,6 +46,7 @@ dependencies:
   jwt_decode: ^0.3.1
   flutter_pdfview: ^1.4.3
   url_launcher: ^6.3.1
+  pdfx: ^2.6.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
