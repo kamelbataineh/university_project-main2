@@ -1,30 +1,36 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:pdfx/pdfx.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'PdfViewerPage.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:http/http.dart' as http;
 
-import 'AdminDoctorProfilePage.dart';
+class DoctorProfilePage extends StatefulWidget {
+  final Map doctor;
+  final Function()? onApprove;
+  final Function()? onToggleActive;
 
-class AdminDoctorListPage extends StatefulWidget {
-  const AdminDoctorListPage({super.key});
+  const DoctorProfilePage({
+    super.key,
+    required this.doctor,
+    this.onApprove,
+    this.onToggleActive,
+  });
 
   @override
-  State<AdminDoctorListPage> createState() => _AdminDoctorListPageState();
+  State<DoctorProfilePage> createState() => _DoctorProfilePageState();
 }
 
-class _AdminDoctorListPageState extends State<AdminDoctorListPage>
-    with SingleTickerProviderStateMixin {
+class _DoctorProfilePageState extends State<DoctorProfilePage> {
+  late Map doctor;
   List doctors = [];
   bool loading = true;
-  late TabController tabController;
 
   @override
   void initState() {
     super.initState();
-    tabController = TabController(length: 2, vsync: this);
-    fetchDoctors();
+    doctor = Map.from(widget.doctor); // نعمل نسخة محلية لتحديث الواجهة
   }
 
   // جلب الدكاترة من السيرفر
@@ -35,7 +41,7 @@ class _AdminDoctorListPageState extends State<AdminDoctorListPage>
 
     try {
       final response = await http.get(
-        Uri.parse("http://10.0.2.2:8000/admin/users"),
+        Uri.parse("http://10.0.2.2:8000/admin/doctor"),
         headers: {"Authorization": "Bearer $token"},
       );
 
@@ -69,7 +75,10 @@ class _AdminDoctorListPageState extends State<AdminDoctorListPage>
 
     final response = await http.put(
       Uri.parse("http://10.0.2.2:8000/admin/doctor/update/$id"),
-      headers: {"Authorization": "Bearer $token", "Content-Type": "application/json"},
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json"
+      },
       body: jsonEncode(body),
     );
 
@@ -81,213 +90,183 @@ class _AdminDoctorListPageState extends State<AdminDoctorListPage>
     }
   }
 
-  // بطاقة كل طبيب
-  Widget doctorCard(Map doctor, {bool showApprove = false, bool showActive = false}) {
+  @override
+  Widget build(BuildContext context) {
     final cvUrl = doctor['cv_url'];
 
-    return Card(
-      margin: const EdgeInsets.all(8),
-      child: ListTile(
-        title: Text("${doctor['first_name']} ${doctor['last_name']}"),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("Email: ${doctor['email']}"),
-            if (showActive) Text("Active: ${doctor['is_active']}"),
-            if (showApprove) Text("Approved: ${doctor['is_approved']}"),
-          ],
-        ),
-        trailing: Column(
-          children: [
-            if (showApprove)
-              IconButton(
-                icon: const Icon(Icons.check_circle, color: Colors.green),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => DoctorProfilePage(
-                        doctor: doctor,
-                        onApprove: () => updateDoctor(doctor["_id"], isApproved: true),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            if (showActive)
-              IconButton(
-                icon: Icon(
-                  doctor['is_active'] ? Icons.pause : Icons.play_arrow,
-                  color: doctor['is_active'] ? Colors.red : Colors.green,
+    return Scaffold(
+      appBar:
+          AppBar(title: Text("${doctor['first_name']} ${doctor['last_name']}")),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              // Email
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.email),
+                  title: const Text("Email"),
+                  subtitle: Text("${doctor['email']}"),
                 ),
-                onPressed: () => updateDoctor(
-                    doctor["_id"], isActive: !doctor['is_active']),
               ),
-          ],
-        ),
-        onTap: cvUrl != null
-            ? () async {
-          if (cvUrl.endsWith(".pdf")) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => PdfViewerPage(url: cvUrl),
+
+              // Phone
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.phone),
+                  title: const Text("Phone"),
+                  subtitle: Text("${doctor['phone_number'] ?? '-'}"),
+                ),
               ),
-            );
-          } else {
-            final uri = Uri.parse(cvUrl);
-            if (await canLaunchUrl(uri)) {
-              await launchUrl(uri, mode: LaunchMode.externalApplication);
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("لا يمكن فتح الملف")),
-              );
-            }
-          }
-        }
-            : null,
-      ),
-    );
-  }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("قائمة الدكاترة"),
-        bottom: TabBar(
-          controller: tabController,
-          tabs: const [
-            Tab(text: "طلبات الموافقة"),
-            Tab(text: "الدكاترة"),
-          ],
-        ),
-      ),
-      body: loading
-          ? const Center(child: CircularProgressIndicator())
-          : TabBarView(
-        controller: tabController,
-        children: [
-          // Tab 1: طلبات الموافقة
-          ListView(
-            children: doctors
-                .where((d) => d['is_approved'] == false)
-                .map((d) => doctorCard(d, showApprove: true))
-                .toList(),
-          ),
-          // Tab 2: الدكاترة النشطين / غير النشطين
-          ListView(
-            children: doctors
-                .map((d) => doctorCard(d, showActive: true))
-                .toList(),
-          ),
-        ],
-      ),
-    );
-  }
-}
+              // Approved
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.check_circle_outline),
+                  title: const Text("Approved"),
+                  subtitle: Text("${doctor['is_approved']}"),
+                  trailing: doctor['is_approved'] == true
+                      ? null // إذا تمت الموافقة، لا يظهر الزر
+                      : ElevatedButton(
+                    onPressed: () {
+                      // عرض نافذة التأكيد
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text("تأكيد"),
+                          content: const Text("هل تريد الموافقة على هذا الحساب؟"),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text("لا"),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context); // إغلاق الـ Dialog
 
-// ================= PDF Viewer =================
-class PdfViewerPage extends StatefulWidget {
-  final String url;
+                                // تحديث الحالة محليًا
+                                setState(() {
+                                  doctor['is_approved'] = true;
+                                });
 
-  const PdfViewerPage({super.key, required this.url});
+                                // إرسال التحديث للسيرفر
+                                updateDoctor(doctor["_id"], isApproved: true);
 
-  @override
-  State<PdfViewerPage> createState() => _PdfViewerPageState();
-}
+                                // عرض SnackBar
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text("تمت الموافقة على الحساب"),
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+                              },
+                              child: const Text("نعم"),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    child: const Text("موافق"),
+                  ),
+                ),
+              ),
 
-class _PdfViewerPageState extends State<PdfViewerPage> {
-  PdfControllerPinch? controller;
-  bool loading = true;
 
-  @override
-  void initState() {
-    super.initState();
-    loadPdf();
-  }
+              // Active مع أيقونة + زر مباشر
+              // Active مع أيقونة + زر مباشر
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.person),
+                  title: const Text("الحساب"),
+                  subtitle: Text(doctor['is_active'] ? "Active" : "Not Active"),
+                  trailing: IconButton(
+                    icon: Icon(
+                      doctor['is_active'] ? Icons.pause : Icons.play_arrow,
+                      color: doctor['is_active'] ? Colors.red : Colors.green,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        doctor['is_active'] = !doctor['is_active'];
+                      });
 
-  Future<void> loadPdf() async {
-    try {
-      final response = await http.get(Uri.parse(widget.url));
+                      // إرسال التحديث للسيرفر
+                      updateDoctor(doctor["_id"], isActive: doctor['is_active']);
 
-      if (response.statusCode == 200) {
-        controller = PdfControllerPinch(
-          document: PdfDocument.openData(response.bodyBytes),
-        );
-      } else {
-        throw Exception("خطأ في تحميل الملف");
-      }
-    } catch (e) {
-      print("❌ PDF Error: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("فشل تحميل PDF")),
-      );
-    }
+                      // عرض SnackBar
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            doctor['is_active']
+                                ? "تم تفعيل الحساب"
+                                : "تم إلغاء تنشيط الحساب",
+                          ),
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
 
-    setState(() => loading = false);
-  }
+              const SizedBox(height: 20),
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("عرض CV")),
-      body: loading
-          ? const Center(child: CircularProgressIndicator())
-          : controller == null
-          ? const Center(child: Text("لا يمكن فتح الملف"))
-          : PdfViewPinch(controller: controller!),
-    );
-  }
-}
-
-// ================= صفحة الطبيب =================
-class DoctorProfilePage extends StatelessWidget {
-  final Map doctor;
-  final Function()? onApprove;
-
-  const DoctorProfilePage({super.key, required this.doctor, this.onApprove});
-
-  @override
-  Widget build(BuildContext context) {
-    final cvUrl = doctor['cv_url'];
-
-    return Scaffold(
-      appBar: AppBar(title: Text("${doctor['first_name']} ${doctor['last_name']}")),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("Email: ${doctor['email']}"),
-            Text("Phone: ${doctor['phone_number'] ?? '-'}"),
-            Text("Approved: ${doctor['is_approved']}"),
-            const SizedBox(height: 20),
-            if (cvUrl != null)
-              ElevatedButton.icon(
-                icon: const Icon(Icons.picture_as_pdf),
-                label: const Text("عرض السيرة الذاتية"),
-                onPressed: () async {
-                  if (cvUrl.endsWith(".pdf")) {
-                    Navigator.push(
+              // عرض السيرة الذاتية
+              if (cvUrl != null)
+                Card(
+                  color: Colors.blue.shade50,
+                  child: ListTile(
+                    leading: const Icon(Icons.picture_as_pdf, color: Colors.red),
+                    title: const Text("عرض السيرة الذاتية"),
+                    onTap: () {
+                      Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (_) => PdfViewerPage(url: cvUrl)));
-                  } else {
-                    final uri = Uri.parse(cvUrl);
-                    if (await canLaunchUrl(uri)) {
-                      await launchUrl(uri, mode: LaunchMode.externalApplication);
-                    }
-                  }
-                },
-              ),
-            const Spacer(),
-            if (onApprove != null)
-              ElevatedButton(
-                onPressed: onApprove,
-                child: const Text("موافق"),
-              ),
-          ],
+                          builder: (_) => PdfViewerPage(url: cvUrl),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+
+
+              // زر الموافقة
+              if (widget.onApprove != null)
+                Card(
+                  color: Colors.green.shade50,
+                  child: ListTile(
+                    leading: const Icon(Icons.check),
+                    title: const Text("موافق"),
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (_) => AlertDialog(
+                          title: const Text("تأكيد"),
+                          content: const Text("هل تريد الموافقة على هذا الحساب؟"),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text("لا"),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                widget.onApprove!();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text("تمت الموافقة على الحساب")),
+                                );
+                              },
+                              child: const Text("نعم"),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

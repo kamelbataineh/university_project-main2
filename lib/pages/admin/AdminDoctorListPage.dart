@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'AdminDoctorProfilePage.dart';
 
@@ -19,6 +18,12 @@ class _AdminDoctorListPageState extends State<AdminDoctorListPage>
   bool loading = true;
   late TabController tabController;
 
+  // دالة لتكوين الرابط الكامل إذا كان الرابط نسبي
+  String getFullUrl(String cvUrl) {
+    if (cvUrl.startsWith("http")) return cvUrl;
+    return "http://10.0.2.2:8000$cvUrl";
+  }
+
   @override
   void initState() {
     super.initState();
@@ -26,6 +31,7 @@ class _AdminDoctorListPageState extends State<AdminDoctorListPage>
     fetchDoctors();
   }
 
+  // جلب الدكاترة من السيرفر
   Future<void> fetchDoctors() async {
     setState(() => loading = true);
     final prefs = await SharedPreferences.getInstance();
@@ -33,7 +39,7 @@ class _AdminDoctorListPageState extends State<AdminDoctorListPage>
 
     try {
       final response = await http.get(
-        Uri.parse("http://10.0.2.2:8000/admin/users"),
+        Uri.parse("http://10.0.2.2:8000/admin/doctor"),
         headers: {"Authorization": "Bearer $token"},
       );
 
@@ -55,6 +61,7 @@ class _AdminDoctorListPageState extends State<AdminDoctorListPage>
     }
   }
 
+  // تحديث حالة الطبيب
   Future<void> updateDoctor(String id,
       {bool? isActive, bool? isApproved}) async {
     final prefs = await SharedPreferences.getInstance();
@@ -78,7 +85,11 @@ class _AdminDoctorListPageState extends State<AdminDoctorListPage>
     }
   }
 
+  // بطاقة كل طبيب
   Widget doctorCard(Map doctor, {bool showApprove = false, bool showActive = false}) {
+    final cvUrl = doctor['cv_url'];
+    final fullUrl = getFullUrl(cvUrl);
+
     return Card(
       margin: const EdgeInsets.all(8),
       child: ListTile(
@@ -95,7 +106,7 @@ class _AdminDoctorListPageState extends State<AdminDoctorListPage>
           children: [
             if (showApprove)
               IconButton(
-                icon: const Icon(Icons.check_circle, color: Colors.green),
+                icon: const Icon(Icons.keyboard_arrow_right, color: Colors.green),
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -119,18 +130,17 @@ class _AdminDoctorListPageState extends State<AdminDoctorListPage>
               ),
           ],
         ),
-        onTap: doctor['cv_url'] != null
-            ? () async {
-          final url = Uri.parse("http://10.0.2.2:8000${doctor['cv_url']}");
-          if (await canLaunchUrl(url)) {
-            await launchUrl(url);
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("لا يمكن فتح الملف")),
-            );
-          }
-        }
-            : null,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => DoctorProfilePage(
+                doctor: doctor, // تمرير بيانات الدكتور
+                onApprove: () => updateDoctor(doctor["_id"], isApproved: true), // إذا موجود
+              ),
+            ),
+          );
+        },
       ),
     );
   }

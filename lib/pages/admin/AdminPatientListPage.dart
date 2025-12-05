@@ -1,7 +1,8 @@
-// admin_patient_list_page.dart
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import 'AdminPatientProfilePage.dart';
 
 class AdminPatientListPage extends StatefulWidget {
   const AdminPatientListPage({super.key});
@@ -10,18 +11,20 @@ class AdminPatientListPage extends StatefulWidget {
   State<AdminPatientListPage> createState() => _AdminPatientListPageState();
 }
 
-class _AdminPatientListPageState extends State<AdminPatientListPage> {
+class _AdminPatientListPageState extends State<AdminPatientListPage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
   List patients = [];
   bool loading = false;
-  final String baseUrl = "http://10.0.2.2:8000"; // غيّر حسب API
+  final String baseUrl = "http://10.0.2.2:8000"; // API
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
     fetchPatients();
   }
 
-  // ------------------ جلب جميع المرضى ------------------
   Future<void> fetchPatients() async {
     setState(() => loading = true);
     try {
@@ -44,8 +47,11 @@ class _AdminPatientListPageState extends State<AdminPatientListPage> {
     }
   }
 
-  // ------------------ تفعيل/إيقاف الحساب ------------------
-  Future<void> toggleActive(String patientId, bool currentStatus) async {
+  // ------------------ تفعيل/إيقاف الحساب مباشرة ------------------
+  Future<void> toggleActive(Map patient) async {
+    final patientId = patient["_id"];
+    final currentStatus = patient["is_active"] ?? true;
+
     setState(() => loading = true);
     try {
       final response = await http.put(
@@ -55,10 +61,16 @@ class _AdminPatientListPageState extends State<AdminPatientListPage> {
       );
 
       if (response.statusCode == 200) {
+        setState(() {
+          patient["is_active"] = !currentStatus;
+        });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("تم تعديل حالة الحساب بنجاح ✅")),
+          SnackBar(
+            content: Text(!currentStatus
+                ? "تم تفعيل الحساب ✅"
+                : "تم إلغاء تفعيل الحساب ❌"),
+          ),
         );
-        fetchPatients(); // تحديث القائمة
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("فشل تعديل حالة الحساب")),
@@ -73,43 +85,73 @@ class _AdminPatientListPageState extends State<AdminPatientListPage> {
     }
   }
 
+  List getActivePatients() =>
+      patients.where((p) => p["is_active"] == true).toList();
+  List getInactivePatients() =>
+      patients.where((p) => p["is_active"] == false).toList();
+
+  Widget buildPatientList(List list) {
+    if (list.isEmpty) return const Center(child: Text("لا يوجد مرضى"));
+
+    return ListView.builder(
+      itemCount: list.length,
+      itemBuilder: (context, index) {
+        final patient = list[index];
+        return Card(
+          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          child: ListTile(
+            leading: const Icon(Icons.person),
+            title: Text("${patient["first_name"]} ${patient["last_name"]}"),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(patient["email"] ?? ""),
+                Text(patient["is_active"] ? "Active " : "Not Active "),
+              ],
+            ),
+            trailing: IconButton(
+              icon: Icon(
+                patient["is_active"] ? Icons.pause : Icons.play_arrow,
+                color: patient["is_active"] ? Colors.red : Colors.green,
+              ),
+              onPressed: () => toggleActive(patient),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      AdminPatientProfilePage(patient: patient),
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("قائمة المرضى"),
-        centerTitle: true,
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: "المرضى النشطين"),
+            Tab(text: "المرضى الغير نشطين"),
+          ],
+        ),
       ),
       body: loading
           ? const Center(child: CircularProgressIndicator())
-          : patients.isEmpty
-          ? const Center(child: Text("لا يوجد مرضى"))
-          : ListView.builder(
-        itemCount: patients.length,
-        itemBuilder: (context, index) {
-          final patient = patients[index];
-          return Card(
-            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            child: ListTile(
-              leading: CircleAvatar(
-                backgroundImage: patient["profile_image_url"] != null
-                    ? NetworkImage("http://10.0.2.2:8000/${patient["profile_image_url"]}")
-                    : null,
-                child: patient["profile_image_url"] == null
-                    ? const Icon(Icons.person)
-                    : null,
-              ),
-              title: Text("${patient["first_name"]} ${patient["last_name"]}"),
-              subtitle: Text(patient["email"] ?? ""),
-              trailing: Switch(
-                value: patient["is_active"] ?? true,
-                onChanged: (val) {
-                  toggleActive(patient["_id"], patient["is_active"]);
-                },
-              ),
-            ),
-          );
-        },
+          : TabBarView(
+        controller: _tabController,
+        children: [
+          buildPatientList(getActivePatients()),
+          buildPatientList(getInactivePatients()),
+        ],
       ),
     );
   }

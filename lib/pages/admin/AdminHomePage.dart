@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:university_project/pages/admin/AdminPatientListPage.dart';
 import 'AdminDoctorListPage.dart';
 
 class AdminHomePage extends StatelessWidget {
@@ -27,8 +28,10 @@ class AdminHomePage extends StatelessWidget {
               icon: const Icon(Icons.person),
               label: const Text("عرض المرضى"),
               onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("قريباً...")));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AdminPatientListPage()),
+                );
               },
             ),
           ],
