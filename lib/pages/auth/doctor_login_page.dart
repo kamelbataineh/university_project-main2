@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:university_project/core/config/theme.dart';
 import 'package:university_project/pages/doctor/doctor_intro_page.dart';
 import '../../core/config/app_config.dart';
@@ -68,6 +69,10 @@ class _LoginDoctorPageState extends State<LoginDoctorPage>
         // أخذ التوكن و id الدكتور
         final token = data['access_token'];
         final doctorId = data['doctor_id'];
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString("role", "doctor"); // ← حفظ الدور
+
+        await prefs.setString("saved_email_doctor", _email.text.trim());
 
         Navigator.pushReplacement(
           context,

@@ -2,8 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:university_project/pages/components/chats_list_page.dart';
 import '../auth/LandingPage.dart';
-import '../upload/upload_image.dart';
-import '../upload/upload_page.dart';
+import '../upload/upload_image(2).dart';
 import 'doctor_appointments_page.dart';
 import 'patients_list.dart';
 import 'profile_doctor.dart';
@@ -37,7 +36,7 @@ class _HomeDoctorPageState extends State<HomeDoctorPage> with SingleTickerProvid
     _pages.addAll([
       _buildDashboard(),
       ChatsListPage(userId:widget.userId, token:  widget.token,),
-      UploadPage(),
+      UploadImagePage(),
       DoctorAppointmentsPage(token: widget.token),
       ProfileDoctorPage(token: widget.token),
     ]);

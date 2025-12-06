@@ -7,12 +7,16 @@ class ImageResultsPage extends StatefulWidget {
   final String imageUrl;
   final String imageName;
   final Function(String) onNavigate;
+  final String prediction;
+  final List probabilities;
 
   const ImageResultsPage({
     super.key,
     required this.imageUrl,
     required this.imageName,
     required this.onNavigate,
+    required this.prediction,
+    required this.probabilities,
   });
 
   @override
@@ -23,17 +27,29 @@ class _ImageResultsPageState extends State<ImageResultsPage> {
   bool _isAnalyzing = true;
   String _displayedText = "";
   final String _fullText = "Analyzing image for Pneumonia detection...";
-
+  Timer? _typingTimer;
   @override
   void initState() {
     super.initState();
     _simulateTyping();
   }
 
-  // محاكاة كتابة النص حرف حرف
+
+  @override
+  void dispose() {
+    _typingTimer?.cancel();
+    super.dispose();
+  }
+
+
+
   void _simulateTyping() {
     int index = 0;
-    Timer.periodic(const Duration(milliseconds: 50), (timer) {
+    _typingTimer = Timer.periodic(const Duration(milliseconds: 50), (timer) {
+      if (!mounted) {  // 🟢 تحقق قبل setState
+        timer.cancel();
+        return;
+      }
       if (index < _fullText.length) {
         setState(() {
           _displayedText += _fullText[index];
@@ -41,8 +57,8 @@ class _ImageResultsPageState extends State<ImageResultsPage> {
         index++;
       } else {
         timer.cancel();
-        // بعد الانتهاء نعرض النتائج بعد 0.5 ثانية
         Future.delayed(const Duration(milliseconds: 500), () {
+          if (!mounted) return;  // 🟢 تحقق قبل setState
           setState(() {
             _isAnalyzing = false;
           });
@@ -50,24 +66,6 @@ class _ImageResultsPageState extends State<ImageResultsPage> {
       }
     });
   }
-
-  final Map<String, dynamic> results = {
-    'condition': 'Pneumonia Detection',
-    'confidence': 87.5,
-    'severity': 'medium',
-    'findings': [
-      'Consolidation detected in right lower lobe',
-      'Increased opacity in affected area',
-      'No signs of pleural effusion',
-      'Cardiac silhouette within normal limits',
-    ],
-    'recommendations': [
-      'Antibiotic therapy recommended',
-      'Follow-up X-ray in 2 weeks',
-      'Monitor oxygen saturation',
-      'Consider sputum culture if symptoms persist',
-    ],
-  };
 
   Color severityColor(String severity) {
     switch (severity) {
@@ -96,6 +94,32 @@ class _ImageResultsPageState extends State<ImageResultsPage> {
 
   @override
   Widget build(BuildContext context) {
+    List<String> classNames = ["benign", "malignant", "normal"];
+    double maxProb = widget.probabilities.reduce((a, b) => a > b ? a : b);
+    String severity = maxProb > 0.7
+        ? "high"
+        : maxProb > 0.4
+        ? "medium"
+        : "low";
+
+    final Map<String, dynamic> results = {
+      'condition': 'Pneumonia Detection',
+      'confidence': (maxProb * 100),
+      'severity': severity,
+      'findings': [
+        'Consolidation detected in right lower lobe',
+        'Increased opacity in affected area',
+        'No signs of pleural effusion',
+        'Cardiac silhouette within normal limits',
+      ],
+      'recommendations': [
+        'Antibiotic therapy recommended',
+        'Follow-up X-ray in 2 weeks',
+        'Monitor oxygen saturation',
+        'Consider sputum culture if symptoms persist',
+      ],
+    };
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Image Analysis"),
@@ -110,8 +134,7 @@ class _ImageResultsPageState extends State<ImageResultsPage> {
             const SizedBox(height: 24),
             Text(
               _displayedText,
-              style: const TextStyle(
-                  fontSize: 16, fontWeight: FontWeight.w500),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
           ],
         ),
@@ -121,7 +144,6 @@ class _ImageResultsPageState extends State<ImageResultsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // معاينة الصورة
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
               child: Image.file(
@@ -132,19 +154,39 @@ class _ImageResultsPageState extends State<ImageResultsPage> {
               ),
             ),
             const SizedBox(height: 16),
-            // حالة التشخيص
+
+            // Prediction
             Text(
-              results['condition'],
-              style: const TextStyle(
-                  fontSize: 22, fontWeight: FontWeight.bold),
+              "Prediction: ${widget.prediction}",
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            // شريط الثقة
+
+            // Probabilities
+            ...List.generate(classNames.length, (index) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("${classNames[index]}: ${(widget.probabilities[index] * 100).toStringAsFixed(1)}%"),
+                  const SizedBox(height: 4),
+                  LinearProgressIndicator(
+                    value: widget.probabilities[index],
+                    minHeight: 10,
+                    color: Colors.blueAccent,
+                    backgroundColor: Colors.grey.shade300,
+                  ),
+                  const SizedBox(height: 12),
+                ],
+              );
+            }),
+
+            const SizedBox(height: 16),
+            // Confidence
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Confidence: ${results['confidence']}%",
+                  "Confidence: ${results['confidence'].toStringAsFixed(1)}%",
                   style: const TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 4),
@@ -157,7 +199,8 @@ class _ImageResultsPageState extends State<ImageResultsPage> {
               ],
             ),
             const SizedBox(height: 16),
-            // شدة الحالة
+
+            // Severity
             Row(
               children: [
                 severityIcon(results['severity']),
@@ -165,18 +208,19 @@ class _ImageResultsPageState extends State<ImageResultsPage> {
                 Text(
                   "Severity: ${results['severity'].toUpperCase()}",
                   style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: severityColor(results['severity'])),
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: severityColor(results['severity']),
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
+
             // Findings
             const Text(
               "Findings:",
-              style: TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             ...results['findings'].map<Widget>((f) {
@@ -189,18 +233,17 @@ class _ImageResultsPageState extends State<ImageResultsPage> {
               );
             }).toList(),
             const SizedBox(height: 16),
+
             // Recommendations
             const Text(
               "Recommendations:",
-              style: TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             ...results['recommendations'].map<Widget>((r) {
               return Row(
                 children: [
-                  const Icon(Icons.check_circle,
-                      size: 18, color: Colors.green),
+                  const Icon(Icons.check_circle, size: 18, color: Colors.green),
                   const SizedBox(width: 6),
                   Expanded(child: Text(r, style: const TextStyle(fontSize: 14))),
                 ],

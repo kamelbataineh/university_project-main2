@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:university_project/pages/patient/BookAppointmentPage_doctor.dart';
 import '../auth/FullScreenImagePage.dart';
-import '../components/chat_page.dart';
+import 'chat_page.dart';
 
 const baseUrl = "http://10.0.2.2:8000";
 
-class PatientDoctorProfilePage extends StatefulWidget {
+class PatientdoctorprofileOrChatdoctorprofile extends StatefulWidget {
   final String doctorId;
   final String userId;
   final String token;
 
-  const PatientDoctorProfilePage({
+  const PatientdoctorprofileOrChatdoctorprofile({
     Key? key,
     required this.doctorId,
     required this.userId,
@@ -20,10 +20,10 @@ class PatientDoctorProfilePage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<PatientDoctorProfilePage> createState() => _PatientDoctorProfilePageState();
+  State<PatientdoctorprofileOrChatdoctorprofile> createState() => _ChatDoctorProfileState();
 }
 
-class _PatientDoctorProfilePageState extends State<PatientDoctorProfilePage> {
+class _ChatDoctorProfileState extends State<PatientdoctorprofileOrChatdoctorprofile> {
   Map<String, dynamic>? doctor;
   bool loading = true;
 

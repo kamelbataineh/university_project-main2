@@ -96,6 +96,7 @@ class _PatientLoginPageState extends State<PatientLoginPage>
         await prefs.setString("first_name", firstName);
         await prefs.setString("last_name", lastName);
         await prefs.setString("saved_email", input);
+        await prefs.setString("role", "patient"); // ← حفظ الدور
         // رسالة الترحيب
         String nameMessage;
         if (firstName.isNotEmpty && lastName.isNotEmpty) {

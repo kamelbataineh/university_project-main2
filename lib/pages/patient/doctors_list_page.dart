@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'patient_doctor_profile_page.dart';
+import '../components/PatientDoctorProfile_OR_ChatDoctorProfile.dart';
+import '../components/ChatPatientProfile.dart';
 
 const baseUrl = "http://10.0.2.2:8000/";
 
@@ -91,7 +92,7 @@ class _DoctorsListPageState extends State<DoctorsListPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => PatientDoctorProfilePage(
+                    builder: (context) => PatientdoctorprofileOrChatdoctorprofile(
                       doctorId: doctorId,
                       userId: widget.userId,
                       token: widget.token,

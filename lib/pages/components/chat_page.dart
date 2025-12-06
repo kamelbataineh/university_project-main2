@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:file_picker/file_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/config/app_config.dart';
-import '../patient/patient_doctor_profile_page.dart';
+import 'PatientDoctorProfile_OR_ChatDoctorProfile.dart';
+import 'ChatPatientProfile.dart';
 
 class ChatPage extends StatefulWidget {
   final String name;
@@ -19,7 +21,7 @@ class ChatPage extends StatefulWidget {
     required this.userId,
     required this.otherId,
     required this.token,
-    this.profileImageUrl, // هنا تمرر الصورة
+    this.profileImageUrl,
     Key? key,
   }) : super(key: key);
 
@@ -187,19 +189,35 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                       const Border(bottom: BorderSide(color: Colors.white38)),
                 ),
                 child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => PatientDoctorProfilePage(
-                          doctorId: widget.otherId,
-                          userId: widget.otherId,
-                          token: widget.token,
-                        ),
-                      ),
-                    );
-                  },
-                  child: Row(
+                  onTap: () async {
+
+                      final prefs = await SharedPreferences.getInstance();
+                      final role = prefs.getString("role") ?? "";
+
+                      if (role == "doctor") {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChatPatientProfile(
+                              patientId: widget.otherId, // المريض
+                              userId: widget.userId, // الدكتور الحالي
+                              token: widget.token,
+                            ),
+                          ),
+                        );
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PatientdoctorprofileOrChatdoctorprofile(
+                              doctorId: widget.otherId, // الدكتور الآخر
+                              userId: widget.userId, // المريض الحالي
+                              token: widget.token,
+                            ),
+                          ),
+                        );
+                      }},
+                    child: Row(
                     children: [
                       IconButton(
                         icon: const Icon(Icons.arrow_back_ios_new,
