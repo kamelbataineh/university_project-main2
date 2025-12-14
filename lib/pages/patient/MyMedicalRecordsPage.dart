@@ -10,7 +10,7 @@ class MyMedicalRecordsPage extends StatefulWidget {
   @override
   State<MyMedicalRecordsPage> createState() => _MyMedicalRecordsPageState();
 }
-
+//
 class _MyMedicalRecordsPageState extends State<MyMedicalRecordsPage> {
   List records = [];
   bool loading = true;

@@ -5,7 +5,6 @@ import '../../../core/config/app_config.dart';
 import '../../core/config/app_font.dart';
 import '../../core/config/theme.dart';
 
-
 class MyAppointmentsPage extends StatefulWidget {
   final String token;
 
@@ -86,13 +85,57 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
     }
   }
 
+  Future<void> deleteAppointment(String appointmentId) async {
+    final url = Uri.parse('$baseUrl1/appointments/delete/$appointmentId');
+    try {
+      final res = await http.delete(
+        url,
+        headers: {
+          "Authorization": "Bearer ${widget.token}",
+          "Content-Type": "application/json",
+        },
+      );
+
+      if (res.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("تم حذف الموعد"),
+            backgroundColor: Colors.green,
+          ),
+        );
+        fetchMyAppointments();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("فشل في حذف الموعد"),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("حدث خطأ أثناء الحذف"),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
+  }
+
+  bool isPast(String dateTimeStr) {
+    try {
+      final dateTime = DateTime.parse(dateTimeStr);
+      return dateTime.isBefore(DateTime.now());
+    } catch (e) {
+      return false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Center(
       child: isLoading
-          ? Center(
-        child: CircularProgressIndicator(color: AppTheme.patientPrimary),
-      )
+          ? const Center(child: CircularProgressIndicator())
           : appointments.isEmpty
           ? Center(
         child: Text(
@@ -111,7 +154,9 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
         itemBuilder: (context, index) {
           final appt = appointments[index];
           final status = appt['status'] ?? '-';
-          final isPending = status == 'PendingCancellation';
+          final dateTimeStr = appt['date_time'] ?? '';
+          final past = isPast(dateTimeStr);
+          final showDelete = past || status == 'Appointment cancelled' || status == 'Appointment rejected';
 
           return Card(
             color: AppTheme.cardColor,
@@ -134,7 +179,7 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    "🕒 Date: ${appt['date_time'] ?? '-'}",
+                    "🕒 Date: $dateTimeStr",
                     style: AppFont.regular(
                       size: 14,
                       color: AppTheme.patientText,
@@ -145,12 +190,11 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
                     "📋 Status: $status",
                     style: AppFont.regular(
                       size: 14,
-                      weight:
-                      isPending ? FontWeight.w600 : FontWeight.w400,
-                      color: isPending ? Colors.orange : AppTheme.patientText,
+                      weight: FontWeight.w400,
+                      color: AppTheme.patientText,
                     ),
                   ),
-                   SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
                     "📝 Reason: ${appt['reason'] ?? '-'}",
                     style: AppFont.regular(
@@ -158,23 +202,61 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
                       color: AppTheme.patientText,
                     ),
                   ),
-                   SizedBox(height: 10),
-                  if (!isPending)
+                  const SizedBox(height: 10),
+                  // أزرار حسب الحالة
+                  if (status == 'Waiting for doctor approval')
+                    const Text(
+                      '⏳ Waiting for doctor approval',
+                      style: TextStyle(
+                        color: Colors.orange,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  else if (past)
                     ElevatedButton.icon(
                       onPressed: () =>
-                          requestCancel(appt['appointment_id']),
-                      icon: const Icon(Icons.cancel),
-                      label: const Text('Request Cancellation'),
+                          deleteAppointment(appt['appointment_id']),
+                      icon: const Icon(Icons.delete),
+                      label: const Text('Delete'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.redAccent,
+                        backgroundColor: Colors.grey,
                         foregroundColor: Colors.white,
                         minimumSize: const Size(double.infinity, 45),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                    ),
-
+                    )
+                  else if (showDelete)
+                      ElevatedButton.icon(
+                        onPressed: () =>
+                            deleteAppointment(appt['appointment_id']),
+                        icon: const Icon(Icons.delete),
+                        label: const Text('Delete'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey,
+                          foregroundColor: Colors.white,
+                          minimumSize: const Size(double.infinity, 45),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      )
+                  else if (status == 'Appointment confirmed')
+                      ElevatedButton.icon(
+                        onPressed: () =>
+                            requestCancel(appt['appointment_id']),
+                        icon: const Icon(Icons.cancel),
+                        label: const Text('Request Cancellation'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.redAccent,
+                          foregroundColor: Colors.white,
+                          minimumSize: const Size(double.infinity, 45),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
                 ],
               ),
             ),

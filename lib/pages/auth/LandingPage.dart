@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:university_project/pages/admin/admin_login_page.dart';
 import 'package:university_project/pages/auth/PatientLoginPage.dart';
 import 'package:university_project/pages/auth/RegisterPatientPage.dart';
 import 'package:university_project/pages/doctor/home/doctor_choice_page.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/config/app_font.dart';
 
@@ -14,21 +17,28 @@ class LandingPage extends StatefulWidget {
   State<LandingPage> createState() => _LandingPageState();
 }
 
-class _LandingPageState extends State<LandingPage> with SingleTickerProviderStateMixin {
+class _LandingPageState extends State<LandingPage>
+    with SingleTickerProviderStateMixin {
   final PageController _pageController = PageController();
   int currentIndex = 0;
   late AnimationController _iconController;
+  int _adminTapCount = 0;
+  bool _showAdminIcon = false;
+  DateTime? _lastTapTime;
+  Timer? _adminTimer;
 
   @override
   void initState() {
     super.initState();
-    _iconController = AnimationController(vsync: this, duration: Duration(seconds: 2))..repeat(reverse: true);
+    _iconController =
+        AnimationController(vsync: this, duration: Duration(seconds: 2))
+          ..repeat(reverse: true);
   }
 
   @override
   void dispose() {
-
     _iconController.dispose();
+    _adminTimer?.cancel();
     super.dispose();
   }
 
@@ -42,8 +52,8 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
   List<Map<String, dynamic>> introPages = [
     {
       "title": "Welcome to MediCare Future",
-      "subtitle": "A platform to empower breast cancer patients with AI-assisted insights under doctor supervision.",
-
+      "subtitle":
+          "A platform to empower breast cancer patients with AI-assisted insights under doctor supervision.",
       "icon": Icons.favorite,
       "gradient": [
         Colors.pink.shade400,
@@ -53,21 +63,25 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
     },
     {
       "title": "Secure & Private", // آمن وخاص
-      "subtitle": "Your medical data is fully protected and confidential at all times.",
+      "subtitle":
+          "Your medical data is fully protected and confidential at all times.",
       // بياناتك الطبية محمية وسرية بالكامل في جميع الأوقات.
       "icon": Icons.shield,
       "gradient": [Colors.purple.shade400, Colors.indigo.shade500],
     },
     {
-      "title": "Continuous Support", // دعم متواصل
-      "subtitle": "Access guidance and real-time advice anytime, staying connected with your doctor.",
+      "title": "Continuous Support",
+      // دعم متواصل
+      "subtitle":
+          "Access guidance and real-time advice anytime, staying connected with your doctor.",
       // الوصول إلى الإرشادات والنصائح الفورية في أي وقت، مع الحفاظ على التواصل مع طبيبك.
       "icon": Icons.access_time,
       "gradient": [Colors.orange.shade400, Colors.deepOrange.shade500],
     },
     {
       "title": "Real-time Health Monitoring", // متابعة صحية لحظية
-      "subtitle": "Track your progress, receive insights, and feel empowered in your treatment journey.",
+      "subtitle":
+          "Track your progress, receive insights, and feel empowered in your treatment journey.",
       // تتبع تقدمك، احصل على تحليلات، واشعر بالقوة خلال رحلتك العلاجية.
       "icon": Icons.monitor_heart,
       "gradient": [Colors.teal.shade400, Colors.green.shade500],
@@ -116,6 +130,7 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
       ],
     );
   }
+
   Widget floatingPatientIcon() {
     return SizedBox(
       height: 120,
@@ -131,15 +146,16 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
                 height: 80,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: LinearGradient(colors: [
-                    Colors.pink.shade200,
-                    Colors.pinkAccent.shade200
-                  ],),
+                  gradient: LinearGradient(
+                    colors: [Colors.pink.shade200, Colors.pinkAccent.shade200],
+                  ),
                   boxShadow: [
-                    BoxShadow(color: Colors.pink.shade200.withOpacity(0.5),
+                    BoxShadow(
+                        color: Colors.pink.shade200.withOpacity(0.5),
                         blurRadius: 20,
                         offset: Offset(0, 8)),
-                    BoxShadow(color: Colors.white.withOpacity(0.5),
+                    BoxShadow(
+                        color: Colors.white.withOpacity(0.5),
                         blurRadius: 8,
                         offset: Offset(-4, -4),
                         spreadRadius: 1),
@@ -153,6 +169,7 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
@@ -160,6 +177,78 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
       backgroundColor: Colors.white,
       body: Column(
         children: [
+          if (currentIndex == introPages.length)
+            Align(
+              alignment: Alignment.topRight, // 🔝 الزاوية
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8, right: 8),
+                child: GestureDetector(
+                  onTap: () {
+                    // حماية ضد النقر السريع
+                    final now = DateTime.now();
+                    if (_lastTapTime != null &&
+                        now.difference(_lastTapTime!) <
+                            const Duration(milliseconds: 400)) {
+                      return;
+                    }
+                    _lastTapTime = now;
+
+                    setState(() {
+                      _adminTapCount++;
+
+                      // 🔓 تفعيل وضع الأدمن بعد 3 كبسات
+                      if (_adminTapCount == 3) {
+                        _showAdminIcon = true;
+
+                        // SnackBar لإعلام المستخدم
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Admin mode activated'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+
+                        // ⏳ إخفاء تلقائي بعد 10 ثواني
+                        _adminTimer?.cancel();
+                        _adminTimer = Timer(const Duration(seconds: 10), () {
+                          if (mounted) {
+                            setState(() {
+                              _adminTapCount = 0;
+                              _showAdminIcon = false;
+                            });
+                          }
+                        });
+                      }
+                    });
+
+                    // 🔐 بعد التفعيل: أي كبسة تفتح صفحة الأدمن
+                    if (_showAdminIcon && _adminTapCount > 3) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => AdminLoginPage()),
+                      );
+                    }
+                  },
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 300),
+                    opacity: _showAdminIcon ? 1.0 : 0.05,
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.black12.withOpacity(0.04),
+                      ),
+                      child: const Icon(
+                        Icons.admin_panel_settings,
+                        size: 22,
+                        color: Colors.orange,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
           Expanded(
             child: PageView.builder(
               controller: _pageController,
@@ -173,21 +262,18 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
                   return SingleChildScrollView(
                     padding: EdgeInsets.symmetric(horizontal: 16, vertical: 32),
                     child: Column(
-                      children:
-                      [
-
+                      children: [
                         // Text(
                         //   "Get Started",
                         //   style: TextStyle(
                         //       fontSize: 28, fontWeight: FontWeight.bold),
                         // ),
-                        SizedBox(height: 24),
                         SizedBox(
                           width: width > 600 ? width / 2 - 24 : width - 32,
                           child: _roleCard(
                             title: "User",
                             description:
-                            "Access healthcare services, manage health records, and connect with professionals",
+                                "Access healthcare services, manage health records, and connect with professionals",
                             icon: Icons.person,
                             gradient: [
                               Colors.pink.shade200,
@@ -197,18 +283,20 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
                             onCreate: () => Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (_) => RegisterPatientPage())), // التسجيل كعضو
+                                    builder: (_) => RegisterPatientPage())),
+                            // التسجيل كعضو
                             onLogin: () => Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (_) => PatientLoginPage())), // تسجيل الدخول
+                                    builder: (_) =>
+                                        PatientLoginPage())), // تسجيل الدخول
                           ),
                         ),
 
                         SizedBox(height: 24),
                         // نص دعائي للدكاترة
                         GestureDetector(
-                          onTap: () =>  Navigator.pushReplacement(
+                          onTap: () => Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                   builder: (_) => DoctorChoicePage())),
@@ -233,7 +321,6 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
                             ),
                             child: Column(
                               children: [
-
                                 Icon(Icons.medical_services,
                                     color: Colors.indigo, size: 36),
                                 SizedBox(height: 12),
@@ -254,7 +341,8 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
                                     size: 14,
                                     weight: FontWeight.w600,
                                     color: Colors.grey[700]!,
-                                  ),)
+                                  ),
+                                )
                               ],
                             ),
                           ),
@@ -267,7 +355,40 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
                             size: 12,
                             weight: FontWeight.w600,
                             color: Colors.grey[500]!,
-                          ), ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        TextButton.icon(
+                          onPressed: () async {
+                            final Uri emailUri = Uri(
+                              scheme: 'mailto',
+                              path: 'batainehkamel2@gmail.com',
+                              queryParameters: {
+                                'subject': 'Support Request',
+                              },
+                            );
+
+                            await launchUrl(
+                              emailUri,
+                              mode: LaunchMode.externalApplication,
+                            );
+                          },
+                          icon: const Icon(
+                            Icons.support_agent,
+                            size: 18,
+                            color: Colors.pink,
+                          ),
+                          label: Text(
+                            'Contact Technical Support',
+                            style: AppFont.regular(
+                              size: 13,
+                              weight: FontWeight.w600,
+                              color: Colors.pink,
+                            ),
+                          ),
+                        ),
+
                       ],
                     ),
                   );
@@ -305,42 +426,6 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
           //     ),
           //     child: const Text("Next", style: TextStyle(color: Colors.white)),
           //   ),
-          SizedBox(height: 24),
-          // نص دعائي للدكاترة
-          GestureDetector(
-            onTap: () =>  Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (_) => AdminLoginPage())),
-            child: Container(
-              padding: EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(32),
-                gradient: LinearGradient(colors: [
-                  Colors.purple.shade100.withOpacity(0.3),
-                  Colors.indigo.shade100.withOpacity(0.3)
-                ]),
-                boxShadow: [
-                  BoxShadow(
-                      color: Colors.grey.shade200,
-                      blurRadius: 12,
-                      offset: Offset(8, 8)),
-                  BoxShadow(
-                      color: Colors.white,
-                      blurRadius: 12,
-                      offset: Offset(-8, -8)),
-                ],
-              ),
-              child: Column(
-                children: [
-
-                  Icon(Icons.medical_services,
-                      color: Colors.indigo, size: 36),
-                  SizedBox(height: 8),
-                ],
-              ),
-            ),
-          ),
         ],
       ),
     );
@@ -372,9 +457,7 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
                   blurRadius: 12,
                   offset: Offset(8, 8)),
               BoxShadow(
-                  color: Colors.white,
-                  blurRadius: 12,
-                  offset: Offset(-8, -8)),
+                  color: Colors.white, blurRadius: 12, offset: Offset(-8, -8)),
             ],
           ),
           child: Column(
@@ -395,21 +478,25 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
                 child: Icon(icon, color: Colors.white, size: 36),
               ),
               SizedBox(height: 16),
-              Text(title,
+              Text(
+                title,
                 style: AppFont.regular(
                   size: 18,
                   weight: FontWeight.w800,
                   color: Colors.pinkAccent,
-                ),),
+                ),
+              ),
               SizedBox(height: 8),
-              Text(description,
-                  textAlign: TextAlign.center,
+              Text(
+                description,
+                textAlign: TextAlign.center,
                 style: AppFont.regular(
                   size: 12,
                   weight: FontWeight.w600,
                   color: Colors.grey[700]!,
-                ),),
-                SizedBox(height: 12),
+                ),
+              ),
+              SizedBox(height: 12),
               ElevatedButton(
                 onPressed: onCreate,
                 style: ElevatedButton.styleFrom(
@@ -418,12 +505,14 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20)),
                 ),
-                child: Text('   Create Account   ',
+                child: Text(
+                  '   Create Account   ',
                   style: AppFont.regular(
                     size: 13,
                     weight: FontWeight.w600,
                     color: Colors.white,
-                  ),),
+                  ),
+                ),
               ),
               OutlinedButton(
                 onPressed: onLogin,
@@ -433,12 +522,14 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
                       borderRadius: BorderRadius.circular(20)),
                   backgroundColor: Colors.white.withOpacity(0.8),
                 ),
-                child: Text(' Login ',
+                child: Text(
+                  ' Login ',
                   style: AppFont.regular(
                     size: 13,
                     weight: FontWeight.w600,
                     color: gradient[0],
-                  ),),
+                  ),
+                ),
               ),
             ],
           ),

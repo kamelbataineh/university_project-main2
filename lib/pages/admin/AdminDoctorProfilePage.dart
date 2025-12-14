@@ -89,6 +89,26 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
           .showSnackBar(const SnackBar(content: Text("فشل التحديث")));
     }
   }
+  Future<void> deleteDoctor(String id) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString("admin_token") ?? "";
+
+    final response = await http.delete(
+      Uri.parse("http://10.0.2.2:8000/admin/doctor/$id"),
+      headers: {"Authorization": "Bearer $token"},
+    );
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("تم حذف الدكتور بنجاح ✅")),
+      );
+      fetchDoctors(); // إعادة تحميل القائمة
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("فشل حذف الدكتور ❌")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -229,14 +249,16 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                   ),
                 ),
 
-
-              // زر الموافقة
-              if (widget.onApprove != null)
+// زر الموافقة
+              if (widget.onApprove != null && doctor['is_approved'] != true)
                 Card(
                   color: Colors.green.shade50,
                   child: ListTile(
                     leading: const Icon(Icons.check),
-                    title: const Text("موافق"),
+                    title: const Text(
+                      "موافق",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     onTap: () {
                       showDialog(
                         context: context,
@@ -251,10 +273,20 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                             TextButton(
                               onPressed: () {
                                 Navigator.pop(context);
+
+                                // تحديث الحالة محليًا
+                                setState(() {
+                                  doctor['is_approved'] = true;
+                                });
+
+                                // استدعاء دالة الموافقة الأصلية
                                 widget.onApprove!();
+
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                      content: Text("تمت الموافقة على الحساب")),
+                                    content: Text("تمت الموافقة على الحساب"),
+                                    duration: Duration(seconds: 2),
+                                  ),
                                 );
                               },
                               child: const Text("نعم"),
@@ -265,6 +297,46 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                     },
                   ),
                 ),
+
+
+
+              // زر حذف الدكتور
+              Card(
+                color: Colors.red.shade50,
+                child: ListTile(
+                  leading: const Icon(Icons.delete, color: Colors.red),
+                  title: Text(
+                    "Delete the doctor",
+                    style: TextStyle(
+                      color: Colors.red,      // اللون أحمر
+                      fontWeight: FontWeight.bold, // عريض
+                    ),
+                  ),
+                  onTap: () async {
+                    bool? confirm = await showDialog(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        title: const Text("Confirm deletion"),
+                        content: const Text("Are you sure to delete this doctor's account?"),
+                        actions: [
+                          TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text("no")),
+                          TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: const Text("yes")),
+                        ],
+                      ),
+                    );
+
+                    if (confirm == true) {
+                      deleteDoctor(doctor["_id"]);
+                      Navigator.pop(context); // الرجوع للقائمة بعد الحذف
+                    }
+                  },
+                ),
+              ),
+
             ],
           ),
         ),

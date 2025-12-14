@@ -55,15 +55,27 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
 
         setState(() {
           messages = data.map((msg) {
+            // تحويل أي ObjectId من MongoDB إلى String بطريقة آمنة
+            String senderId = "";
+            if (msg["sender_id"] is Map && msg["sender_id"]["\$oid"] != null) {
+              senderId = msg["sender_id"]["\$oid"];
+            } else {
+              senderId = msg["sender_id"].toString();
+            }
+
+            // المقارنة بعد إزالة المسافات
+            bool isMe = senderId.trim() == widget.userId.trim();
+
             return {
-              "sender": msg["sender_id"] == widget.userId ? "me" : "other",
-              "text":
-                  msg["type"] == "image" ? msg["preview"] : msg["message_text"],
+              "sender": isMe ? "me" : "other",   // ← هذا يحدد اليمين أو اليسار
+              "text": msg["type"] == "image" ? msg["preview"] : msg["message_text"],
               "time": msg["timestamp"],
               "type": msg["type"],
             };
           }).toList();
+
         });
+
 
         Future.delayed(const Duration(milliseconds: 200), () {
           if (_scrollController.hasClients) {

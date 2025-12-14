@@ -238,47 +238,44 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
     Widget? suffixIcon,
     void Function(String)? onChanged,
     int? maxLength,
+    bool isNumberOnly = false,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            gradient: LinearGradient(
-                colors: [Colors.white, Colors.pink.shade100.withOpacity(0.3)]),
-            boxShadow: [
-              BoxShadow(
-                  color: Colors.pink.shade100.withOpacity(0.9),
-                  offset: Offset(6, 6),
-                  blurRadius: 12),
-              BoxShadow(
-                  color: Colors.white.withOpacity(0.5),
-                  offset: Offset(-6, -6),
-                  blurRadius: 12),
-            ],
-          ),
-          child: TextFormField(
-            controller: controller,
-            obscureText: obscure,
-            validator: validator,
-            onChanged: onChanged,
-            style: TextStyle(color: Colors.pink.shade900),
-            decoration: InputDecoration(
-              contentPadding: EdgeInsets.symmetric(vertical: 16),
-              prefixIcon: Icon(icon, color: Colors.pink.shade200),
-              hintText: hint,
-              suffixIcon: suffixIcon,
-              hintStyle: TextStyle(color: Colors.grey),
-              border: InputBorder.none,
-            ),
-            inputFormatters: [
-              if (maxLength != null) LengthLimitingTextInputFormatter(maxLength),
-            ],
-          ),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        gradient: LinearGradient(
+            colors: [Colors.white, Colors.pink.shade100.withOpacity(0.3)]),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.pink.shade100.withOpacity(0.9),
+              offset: Offset(6, 6),
+              blurRadius: 12),
+          BoxShadow(
+              color: Colors.white.withOpacity(0.5),
+              offset: Offset(-6, -6),
+              blurRadius: 12),
+        ],
+      ),
+      child: TextFormField(
+        controller: controller,
+        obscureText: obscure,
+        validator: validator,
+        onChanged: onChanged,
+        style: TextStyle(color: Colors.pink.shade900),
+        keyboardType: isNumberOnly ? TextInputType.number : TextInputType.text,
+        inputFormatters: [
+          if (isNumberOnly) FilteringTextInputFormatter.digitsOnly,
+          if (maxLength != null) LengthLimitingTextInputFormatter(maxLength),
+        ],
+        decoration: InputDecoration(
+          contentPadding: EdgeInsets.symmetric(vertical: 16),
+          prefixIcon: Icon(icon, color: Colors.pink.shade200),
+          hintText: hint,
+          suffixIcon: suffixIcon,
+          hintStyle: TextStyle(color: Colors.grey),
+          border: InputBorder.none,
         ),
-
-      ],
+      ),
     );
   }
 
@@ -337,7 +334,8 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
                 children: [
                   IconButton(
                     icon: Icon(Icons.arrow_back, color: AppTheme.patientIcon),
-                    onPressed: () => Navigator.pushReplacement(context,
+                    onPressed: () => Navigator.pushReplacement(
+                        context,
                         MaterialPageRoute(builder: (_) => LandingPage())),
                   ),
                   Spacer(),
@@ -349,7 +347,6 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
                       color: AppTheme.patientAppbar,
                     ),
                   ),
-
                   Spacer(flex: 2),
                 ],
               ),
@@ -365,7 +362,7 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
                       hint: "First Name",
                       icon: Icons.person,
                       validator: (val) =>
-                          val!.isEmpty ? 'Enter your first name' : null,
+                      val!.isEmpty ? 'Enter your first name' : null,
                     ),
                     SizedBox(height: 20),
                     neumorphicTextField(
@@ -373,7 +370,7 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
                       hint: "Last Name",
                       icon: Icons.person,
                       validator: (val) =>
-                          val!.isEmpty ? 'Enter your last name' : null,
+                      val!.isEmpty ? 'Enter your last name' : null,
                     ),
                     SizedBox(height: 20),
                     neumorphicTextField(
@@ -388,7 +385,9 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
                       hint: "Phone Number",
                       icon: Icons.phone,
                       validator: (val) =>
-                          val!.isEmpty ? 'Enter phone number' : null,
+                      val!.isEmpty ? 'Enter phone number' : null,
+                      maxLength: 15,
+                      isNumberOnly: true, // ← هنا الرقم فقط
                     ),
                     SizedBox(height: 20),
                     neumorphicTextField(
@@ -422,38 +421,6 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
                       ),
                       maxLength: 20,
                     ),
-
-                  //   neumorphicTextField(
-                  //   controller: _password,
-                  //   hint: "Password",
-                  //   icon: Icons.lock,
-                  //   obscure: _obscure,
-                  //   validator: (val) {
-                  //     if (val!.isEmpty) return 'Enter password';
-                  //     if (val.length > 20) return 'Password cannot exceed 20 characters';                      if (!hasMinLength(val)) return 'Password must be at least 8 characters';
-                  //     if (!hasNumber(val)) return 'Password must contain at least one number';
-                  //     if (!hasSpecialChar(val)) return 'Password must contain at least one special character';
-                  //     return null;
-                  //   },
-                  //   onChanged: (val) {
-                  //     setState(() {
-                  //       _showPasswordRequirements = val.isNotEmpty;
-                  //     });
-                  //   },
-                  //   suffixIcon: IconButton(
-                  //     icon: Icon(
-                  //       _obscure ? Icons.visibility_off : Icons.visibility,
-                  //       color: Colors.pink.shade300,
-                  //     ),
-                  //     onPressed: () {
-                  //       setState(() {
-                  //         _obscure = !_obscure;
-                  //       });
-                  //     },
-                  //   ),
-                  //   maxLength: 20, // ← اضف هذا السطر
-                  // ),
-
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -471,10 +438,8 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
                             "Contains at least one special character",
                             hasSpecialChar(_password.text),
                           ),
-
                           SizedBox(height: 2),
                         ],
-
                       ],
                     ),
 

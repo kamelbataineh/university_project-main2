@@ -45,10 +45,12 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString("admin_token", resBody["access_token"]);
 
-        Navigator.pushReplacement(
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (_) => const AdminHomePage()),
+              (route) => false, // 🔥 هذا يحذف كل الصفحات السابقة
         );
+
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(resBody["detail"] ?? "خطأ في تسجيل الدخول")),
@@ -65,26 +67,26 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("تسجيل دخول الادمن")),
+      appBar: AppBar(title: const Text("Login Admin")),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             TextField(
               controller: _usernameController,
-              decoration: const InputDecoration(labelText: "اسم المستخدم"),
+              decoration: const InputDecoration(labelText: "Email"),
             ),
             TextField(
               controller: _passwordController,
               obscureText: true,
-              decoration: const InputDecoration(labelText: "كلمة المرور"),
+              decoration: const InputDecoration(labelText: "password"),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: login,
               child: loading
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text("تسجيل الدخول"),
+                  : const Text("Login"),
             ),
           ],
         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'AdminPatientProfilePage.dart';
 
@@ -17,18 +18,29 @@ class _AdminPatientListPageState extends State<AdminPatientListPage>
   List patients = [];
   bool loading = false;
   final String baseUrl = "http://10.0.2.2:8000"; // API
+  late String adminToken; // ✅ تخزين التوكن
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    loadAdminTokenAndFetchPatients(); // ✅ جلب التوكن ثم جلب المرضى
+  }
+
+  Future<void> loadAdminTokenAndFetchPatients() async {
+    final prefs = await SharedPreferences.getInstance();
+    adminToken = prefs.getString("admin_token") ?? "";
     fetchPatients();
   }
 
   Future<void> fetchPatients() async {
     setState(() => loading = true);
     try {
-      final response = await http.get(Uri.parse("$baseUrl/admin/patients"));
+      final response = await http.get(
+        Uri.parse("$baseUrl/admin/patients"),
+        headers: {"Authorization": "Bearer $adminToken"},
+      );
+
       if (response.statusCode == 200) {
         setState(() {
           patients = jsonDecode(response.body);
@@ -56,7 +68,10 @@ class _AdminPatientListPageState extends State<AdminPatientListPage>
     try {
       final response = await http.put(
         Uri.parse("$baseUrl/admin/patient/$patientId/toggle_active"),
-        headers: {"Content-Type": "application/json"},
+        headers: {
+          "Authorization": "Bearer $adminToken",
+          "Content-Type": "application/json",
+        },
         body: jsonEncode({"is_active": !currentStatus}),
       );
 
@@ -67,8 +82,8 @@ class _AdminPatientListPageState extends State<AdminPatientListPage>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(!currentStatus
-                ? "تم تفعيل الحساب ✅"
-                : "تم إلغاء تفعيل الحساب ❌"),
+                ? "The account has been activated ✅"
+                : "Account deactivation has been canceled ❌"),
           ),
         );
       } else {
@@ -87,11 +102,12 @@ class _AdminPatientListPageState extends State<AdminPatientListPage>
 
   List getActivePatients() =>
       patients.where((p) => p["is_active"] == true).toList();
+
   List getInactivePatients() =>
       patients.where((p) => p["is_active"] == false).toList();
 
   Widget buildPatientList(List list) {
-    if (list.isEmpty) return const Center(child: Text("لا يوجد مرضى"));
+    if (list.isEmpty) return const Center(child: Text("No patient"));
 
     return ListView.builder(
       itemCount: list.length,
@@ -120,8 +136,10 @@ class _AdminPatientListPageState extends State<AdminPatientListPage>
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) =>
-                      AdminPatientProfilePage(patient: patient),
+                  builder: (_) => AdminPatientProfilePage(
+                    patient: patient,
+                    adminToken: adminToken, // التوكن الصحيح
+                  ),
                 ),
               );
             },
@@ -135,12 +153,13 @@ class _AdminPatientListPageState extends State<AdminPatientListPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("قائمة المرضى"),
+        title: const Text("List of patients"),
+        centerTitle: true,
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(text: "المرضى النشطين"),
-            Tab(text: "المرضى الغير نشطين"),
+            Tab(text: "Active patients"),
+            Tab(text: "Inactive patients"),
           ],
         ),
       ),

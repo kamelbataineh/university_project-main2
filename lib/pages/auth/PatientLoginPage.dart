@@ -111,9 +111,10 @@ class _PatientLoginPageState extends State<PatientLoginPage>
 
         // الانتقال للصفحة الرئيسية
         Future.delayed(const Duration(seconds: 1), () {
-          Navigator.pushReplacement(
+          Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (_) => HomePatientPage(token: token)),
+                (route) => false, // 🔥 هذا يحذف كل الصفحات السابقة
           );
         });
       } else {

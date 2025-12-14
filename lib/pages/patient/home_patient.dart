@@ -49,7 +49,16 @@ class _HomePatientPageState extends State<HomePatientPage>
       });
     }
   }
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
 
+      // إذا ضغط المستخدم على Home (index = 0)، حدث الاسم
+      if (_selectedIndex == 0) {
+        fetchPatientName();
+      }
+    });
+  }
 
   @override
   void initState() {
@@ -83,7 +92,6 @@ class _HomePatientPageState extends State<HomePatientPage>
     // MyMedicalRecordsPage(token: widget.token, userId: userId),
   ];
 
-  void _onItemTapped(int index) => setState(() => _selectedIndex = index);
 
   @override
   Widget build(BuildContext context) {
@@ -217,11 +225,12 @@ class _HomePatientPageState extends State<HomePatientPage>
   }
 
 
+
   Widget _buildNavItem(IconData icon, String label, int index) {
     final bool isSelected = _selectedIndex == index;
 
     return GestureDetector(
-      onTap: () => setState(() => _selectedIndex = index),
+      onTap: () => _onItemTapped(index),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
@@ -289,7 +298,6 @@ class _HomePatientPageState extends State<HomePatientPage>
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(
         'Welcome, $firstName $lastName',
-          key: ValueKey('$firstName$lastName'), // << اجبر Flutter يعيد البناء
           style: GoogleFonts.nunito(
             fontSize: 26,
             fontWeight: FontWeight.bold,

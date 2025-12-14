@@ -149,12 +149,12 @@ class _AdminDoctorListPageState extends State<AdminDoctorListPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("قائمة الدكاترة"),
-        bottom: TabBar(
+          title: const Text("List of doctor"),
+          centerTitle: true,        bottom: TabBar(
           controller: tabController,
           tabs: const [
-            Tab(text: "طلبات الموافقة"),
-            Tab(text: "الدكاترة"),
+            Tab(text: "Approval requests"),
+            Tab(text: "Doctors"),
           ],
         ),
       ),
