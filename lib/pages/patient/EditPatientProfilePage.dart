@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
 import 'package:http/http.dart' as http;
@@ -195,6 +196,12 @@ class _EditPatientProfilePageState extends State<EditPatientProfilePage> {
               child: TextField(
                 controller: _controllers[field],
                 decoration: InputDecoration(labelText: label),
+                keyboardType: field == 'phone_number'
+                    ? TextInputType.number
+                    : TextInputType.text,
+                inputFormatters: field == 'phone_number'
+                    ? [FilteringTextInputFormatter.digitsOnly]
+                    : null,
               ),
             ),
             IconButton(
@@ -214,7 +221,6 @@ class _EditPatientProfilePageState extends State<EditPatientProfilePage> {
       ),
     );
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -262,7 +268,7 @@ class _EditPatientProfilePageState extends State<EditPatientProfilePage> {
                       MaterialPageRoute(
                         builder: (context) => PassPatientVerifyOtpPage(
                           email: widget.patientData['email'],
-                          fromProfile: true,  // ⬅️ الجديد
+                          fromProfile: true,
                         ),
                       ),
                     );

@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:open_file/open_file.dart';
 import 'package:university_project/core/config/theme.dart';
 import 'package:university_project/pages/doctor/auth/LoginDoctorPage.dart';
 import 'package:university_project/pages/auth/RegisterPatientPage.dart';
@@ -550,26 +551,67 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                     const SizedBox(height: 20),
 
 
-                    // 📎 زر رفع السيرة الذاتية
-                    ElevatedButton.icon(
-                      onPressed: pickCV,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme
-                            .doctorElevatedButtonbackgroundColor,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20)),
-                      ),
-                      icon: const Icon(Icons.upload_file, color: Colors.white),
-                      label: Text(
-                        _cvFile == null
-                            ? "Upload CV (PDF/Image)"
-                            : "CV Selected ✅",
-                        style: AppFont.regular(
-                          size: 16,
-                          color: Colors.white,
+                    // 📎 رفع السيرة الذاتية مع عرض اسم الملف وحذف وعرضه عند الضغط
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: pickCV,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.doctorElevatedButtonbackgroundColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          icon: const Icon(Icons.upload_file, color: Colors.white),
+                          label: Text(
+                            _cvFile == null ? "Upload CV (PDF/Image)" : "Change CV",
+                            style: AppFont.regular(
+                              size: 16,
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
-                      ),
-
+                        const SizedBox(height: 8),
+                        if (_cvFile != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade200,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () async {
+                                      // فتح الملف باستخدام تطبيق افتراضي
+                                      if (_cvFile != null) {
+                                        final path = _cvFile!.path;
+                                        // تستخدم package مثل open_file
+                                        await OpenFile.open(path);
+                                      }
+                                    },
+                                    child: Text(
+                                      _cvFile!.path.split('/').last, // اسم الملف فقط
+                                      style: AppFont.regular(size: 14, color: Colors.black87),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _cvFile = null; // حذف الملف
+                                    });
+                                  },
+                                  child: const Icon(Icons.close, color: Colors.red),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
                     ),
 
                     const SizedBox(height: 20),
