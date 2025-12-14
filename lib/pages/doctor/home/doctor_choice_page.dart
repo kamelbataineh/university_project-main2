@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:university_project/core/config/theme.dart';
-import '../../core/config/app_font.dart';
+import '../../../core/config/app_font.dart';
 import 'doctor_intro_page.dart';
-import '../auth/doctor_login_page.dart';
-import '../auth/LandingPage.dart';
+import '../auth/LoginDoctorPage.dart';
+import '../../auth/LandingPage.dart';
 
 class DoctorChoicePage extends StatefulWidget {
   const DoctorChoicePage({Key? key}) : super(key: key);
@@ -29,6 +29,9 @@ class _DoctorChoicePageState extends State<DoctorChoicePage>
     _controller.dispose();
     super.dispose();
   }
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +103,7 @@ class _DoctorChoicePageState extends State<DoctorChoicePage>
                 textAlign: TextAlign.center,
               ),
 
-              const SizedBox(height: 40),
+               SizedBox(height: 40),
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -109,14 +112,14 @@ class _DoctorChoicePageState extends State<DoctorChoicePage>
                     Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                            builder: (_) => const LoginDoctorPage()));
+                            builder: (_) =>  LoginDoctorPage()));
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.doctorElevatedButtonbackgroundColor,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    padding:  EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20)),
-                    minimumSize: const Size(double.infinity, 50),
+                    minimumSize:  Size(double.infinity, 50),
                   ),
                   child: Text(
                   "Login",
@@ -128,7 +131,7 @@ class _DoctorChoicePageState extends State<DoctorChoicePage>
                 ),
               ),
               ),
-              const SizedBox(height: 20),
+               SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -137,21 +140,21 @@ class _DoctorChoicePageState extends State<DoctorChoicePage>
                     Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                            builder: (_) => const DoctorIntroPage()));
+                            builder: (_) =>  DoctorIntroPage()));
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.indigo.shade200,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    padding:  EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20)),
-                    minimumSize: const Size(double.infinity, 50),
+                    minimumSize:  Size(double.infinity, 50),
                   ),
                   child:Text(
                     "Register",
                     style: AppFont.regular(
                       size: 18,
                       color: Colors.white,
-                      weight: FontWeight.w400, // نفس الافتراضي، فيك تشيله إذا بدك
+                      weight: FontWeight.w400,
                     ),
                   ),
                 )

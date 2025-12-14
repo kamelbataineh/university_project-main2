@@ -2,33 +2,31 @@ import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:university_project/core/config/theme.dart';
-import 'package:university_project/pages/doctor/doctor_intro_page.dart';
 import '../../core/config/app_config.dart';
 import '../../core/config/app_font.dart';
-import '../doctor/home_doctor.dart';
-import 'package:http/http.dart' as http;
-
+import '../../core/config/theme.dart';
+import '../patient/home_patient.dart';
 import '../password/pass_patient/PatientForgotPasswordPage.dart';
+import 'RegisterPatientPage.dart';
 
-class LoginDoctorPage extends StatefulWidget {
-  const LoginDoctorPage({Key? key}) : super(key: key);
+class PatientLoginPage extends StatefulWidget {
+  PatientLoginPage({Key? key}) : super(key: key);
 
   @override
-  State<LoginDoctorPage> createState() => _LoginDoctorPageState();
+  State<PatientLoginPage> createState() => _PatientLoginPageState();
 }
 
-class _LoginDoctorPageState extends State<LoginDoctorPage>
+class _PatientLoginPageState extends State<PatientLoginPage>
     with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
   bool loading = false;
   bool rememberMe = false;
-  bool _obscure = true;
-
   late AnimationController _iconController;
+  bool _obscure = true;
 
   @override
   void initState() {
@@ -36,6 +34,7 @@ class _LoginDoctorPageState extends State<LoginDoctorPage>
     _iconController =
         AnimationController(vsync: this, duration: Duration(seconds: 2))
           ..repeat(reverse: true);
+    _loadSavedEmail();
   }
 
   @override
@@ -45,49 +44,97 @@ class _LoginDoctorPageState extends State<LoginDoctorPage>
     _iconController.dispose();
     super.dispose();
   }
+  void _loadSavedEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedEmail = prefs.getString("saved_email") ?? "";
+    setState(() {
+      _email.text = savedEmail;
+    });
+  }
 
-  void _loginDoctor() async {
+
+  Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
-
     setState(() => loading = true);
 
-    try {
-      final body = jsonEncode({
-        "email": _email.text.trim(),
-        "password": _password.text.trim(),
-      });
+    final input = _email.text.trim();
+    final password = _password.text.trim();
+    final data = <String, String>{
+      'email': input,
+      'password': password,
+    };
 
+    try {
       final response = await http.post(
-        Uri.parse(doctorLogin),
-        headers: {'Content-Type': 'application/json'},
-        body: body,
+        Uri.parse(patientLogin),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(data),
       );
 
-      final data = jsonDecode(response.body);
+      final resBodyStr = utf8.decode(response.bodyBytes);
 
       if (response.statusCode == 200) {
-        // أخذ التوكن و id الدكتور
-        final token = data['access_token'];
-        final doctorId = data['doctor_id'];
+        final resBody = jsonDecode(resBodyStr);
+        final token = resBody["access_token"] ?? "";
+
+        final patientData = resBody["patient_data"] ?? {};
+        final firstName = patientData["first_name"] ?? "";
+        final lastName = patientData["last_name"] ?? "";
+
+        if (token.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content:
+                    Text("The token has not been received from the server.")),
+          );
+          return;
+        }
+
+        // حفظ البيانات في SharedPreferences
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setString("role", "doctor"); // ← حفظ الدور
+        await prefs.setString("token", token);
+        await prefs.setString("first_name", firstName);
+        await prefs.setString("last_name", lastName);
+        await prefs.setString("saved_email", input);
+        await prefs.setString("role", "patient"); // ← حفظ الدور
+        // رسالة الترحيب
+        String nameMessage;
+        if (firstName.isNotEmpty && lastName.isNotEmpty) {
+          nameMessage = 'Welcome $firstName $lastName ';
+        } else {
+          nameMessage = 'Welcome';
+        }
 
-        await prefs.setString("saved_email_doctor", _email.text.trim());
-
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => HomeDoctorPage(token: token, userId: doctorId),
-          ),
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(backgroundColor: Colors.green, content: Text(nameMessage)),
         );
+
+        // الانتقال للصفحة الرئيسية
+        Future.delayed(const Duration(seconds: 1), () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => HomePatientPage(token: token)),
+          );
+        });
       } else {
-        final message = data['detail'] ?? 'حدث خطأ، حاول مرة أخرى';
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(message)));
+        String errorMsg =
+            "Connection to the server failed (${response.statusCode})";
+        try {
+          final resBody = jsonDecode(resBodyStr);
+          if (resBody['detail'] != null)
+            errorMsg = resBody['detail'].toString();
+        } catch (_) {}
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(backgroundColor: Colors.redAccent, content: Text(errorMsg)),
+        );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('خطأ في الاتصال بالخادم')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.redAccent,
+          content: Text("Connection to the server failed: $e"),
+        ),
+      );
     } finally {
       setState(() => loading = false);
     }
@@ -99,40 +146,42 @@ class _LoginDoctorPageState extends State<LoginDoctorPage>
     required IconData icon,
     bool obscure = false,
     String? Function(String?)? validator,
-    Widget? suffixIcon, // ← اضف هذا السطر فقط
+    Widget? suffixIcon,
   }) {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        gradient: LinearGradient(
-            colors: [Colors.white, Colors.indigo.shade50.withOpacity(0.3)]),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.indigo.shade100.withOpacity(0.4),
-              offset: Offset(6, 6),
-              blurRadius: 12),
-          BoxShadow(
-              color: Colors.white.withOpacity(0.8),
-              offset: Offset(-6, -6),
-              blurRadius: 12),
-        ],
-      ),
-      child: TextFormField(
-        controller: controller,
-        obscureText: obscure,
-        validator: validator,
-        style: TextStyle(color: AppTheme.doctorText),
-        decoration: InputDecoration(
-          prefixIcon: Icon(icon, color: AppTheme.doctorIcon),
-          hintText: hint,
-          suffixIcon: suffixIcon,
-          hintStyle: TextStyle(color: Colors.grey),
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(vertical: 18),
+
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          gradient: LinearGradient(
+              colors: [Colors.white, Colors.pink.shade50.withOpacity(0.3)]),
+          boxShadow: [
+            BoxShadow(
+                color: Colors.pink.shade100.withOpacity(0.9),
+                offset: Offset(6, 6),
+                blurRadius: 12),
+            BoxShadow(
+                color: Colors.white.withOpacity(0.5),
+                offset: Offset(-6, -6),
+                blurRadius: 12),
+          ],
         ),
-      ),
-    );
+        child: TextFormField(
+          controller: controller,
+          obscureText: obscure,
+          validator: validator,
+          style: TextStyle(color: Colors.pink.shade800),
+          decoration: InputDecoration(
+            prefixIcon: Icon(icon, color: Colors.pink.shade200),
+            hintText: hint,
+            suffixIcon: suffixIcon,
+            hintStyle: TextStyle(color: Colors.grey),
+            border: InputBorder.none,
+            contentPadding: EdgeInsets.symmetric(vertical: 16),
+          ),
+        ),
+      )
+    ]);
   }
 
   Widget floatingHeartIcon() {
@@ -151,11 +200,11 @@ class _LoginDoctorPageState extends State<LoginDoctorPage>
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
-                    colors: [Colors.indigo, Colors.indigo],
+                    colors: [Colors.pink.shade200, Colors.pinkAccent.shade200],
                   ),
                   boxShadow: [
                     BoxShadow(
-                        color: Colors.indigo.shade200.withOpacity(0.5),
+                        color: Colors.pink.shade200.withOpacity(0.5),
                         blurRadius: 20,
                         offset: Offset(0, 8)),
                     BoxShadow(
@@ -165,8 +214,7 @@ class _LoginDoctorPageState extends State<LoginDoctorPage>
                         spreadRadius: 1),
                   ],
                 ),
-                child:
-                    Icon(Icons.medical_services, color: Colors.white, size: 40),
+                child: Icon(Icons.favorite, color: Colors.white, size: 40),
               ),
             );
           },
@@ -187,16 +235,13 @@ class _LoginDoctorPageState extends State<LoginDoctorPage>
             floatingHeartIcon(),
             SizedBox(height: 16),
             Text(
-              'Doctor Login',
+              'User Login',
               style: GoogleFonts.nunito(
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
                 foreground: Paint()
                   ..shader = LinearGradient(
-                    colors: [
-                      Colors.indigo.shade200,
-                      Colors.indigo.shade400
-                    ],
+                    colors: [Colors.pink.shade200, Colors.pink.shade400],
                   ).createShader(Rect.fromLTWH(0, 0, 200, 0)),
               ),
             ),
@@ -206,7 +251,7 @@ class _LoginDoctorPageState extends State<LoginDoctorPage>
             Text(
               'Welcome back! Sign in to continue',
               style: AppFont.regular(
-                size: 14,
+                size: 16,
                 color: Colors.grey.shade600,
               ),
             ),
@@ -222,6 +267,9 @@ class _LoginDoctorPageState extends State<LoginDoctorPage>
                       icon: Icons.email_outlined,
                       validator: (val) =>
                           val!.isEmpty ? 'Please enter your email' : null),
+                  SizedBox(
+                    height: 20,
+                  ),
                   neumorphicTextField(
                     controller: _password,
                     hint: "Password",
@@ -231,7 +279,7 @@ class _LoginDoctorPageState extends State<LoginDoctorPage>
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscure ? Icons.visibility_off : Icons.visibility,
-                        color: Colors.indigo.shade200,
+                        color: Colors.pink.shade300,
                       ),
                       onPressed: () {
                         setState(() {
@@ -240,6 +288,7 @@ class _LoginDoctorPageState extends State<LoginDoctorPage>
                       },
                     ),
                   ),
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -263,25 +312,20 @@ class _LoginDoctorPageState extends State<LoginDoctorPage>
                                   builder: (_) => ForgotPasswordPage()),
                             );
                           },
-                          child:Text(
-                            'Forgot Password?',
-                            style: AppFont.regular(
-                              color: AppTheme.doctorTextBotton,
-                              size: 14
-                                ,weight: FontWeight.bold
-                            ),
-                          ),)
-                        ],
+                          child: Text('Forgot Password?',
+                              style: TextStyle(
+                                  color: AppTheme.patientTextBotton))),
+                    ],
                   ),
                   SizedBox(height: 16),
                   SizedBox(
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: loading ? null : _loginDoctor,
+                      onPressed: loading ? null : _login,
                       style: ElevatedButton.styleFrom(
                         backgroundColor:
-                            AppTheme.doctorElevatedButtonbackgroundColor,
+                            AppTheme.patientElevatedButtonbackgroundColor,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20)),
                       ),
@@ -291,33 +335,23 @@ class _LoginDoctorPageState extends State<LoginDoctorPage>
                               style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white)),
+                                  color: AppTheme.patientElevatedButtonText)),
                     ),
                   ),
                   SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: [Text(
-                      "Don't have an account? ",
-                      style: AppFont.regular(
-                        size: 14,
-                        color: Colors.black, // ممكن تغيّري اللون حسب التصميم
-                      ),
-                    ),
-
+                    children: [
+                      Text("Don't have an account? "),
                       TextButton(
-                onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => DoctorIntroPage())),
-                child: Text(
-                  'Register',
-                  style: AppFont.regular(
-                    color: AppTheme.doctorTextBotton,
-                    size: 14,
-                    weight: FontWeight.bold// ممكن تحددي الحجم حسب التصميم
-                  ),
-                ),
-              ),
+                        onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => RegisterPatientPage())),
+                        child: Text('Register',
+                            style:
+                                TextStyle(color: AppTheme.patientTextBotton)),
+                      ),
                     ],
                   ),
                 ],

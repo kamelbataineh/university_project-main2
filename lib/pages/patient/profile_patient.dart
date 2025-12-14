@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:university_project/pages/auth/FullScreenImagePage.dart';
+import 'package:university_project/pages/auth/PatientLoginPage.dart';
 import 'package:university_project/pages/patient/EditPatientProfilePage.dart';
 import 'dart:convert';
 import '../../core/config/app_config.dart';
@@ -148,7 +149,49 @@ class _ProfilePatientPageState extends State<ProfilePatientPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   ElevatedButton.icon(
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () async {
+                      // عرض نافذة التأكيد
+                      final shouldLogout = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Confirm Logout'),
+                          content: const Text('Are you sure you want to logout?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(false),
+                              child: const Text('No'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(true),
+                              child: const Text('Yes'),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      // إذا ضغط المستخدم نعم
+                      if (shouldLogout ?? false) {
+                        final response = await http.post(
+                          Uri.parse('$baseUrl1/patients/logout'),
+                          headers: {
+                            'Authorization': 'Bearer ${widget.token}',
+                          },
+                        );
+
+                        if (response.statusCode == 200) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => PatientLoginPage(),
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Logout failed. Please try again.')),
+                          );
+                        }
+                      }
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.patientAppbar,
                       padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
@@ -157,6 +200,7 @@ class _ProfilePatientPageState extends State<ProfilePatientPage> {
                     icon: const Icon(Icons.logout, color: Colors.white),
                     label: const Text('Logout', style: TextStyle(color: Colors.white, fontSize: 16)),
                   ),
+
                   ElevatedButton.icon(
                     onPressed: () {
                       Navigator.push(

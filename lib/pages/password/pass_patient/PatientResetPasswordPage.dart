@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:university_project/pages/auth/patient_login_page.dart';
+import 'package:university_project/pages/auth/PatientLoginPage.dart';
 import '../../../core/config/app_config.dart';
 
 class PatientResetPasswordPage extends StatefulWidget {
@@ -158,12 +158,7 @@ class _PatientResetPasswordPageState extends State<PatientResetPasswordPage> {
                 "Contains at least one special character",
                 hasSpecialChar(pass),
               ),
-              _buildPasswordRequirement(
-                "Contains letters, numbers or symbols",
-                pass.contains(RegExp(r'[A-Za-z]')) ||
-                    hasNumber(pass) ||
-                    hasSpecialChar(pass),
-              ),
+
               SizedBox(height: 15),
             ],
 

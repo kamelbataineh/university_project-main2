@@ -5,11 +5,13 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:university_project/pages/patient/profile_patient.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/config/app_config.dart';
 import '../../core/config/app_font.dart';
 import '../../core/config/theme.dart';
 import '../components/chats_list_page.dart';
+import 'MyMedicalRecordsPage.dart';
 import 'book_appointment_page.dart';
 import 'doctors_list_page.dart';
 import 'my_appointments_page.dart';
@@ -44,7 +46,6 @@ class _HomePatientPageState extends State<HomePatientPage>
       setState(() {
         firstName = data['first_name'] ?? 'User';
         lastName = data['last_name'] ?? 'User';
-
       });
     }
   }
@@ -79,7 +80,7 @@ class _HomePatientPageState extends State<HomePatientPage>
     MyAppointmentsPage(token: widget.token),
     DoctorsListPage(token: widget.token, userId: userId, ),
     ProfilePatientPage(token: widget.token),
-
+    // MyMedicalRecordsPage(token: widget.token, userId: userId),
   ];
 
   void _onItemTapped(int index) => setState(() => _selectedIndex = index);
@@ -87,6 +88,40 @@ class _HomePatientPageState extends State<HomePatientPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      endDrawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: AppTheme.patientAppbar,
+              ),
+              child: Text(
+                'Menu',
+                style: AppFont.regular(
+                  size: 20,
+                  weight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+
+            ListTile(
+              leading: Icon(Icons.support_agent, color: Colors.blue),
+              title: Text('Technical Support'),
+              onTap: () {
+                final Uri emailLaunchUri = Uri(
+                  scheme: 'mailto',
+                  path: 'batainehkamel2@gmail.com',
+                  query: 'subject=Support Request',
+                );
+                launchUrl(emailLaunchUri);
+              },
+            ),
+          ],
+        ),
+      ),
+
       appBar: AppBar(
 
         backgroundColor:  AppTheme.patientAppbar,
@@ -108,15 +143,16 @@ class _HomePatientPageState extends State<HomePatientPage>
             color: Colors.white,
           ), ),
         actions: [
-          IconButton(
-            icon:  Icon(Icons.notifications, color: Colors.white),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                 SnackBar(content: Text('🔔 لا توجد إشعارات حالياً')),
-              );
-            },
+          Builder(
+            builder: (context) => IconButton(
+              icon: Icon(Icons.menu, color: Colors.white),
+              onPressed: () {
+                Scaffold.of(context).openEndDrawer();
+              },
+            ),
           ),
         ],
+
 
       ),
       body: Stack(
@@ -172,6 +208,7 @@ class _HomePatientPageState extends State<HomePatientPage>
               Expanded(child: _buildNavItem(Icons.calendar_today_outlined, 'Appointments', 2)),
               Expanded(child: _buildNavItem(Icons.h_mobiledata, 'list doctor', 3)),
               Expanded(child: _buildNavItem(Icons.person_outline, ' Personal profile', 4)),
+
             ],
           ),
         ),
@@ -190,7 +227,7 @@ class _HomePatientPageState extends State<HomePatientPage>
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color(0xFFFFEEF3)  // وردي طبي ناعم
+              ? const Color(0xFFFFEEF3)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
           boxShadow: isSelected
@@ -235,27 +272,15 @@ class _HomePatientPageState extends State<HomePatientPage>
 
   Widget _buildDashboard(BuildContext context) {
     final List<Map<String, dynamic>> features = [
+
       {
-        "title": "Book appointment",
-        "icon": Icons.calendar_today,
-        "color1": Colors.pink.shade400,
-        "color2": Colors.pink.shade300,
-        "page": BookAppointmentPage(userId: userId, token: widget.token),
+        "title": "My Medical Records",
+        "icon": Icons.folder_open,
+        "color1": Colors.teal.shade400,
+        "color2": Colors.teal.shade300,
+        "page": MyMedicalRecordsPage(userId: userId, token: widget.token),
       },
-      // {
-      //   "title": "رفع صورة",
-      //   "icon": Icons.upload_file,
-      //   "color1": Colors.purple.shade400,
-      //   "color2": Colors.indigo.shade400,
-      //   "page": const UploadImagePage(),
-      // },
-      // {
-      //   "title": "عرض النتائج",
-      //   "icon": Icons.bar_chart_outlined,
-      //   "color1": Colors.indigo.shade400,
-      //   "color2": Colors.purple.shade400,
-      //   "page": const ResultsPage(),
-      // },
+
     ];
 
     return Padding(
@@ -264,6 +289,7 @@ class _HomePatientPageState extends State<HomePatientPage>
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(
         'Welcome, $firstName $lastName',
+          key: ValueKey('$firstName$lastName'), // << اجبر Flutter يعيد البناء
           style: GoogleFonts.nunito(
             fontSize: 26,
             fontWeight: FontWeight.bold,
@@ -321,12 +347,15 @@ class _HomePatientPageState extends State<HomePatientPage>
                     children: [
                       Icon(feature["icon"], color: Colors.white, size: 40),
                       const SizedBox(height: 12),
-                      Text(
-                        feature["title"],
-                        style: AppFont.regular(
-                          size: 16,
-                          weight: FontWeight.bold,
-                          color: Colors.white,
+                      Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Text(
+                          feature["title"],
+                          style: AppFont.regular(
+                            size: 16,
+                            weight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
                       )
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:university_project/pages/auth/LandingPage.dart';
-import 'package:university_project/pages/auth/doctor_login_page.dart';
+import 'package:university_project/pages/doctor/auth/LoginDoctorPage.dart';
 void main() async{
 
   runApp(const MyApp());

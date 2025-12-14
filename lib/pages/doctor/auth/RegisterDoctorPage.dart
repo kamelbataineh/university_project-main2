@@ -6,12 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:university_project/core/config/theme.dart';
-import 'package:university_project/pages/auth/doctor_login_page.dart';
-import 'package:university_project/pages/auth/register_patient.dart';
-import 'package:university_project/pages/doctor/doctor_choice_page.dart';
-import '../../core/config/app_config.dart';
-import '../../core/config/app_font.dart';
-import '../doctor/DoctorVerifyOtpPage.dart';
+import 'package:university_project/pages/doctor/auth/LoginDoctorPage.dart';
+import 'package:university_project/pages/auth/RegisterPatientPage.dart';
+import 'package:university_project/pages/doctor/home/doctor_choice_page.dart';
+import '../../../core/config/app_config.dart';
+import '../../../core/config/app_font.dart';
+import 'DoctorVerifyOtpPage.dart';
 
 class RegisterDoctorPage extends StatefulWidget {
   const RegisterDoctorPage({Key? key}) : super(key: key);
@@ -30,6 +30,10 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
   final TextEditingController _phoneNumber = TextEditingController();
   final TextEditingController _confirmPassword = TextEditingController();
   bool _obscure = true;
+  bool hasMinLength(String password) => password.length >= 8;
+  bool hasNumber(String password) => RegExp(r'\d').hasMatch(password);
+  bool hasSpecialChar(String password) => RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password);
+  bool _showPasswordRequirements = false;
 
 
   bool loading = false;
@@ -226,7 +230,7 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
     required IconData icon,
     bool obscure = false,
     String? Function(String?)? validator,
-    Widget? suffixIcon, int? maxLength,
+    Widget? suffixIcon, int? maxLength,void Function(String)? onChanged,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -423,55 +427,99 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                         icon: Icons.person,
                         validator: (val) =>
                         val!.isEmpty ? 'Enter your first name' : null),
-                    const SizedBox(height: 20),
+                     SizedBox(height: 20),
                     neumorphicTextField(
                         controller: _lastName,
                         hint: "Last Name",
                         icon: Icons.person,
                         validator: (val) =>
                         val!.isEmpty ? 'Enter your last name' : null),
-                    const SizedBox(height: 20),
+                     SizedBox(height: 20),
                     neumorphicTextField(
                         controller: _email,
                         hint: "Email",
                         icon: Icons.email,
                         validator: validateEmail),
-                    const SizedBox(height: 20),
+                     SizedBox(height: 20),
                     neumorphicTextField(
                         controller: _phoneNumber,
                         hint: "Phone Number",
                         icon: Icons.phone,
                         validator: (val) =>
                         val!.isEmpty ? 'Enter phone number' : null),
-                    const SizedBox(height: 20),
+                     SizedBox(height: 20),
 
 
-                    neumorphicTextField(
-                      controller: _password,
-                      hint: "Password",
-                      icon: Icons.lock,
-                      obscure: _obscure,
-                      maxLength: 20,
-                      // الحد الأقصى 20 حرف
-                      validator: (val) =>
-                      val!.isEmpty
-                          ? 'Enter password'
-                          : null,
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscure ? Icons.visibility_off : Icons.visibility,
-                          color: Colors.indigo.shade200,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        neumorphicTextField(
+                          controller: _password,
+                          hint: "Password",
+                          icon: Icons.lock,
+                          obscure: _obscure,
+                          validator: (val) {
+                            if (val!.isEmpty) return 'Enter password';
+                            if (val.length > 20) return 'Password cannot exceed 20 characters';
+                            if (!hasMinLength(val)) return 'Password must be at least 8 characters';
+                            if (!hasNumber(val)) return 'Password must contain at least one number';
+                            if (!hasSpecialChar(val)) return 'Password must contain at least one special character';
+                            return null;
+                          },
+                          onChanged: (val) {
+                            setState(() {
+                              _showPasswordRequirements = val.isNotEmpty;
+                            });
+                          },
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscure ? Icons.visibility_off : Icons.visibility,
+                              color: Colors.pink.shade300,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscure = !_obscure;
+                              });
+                            },
+                          ),
+                          maxLength: 20,
                         ),
-                        onPressed: () {
-                          setState(() {
-                            _obscure = !_obscure;
-                          });
-                        },
-                      ),
+
+                        // 🔹 Show password requirements dynamically
+                        if (_showPasswordRequirements)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8, left: 12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  hasMinLength(_password.text) ? "✔ At least 8 characters" : "❌ At least 8 characters",
+                                  style: TextStyle(
+                                    color: hasMinLength(_password.text) ? Colors.green : Colors.redAccent,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                Text(
+                                  hasNumber(_password.text) ? "✔ Contains number" : "❌ Contains number",
+                                  style: TextStyle(
+                                    color: hasNumber(_password.text) ? Colors.green : Colors.redAccent,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                Text(
+                                  hasSpecialChar(_password.text) ? "✔ Contains special character" : "❌ Contains special character",
+                                  style: TextStyle(
+                                    color: hasSpecialChar(_password.text) ? Colors.green : Colors.redAccent,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
                     ),
 
-
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20),
                     neumorphicTextField(
                       controller: _confirmPassword,
                       hint: "Confirm Password",

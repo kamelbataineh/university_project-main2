@@ -2,13 +2,15 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../auth/FullScreenImagePage.dart';
-import 'chat_page.dart';
+import '../doctor/records/DoctorPatientMedicalRecordsPage.dart';
+import '../doctor/records/EditRecordPage.dart';
+import '../doctor/records/add_record_page.dart';
 
 const baseUrl = "http://10.0.2.2:8000";
 
 class ChatPatientProfile extends StatefulWidget {
-  final String patientId;   // مريض
-  final String userId;      // الدكتور الحالي
+  final String patientId;
+  final String userId;
   final String token;
 
   const ChatPatientProfile({
@@ -25,12 +27,54 @@ class ChatPatientProfile extends StatefulWidget {
 class _ChatPatientProfileState extends State<ChatPatientProfile> {
   Map<String, dynamic>? patient;
   bool loading = true;
+  Map<String, dynamic>? record;
+  bool recordExists = false; // افتراضيًا لا يوجد سجل
+  bool loadingRecord = true;
+  String? recordId;
 
   @override
   void initState() {
     super.initState();
-    fetchPatient();
+    fetchPatient().then((_) => fetchPatientRecord());
   }
+
+  Future<void> fetchPatientRecord() async {
+    try {
+      final response = await http.get(
+        Uri.parse(
+            "$baseUrl/api/v1/doctor/patients/${widget.patientId}/medical_records?page=1&limit=1"),
+        headers: {"Authorization": "Bearer ${widget.token}"},
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        // ✅ تحقق من وجود 'records' واحتوائها على سجلات
+        if (data['records'] != null && data['records'].isNotEmpty) {
+          setState(() {
+            record = data['records'][0]; // أول سجل
+            recordExists = true;
+
+            // الحصول على recordId بشكل آمن
+            if (record!['_id'] != null) {
+              if (record!['_id'] is Map && record!['_id']['\$oid'] != null) {
+                recordId = record!['_id']['\$oid'];
+              } else {
+                recordId = record!['_id'].toString();
+              }
+            }
+          });
+        }
+      } else {
+        print("Failed to fetch records: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error fetching record: $e");
+    } finally {
+      setState(() => loadingRecord = false);
+    }
+  }
+
 
   Future<void> fetchPatient() async {
     try {
@@ -93,7 +137,7 @@ class _ChatPatientProfileState extends State<ChatPatientProfile> {
     }
 
     final fullName =
-    "${patient!["first_name"] ?? ''} ${patient!["last_name"] ?? ''}".trim();
+        "${patient!["first_name"] ?? ''} ${patient!["last_name"] ?? ''}".trim();
 
     String patientId;
     if (patient!["_id"] is Map && patient!["_id"]["\$oid"] != null) {
@@ -118,32 +162,32 @@ class _ChatPatientProfileState extends State<ChatPatientProfile> {
               backgroundColor: Colors.pink.shade100,
               child: patient!['profile_image_url'] != null
                   ? GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => FullScreenImagePage(
-                        imageUrl:
-                        "$baseUrl/${patient!['profile_image_url']}",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => FullScreenImagePage(
+                              imageUrl:
+                                  "$baseUrl/${patient!['profile_image_url']}",
+                            ),
+                          ),
+                        );
+                      },
+                      child: ClipOval(
+                        child: Image.network(
+                          "$baseUrl/${patient!['profile_image_url']}",
+                          width: 120,
+                          height: 120,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Icon(Icons.person_outline,
+                                size: 70, color: Colors.pink);
+                          },
+                        ),
                       ),
-                    ),
-                  );
-                },
-                child: ClipOval(
-                  child: Image.network(
-                    "$baseUrl/${patient!['profile_image_url']}",
-                    width: 120,
-                    height: 120,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return const Icon(Icons.person_outline,
-                          size: 70, color: Colors.pink);
-                    },
-                  ),
-                ),
-              )
+                    )
                   : const Icon(Icons.person_outline,
-                  size: 70, color: Colors.pink),
+                      size: 70, color: Colors.pink),
             ),
 
             const SizedBox(height: 20),
@@ -155,12 +199,92 @@ class _ChatPatientProfileState extends State<ChatPatientProfile> {
 
             // معلومات المريض
             buildInfoCard(Icons.email_outlined, 'Email', patient!['email']),
-            buildInfoCard(
-                Icons.phone_android_outlined, 'Phone', patient!['phone_number']),
+            buildInfoCard(Icons.phone_android_outlined, 'Phone',
+                patient!['phone_number']),
             buildInfoCard(Icons.male, 'Gender', patient!['gender']),
             buildInfoCard(Icons.cake, 'Age', "${patient!['age'] ?? ''}"),
             buildInfoCard(Icons.info_outline, 'Bio', patient!['bio']),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.medical_services),
+                label: const Text("سجلات المريض"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.pinkAccent,
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                ),
+                onPressed: () {
+                  if (patient != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => DoctorPatientFullRecordPage(
+                            token: widget.token,
+                            patientId: patientId,
+                            patientName: fullName),
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content:
+                            Text("❌ المريض غير موجود، لا يمكن عرض السجلات"),
+                      ),
+                    );
+                  }
+                },
+              ),
+            ),
+
+            SizedBox(
+              width: double.infinity,
+              child: loadingRecord
+                  ? Center(child: CircularProgressIndicator())
+                  : recordExists && recordId != null
+                      ? ElevatedButton.icon(
+                          icon: const Icon(Icons.edit),
+                          label: const Text("تعديل السجل الطبي"),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange,
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => EditRecordPage(
+                                  token: widget.token,
+                                  patientId: patientId,
+                                  recordId: recordId!,
+                                ),
+                              ),
+                            );
+                          },
+                        )
+                      : ElevatedButton.icon(
+                          icon: const Icon(Icons.medical_services),
+                          label: const Text("إضافة سجل طبي"),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.pinkAccent,
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => AddRecordPage(
+                                  token: widget.token,
+                                  patientId: patientId,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+            ),
           ],
         ),
       ),
-    );}}
+    );
+  }
+}

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:university_project/pages/upload/upload_image(2).dart';
+import 'package:university_project/pages/doctor/ai/upload_image(2).dart';
 
 class UploadPage extends StatelessWidget {
   const UploadPage({super.key});

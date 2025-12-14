@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:university_project/pages/admin/admin_login_page.dart';
-import 'package:university_project/pages/auth/patient_login_page.dart';
-import 'package:university_project/pages/auth/register_patient.dart';
-import 'package:university_project/pages/doctor/doctor_choice_page.dart';
+import 'package:university_project/pages/auth/PatientLoginPage.dart';
+import 'package:university_project/pages/auth/RegisterPatientPage.dart';
+import 'package:university_project/pages/doctor/home/doctor_choice_page.dart';
 
 import '../../core/config/app_font.dart';
 

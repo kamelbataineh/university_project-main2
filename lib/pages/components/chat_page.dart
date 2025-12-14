@@ -346,11 +346,10 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                 ),
                 child: Row(
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.attach_file,
+                    Icon(Icons.person_sharp,
                           color: Colors.purpleAccent),
-                      onPressed: pickAndSendFile,
-                    ),
+                     SizedBox(width: 4),
+
                     Expanded(
                       child: TextField(
                         controller: _controller,

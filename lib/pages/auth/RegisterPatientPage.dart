@@ -5,12 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:university_project/core/config/theme.dart';
 import 'package:university_project/pages/auth/LandingPage.dart';
-import 'package:university_project/pages/auth/patient_login_page.dart';
-import 'package:university_project/pages/auth/register_doctor.dart';
+import 'package:university_project/pages/auth/PatientLoginPage.dart';
+import 'package:university_project/pages/doctor/auth/RegisterDoctorPage.dart';
 import '../../core/config/app_font.dart';
 import '../patient/patient_verify_otp_page.dart';
-import '../password/pass_patient/PassPatientVerifyOtpPage.dart';
-import 'doctor_login_page.dart';
+
 import 'package:http/http.dart' as http;
 import '../../core/config/app_config.dart';
 
@@ -237,7 +236,8 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
     bool obscure = false,
     String? Function(String?)? validator,
     Widget? suffixIcon,
-    void Function(String)? onChanged,  int? maxLength, // ← اضف هذا السطر
+    void Function(String)? onChanged,
+    int? maxLength,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -271,90 +271,18 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
               suffixIcon: suffixIcon,
               hintStyle: TextStyle(color: Colors.grey),
               border: InputBorder.none,
-              errorStyle: TextStyle(height: 0),
-
             ),
             inputFormatters: [
-              LengthLimitingTextInputFormatter(maxLength ),
+              if (maxLength != null) LengthLimitingTextInputFormatter(maxLength),
             ],
-
-
           ),
         ),
-        Builder(
-          builder: (context) {
-            final errorText =
-            _showErrors ? validator?.call(controller.text) : null;
-            return errorText != null
-                ? Padding(
-              padding: const EdgeInsets.only(left: 10, top: 10),
-              child: Text(
-                errorText,
-                style: TextStyle(
-                  color: Colors.redAccent,
-                  fontSize: 13,
-                ),
-                textAlign: TextAlign.right,
-              ),
-            )
-                : SizedBox.shrink();
-          },
-        ),
+
       ],
     );
   }
 
 
-  //
-  // Widget floatingPatientIcon() {
-  //   return SizedBox(
-  //     height: 150,
-  //     child: Stack(
-  //       alignment: Alignment.center,
-  //       children: [
-  //         for (int i = 0; i < 3; i++)
-  //           AnimatedBuilder(
-  //             animation: _iconController,
-  //             builder: (context, child) {
-  //               double scale = 0.8 + 0.7 * _iconController.value;
-  //               return Transform.scale(
-  //                 scale: scale,
-  //                 child: Container(
-  //                   width: 60.0 + i * 30,
-  //                   height: 60.0 + i * 30,
-  //                   decoration: BoxDecoration(
-  //                     shape: BoxShape.circle,
-  //                     border: Border.all(
-  //                       color: Colors.pink.shade200.withOpacity(0.3),
-  //                       width: 2,
-  //                     ),
-  //                   ),
-  //                 ),
-  //               );
-  //             },
-  //           ),
-  //         Container(
-  //           width: 80,
-  //           height: 80,
-  //           decoration: BoxDecoration(
-  //             shape: BoxShape.circle,
-  //             gradient: LinearGradient(
-  //               colors: [Colors.pink.shade300, Colors.pink.shade500],
-  //             ),
-  //             boxShadow: [
-  //               BoxShadow(
-  //                 color: Colors.pink.shade300.withOpacity(0.6),
-  //                 blurRadius: 20,
-  //                 offset: const Offset(0, 10),
-  //               ),
-  //             ],
-  //           ),
-  //           child: const Icon(Icons.favorite, color: Colors.white, size: 40),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   Widget floatingPatientIcon() {
     return SizedBox(

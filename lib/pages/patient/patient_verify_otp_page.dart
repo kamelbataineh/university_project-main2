@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/config/app_config.dart';
-import '../auth/patient_login_page.dart';
+import '../auth/PatientLoginPage.dart';
 class PatientVerifyOtpPage extends StatefulWidget {
   final String email;
   final String firstName;
