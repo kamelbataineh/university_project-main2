@@ -51,24 +51,37 @@ class MedicalRecordService {
 
     return response.statusCode == 201;
   }
+  Future<bool> updateRecord({
+    required String recordId,
+    required String patientId,
+    required Map<String, dynamic> data,
+    String changesDescription = "Updated record fields", // ⬅️ حقل الوصف المطلوب
+  }) async {
+    final url = Uri.parse("$baseUrl/api/v1/medical_records/$recordId");
 
-  Future<bool> updateRecord({required String recordId, required Map<String, dynamic> data}) async {
+    // بناء الـ payload النهائي
+    final payload = {
+      "patient_id": patientId,
+      "data": data,
+      "changes_description": changesDescription, // ⬅️ أضف هذا
+    };
+
+    print("📤 Sending update: ${jsonEncode(payload)}");
+
     final response = await http.put(
-      Uri.parse("$baseUrl/medical_records/$recordId"),
+      url,
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer $token",
       },
-      body: jsonEncode(data),
+      body: jsonEncode(payload),
     );
 
-    if (response.statusCode == 200) {
-      return true; // ✅ تم التحديث بنجاح
-    } else {
-      print("خطأ تحديث السجل: ${response.body}");
-      return false; // ❌ فشل التحديث
-    }
+    print("📥 Response: ${response.body}");
+
+    return response.statusCode == 200;
   }
+
   Future<Map<String, dynamic>> getRecord(String recordId) async {
     final response = await http.get(
       Uri.parse("$baseUrl/api/v1/medical_records/$recordId"),

@@ -16,279 +16,249 @@ class AddRecordPage extends StatefulWidget {
 }
 
 class _AddRecordPageState extends State<AddRecordPage> {
-  // -------- Basic Info --------
+  // -------- Controllers --------
   final ageCtrl = TextEditingController();
-  String gender = "Male";
-
-  // -------- Diseases --------
   final diseaseCtrl = TextEditingController();
-  List<String> diseases = [];
-
-  // -------- Allergies --------
   final allergyCtrl = TextEditingController();
-  List<String> allergies = [];
-
-  // -------- Medications --------
   final medNameCtrl = TextEditingController();
   final medDoseCtrl = TextEditingController();
-  List<Map<String, String>> medications = [];
-
-  // -------- Surgeries --------
   final surgeryTypeCtrl = TextEditingController();
-  DateTime? surgeryDate;
-  List<Map<String, dynamic>> surgeries = [];
-
-  // -------- Family History --------
   final familyCtrl = TextEditingController();
-  List<String> familyHistory = [];
-
-  // -------- Lifestyle --------
   final exerciseCtrl = TextEditingController();
   final stressCtrl = TextEditingController();
-
-  // -------- Symptoms & Notes --------
   final symptomsCtrl = TextEditingController();
   final notesCtrl = TextEditingController();
+  final diagnosisCtrl = TextEditingController();
+
+  String gender = "Male";
+  DateTime? surgeryDate;
+
+  List<String> diseases = [];
+  List<String> allergies = [];
+  List<Map<String, String>> medications = [];
+  List<Map<String, dynamic>> surgeries = [];
+  List<String> familyHistory = [];
 
   bool isLoading = false;
 
-  @override
-  void dispose() {
-    ageCtrl.dispose();
-    diseaseCtrl.dispose();
-    allergyCtrl.dispose();
-    medNameCtrl.dispose();
-    medDoseCtrl.dispose();
-    surgeryTypeCtrl.dispose();
-    familyCtrl.dispose();
-    exerciseCtrl.dispose();
-    stressCtrl.dispose();
-    symptomsCtrl.dispose();
-    notesCtrl.dispose();
-    super.dispose();
-  }
-
+  // -------- Save --------
   Future<void> saveRecord() async {
-    if (ageCtrl.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("يرجى إدخال العمر")),
-      );
-      return;
-    }
-
-    if (exerciseCtrl.text.isEmpty || stressCtrl.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("يرجى تعبئة نمط الحياة")),
-      );
-      return;
-    }
+    if (ageCtrl.text.isEmpty) return;
 
     setState(() => isLoading = true);
 
-    try {
-      final service = MedicalRecordService(
-        baseUrl: "http://10.0.2.2:8000",
-        token: widget.token,
-      );
+    final recordData = {
+      "basic_info": {
+        "age": int.parse(ageCtrl.text),
+        "gender": gender,
+      },
+      "diseases": diseases,
+      "allergies": allergies,
+      "medications": medications,
+      "surgeries": surgeries,
+      "family_history": familyHistory,
+      "lifestyle": {
+        "exercise": exerciseCtrl.text,
+        "stress_level": stressCtrl.text,
+      },
+      "current_symptoms": symptomsCtrl.text,
+      "notes": notesCtrl.text,
+      "update_history": [],
+      "diagnosis": diagnosisCtrl.text,
+    };
 
-      // بناء Map متوافق مع backend
-      final recordData = {
-        "basic_info": {
-          "age": int.parse(ageCtrl.text),
-          "gender": gender,
-        },
-        "diseases": diseases,
-        "allergies": allergies,
-        "medications": medications,
-        "surgeries": surgeries.map((s) => {
-          "type": s["type"],
-          "date": s["date"],
-        }).toList(),
-        "family_history": familyHistory,
-        "lifestyle": {
-          "exercise": exerciseCtrl.text,
-          "stress_level": stressCtrl.text,
-        },
-        "current_symptoms": symptomsCtrl.text,
-        "notes": notesCtrl.text,
-        "update_history": [],
-        "diagnosis": ""   // ✅ أضف هذا الحقل
-      };
+    final service = MedicalRecordService(
+      baseUrl: "http://10.0.2.2:8000",
+      token: widget.token,
+    );
 
+    await service.createFullMedicalRecord(
+      patientId: widget.patientId,
+      data: recordData,
+    );
 
-
-      final success = await service.createFullMedicalRecord(
-        patientId: widget.patientId,
-        data: recordData,
-      );
-
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("تم حفظ السجل الطبي بالكامل")),
-        );
-        Navigator.pop(context, true);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("❌ فشل حفظ السجل")),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("❌ خطأ: $e")),
-      );
-    } finally {
-      setState(() => isLoading = false);
-    }
+    setState(() => isLoading = false);
+    Navigator.pop(context, true);
   }
 
-
+  // -------- UI --------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("إضافة سجل طبي شامل")),
+      backgroundColor: const Color(0xffF6F7FB),
+      appBar: AppBar(
+        title: const Text("Add Medical Record"),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
+      ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
 
-            // -------- Basic Info --------
-            const Text("المعلومات الأساسية", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            TextField(
-              controller: ageCtrl,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: "العمر", border: OutlineInputBorder()),
-            ),
-            const SizedBox(height: 10),
-            DropdownButtonFormField(
-              decoration: const InputDecoration(border: OutlineInputBorder(), labelText: "الجنس"),
-              value: gender,
-              items: const [
-                DropdownMenuItem(value: "Male", child: Text("ذكر")),
-                DropdownMenuItem(value: "Female", child: Text("أنثى")),
-              ],
-              onChanged: (v) => setState(() => gender = v!),
+            // Basic Info
+            sectionCard(
+              icon: Icons.person,
+              title: "Basic Information",
+              child: Column(
+                children: [
+                  input(ageCtrl, "Age", TextInputType.number),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField(
+                    value: gender,
+                    items: const [
+                      DropdownMenuItem(value: "Male", child: Text("Male")),
+                      DropdownMenuItem(value: "Female", child: Text("Female")),
+                    ],
+                    onChanged: (v) => setState(() => gender = v!),
+                    decoration: field("Gender"),
+                  ),
+                ],
+              ),
             ),
 
-            const SizedBox(height: 20),
-
-            // -------- Diseases --------
-            sectionTitle("الأمراض"),
-            rowAdd(
+            // Diseases
+            sectionList(
+              title: "Diseases",
+              icon: Icons.favorite,
               controller: diseaseCtrl,
-              hint: "اسم المرض",
-              onAdd: () {
-                setState(() {
-                  diseases.add(diseaseCtrl.text);
-                  diseaseCtrl.clear();
-                });
-              },
+              list: diseases,
+              hint: "Disease name",
             ),
-            listDisplay(diseases),
 
-            const SizedBox(height: 20),
-
-            // -------- Allergies --------
-            sectionTitle("الحساسية"),
-            rowAdd(
+            // Allergies
+            sectionList(
+              title: "Allergies",
+              icon: Icons.warning,
               controller: allergyCtrl,
-              hint: "نوع الحساسية",
-              onAdd: () {
-                setState(() {
-                  allergies.add(allergyCtrl.text);
-                  allergyCtrl.clear();
-                });
-              },
+              list: allergies,
+              hint: "Allergy type",
             ),
-            listDisplay(allergies),
 
-            const SizedBox(height: 20),
-
-            // -------- Medications --------
-            sectionTitle("الأدوية"),
-            TextField(controller: medNameCtrl, decoration: field("اسم الدواء")),
-            const SizedBox(height: 8),
-            TextField(controller: medDoseCtrl, decoration: field("الجرعة")),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  medications.add({
-                    "name": medNameCtrl.text,
-                    "dose": medDoseCtrl.text,
-                  });
-                  medNameCtrl.clear();
-                  medDoseCtrl.clear();
-                });
-              },
-              child: const Text("إضافة دواء"),
+            // Medications
+            sectionCard(
+              icon: Icons.medication,
+              title: "Medications",
+              child: Column(
+                children: [
+                  input(medNameCtrl, "Medication Name"),
+                  const SizedBox(height: 8),
+                  input(medDoseCtrl, "Dose"),
+                  addBtn(() {
+                    if (medNameCtrl.text.isNotEmpty && medDoseCtrl.text.isNotEmpty) {
+                      setState(() {
+                        medications.add({
+                          "name": medNameCtrl.text,
+                          "dose": medDoseCtrl.text,
+                        });
+                        medNameCtrl.clear();
+                        medDoseCtrl.clear();
+                      });
+                    }
+                  }),
+                  listView(medications.map((m) => "${m['name']} - ${m['dose']}").toList(),
+                          (i) => setState(() => medications.removeAt(i))),
+                ],
+              ),
             ),
-            listDisplay(medications.map((m) => "${m['name']} - ${m['dose']}").toList()),
 
-            const SizedBox(height: 20),
-
-            // -------- Surgeries --------
-            sectionTitle("العمليات"),
-            TextField(controller: surgeryTypeCtrl, decoration: field("نوع العملية")),
-            const SizedBox(height: 8),
-            ElevatedButton(
-              onPressed: () async {
-                final picked = await showDatePicker(
-                  context: context,
-                  initialDate: DateTime.now(),
-                  firstDate: DateTime(1950),
-                  lastDate: DateTime.now(),
-                );
-                if (picked != null) {
-                  setState(() => surgeryDate = picked);
-                  surgeries.add({
-                    "type": surgeryTypeCtrl.text,
-                    "date": picked.toIso8601String(),
-                  });
-                  surgeryTypeCtrl.clear();
-                }
-              },
-              child: const Text("إضافة عملية"),
+            // Surgeries
+            sectionCard(
+              icon: Icons.local_hospital,
+              title: "Surgeries",
+              child: Column(
+                children: [
+                  input(surgeryTypeCtrl, "Surgery Type"),
+                  const SizedBox(height: 8),
+                  ElevatedButton(
+                    child: Text(surgeryDate == null
+                        ? "Select Surgery Date"
+                        : surgeryDate!.toLocal().toString().split(' ')[0]),
+                    onPressed: () async {
+                      final date = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(1900),
+                        lastDate: DateTime.now(),
+                      );
+                      if (date != null) setState(() => surgeryDate = date);
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.add),
+                    label: const Text("Add Surgery"),
+                    onPressed: () {
+                      if (surgeryTypeCtrl.text.isNotEmpty && surgeryDate != null) {
+                        setState(() {
+                          surgeries.add({
+                            "type": surgeryTypeCtrl.text,
+                            "date": surgeryDate!.toIso8601String(),
+                          });
+                          surgeryTypeCtrl.clear();
+                          surgeryDate = null;
+                        });
+                      }
+                    },
+                  ),
+                  Column(
+                    children: List.generate(surgeries.length, (i) {
+                      final s = surgeries[i];
+                      return ListTile(
+                        title: Text("${s['type']} - ${s['date'].substring(0, 10)}"),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => setState(() => surgeries.removeAt(i)),
+                        ),
+                      );
+                    }),
+                  ),
+                ],
+              ),
             ),
-            listDisplay(surgeries.map((s) => "${s['type']} - ${s['date']}").toList()),
 
-            const SizedBox(height: 20),
-
-            // -------- Family History --------
-            sectionTitle("التاريخ العائلي"),
-            rowAdd(
+            // Family History
+            sectionList(
+              title: "Family History",
+              icon: Icons.group,
               controller: familyCtrl,
-              hint: "مرض وراثي",
-              onAdd: () {
-                setState(() {
-                  familyHistory.add(familyCtrl.text);
-                  familyCtrl.clear();
-                });
-              },
+              list: familyHistory,
+              hint: "Hereditary condition",
             ),
-            listDisplay(familyHistory),
 
-            const SizedBox(height: 20),
+            // Lifestyle
+            sectionCard(
+              icon: Icons.directions_run,
+              title: "Lifestyle",
+              child: Column(
+                children: [
+                  input(exerciseCtrl, "Exercise"),
+                  const SizedBox(height: 8),
+                  input(stressCtrl, "Stress Level"),
+                ],
+              ),
+            ),
 
-            // -------- Lifestyle --------
-            sectionTitle("نمط الحياة"),
-            TextField(controller: exerciseCtrl, decoration: field("التمارين الرياضية")),
-            const SizedBox(height: 10),
-            TextField(controller: stressCtrl, decoration: field("مستوى التوتر")),
+            // Symptoms
+            sectionCard(
+              icon: Icons.notes,
+              title: "Symptoms",
+              child: input(symptomsCtrl, "Symptoms"),
+            ),
 
-            const SizedBox(height: 20),
+            // Notes
+            sectionCard(
+              icon: Icons.edit_note,
+              title: "Notes",
+              child: input(notesCtrl, "Notes", TextInputType.text),
+            ),
 
-            // -------- Symptoms --------
-            sectionTitle("الأعراض الحالية"),
-            TextField(controller: symptomsCtrl, decoration: field("الأعراض")),
-
-            const SizedBox(height: 20),
-
-            // -------- Notes --------
-            sectionTitle("ملاحظات إضافية"),
-            TextField(
-              controller: notesCtrl,
-              maxLines: 3,
-              decoration: field("ملاحظات"),
+            // Diagnosis
+            sectionCard(
+              icon: Icons.assignment,
+              title: "Diagnosis",
+              child: input(diagnosisCtrl, "diagnosis", TextInputType.text, 3),
             ),
 
             const SizedBox(height: 30),
@@ -297,44 +267,112 @@ class _AddRecordPageState extends State<AddRecordPage> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: isLoading ? null : saveRecord,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
                 child: isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text("حفظ السجل الطبي"),
+                    : const Text("Save Medical Record"),
               ),
             ),
+            const SizedBox(height: 100),
           ],
         ),
       ),
     );
   }
 
-  // ------- UI Helpers -------
-  Widget sectionTitle(String title) {
-    return Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold));
-  }
-
-  InputDecoration field(String text) {
-    return InputDecoration(labelText: text, border: const OutlineInputBorder());
-  }
-
-  Widget rowAdd({required TextEditingController controller, required String hint, required VoidCallback onAdd}) {
-    return Row(
-      children: [
-        Expanded(
-          child: TextField(
-            controller: controller,
-            decoration: InputDecoration(labelText: hint, border: const OutlineInputBorder()),
-          ),
+  // -------- Components --------
+  Widget sectionCard({required IconData icon, required String title, required Widget child}) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      elevation: 8,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: Colors.pink,
+                  child: Icon(icon, color: Colors.white),
+                ),
+                const SizedBox(width: 12),
+                Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            const SizedBox(height: 16),
+            child,
+          ],
         ),
-        const SizedBox(width: 10),
-        ElevatedButton(onPressed: onAdd, child: const Text("إضافة"))
-      ],
+      ),
     );
   }
 
-  Widget listDisplay(List<String> items) {
+  Widget sectionList({required String title, required IconData icon, required TextEditingController controller, required List<String> list, required String hint}) {
+    return sectionCard(
+      icon: icon,
+      title: title,
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(child: input(controller, hint)),
+              const SizedBox(width: 8),
+              addBtn(() {
+                if (controller.text.isNotEmpty) {
+                  setState(() {
+                    list.add(controller.text);
+                    controller.clear();
+                  });
+                }
+              }),
+            ],
+          ),
+          listView(list, (i) => setState(() => list.removeAt(i))),
+        ],
+      ),
+    );
+  }
+
+  Widget listView(List<String> items, Function(int) onRemove) {
     return Column(
-      children: items.map((e) => ListTile(title: Text(e))).toList(),
+      children: List.generate(items.length, (i) {
+        return ListTile(
+          title: Text(items[i]),
+          trailing: IconButton(
+            icon: const Icon(Icons.delete, color: Colors.red),
+            onPressed: () => onRemove(i),
+          ),
+        );
+      }),
+    );
+  }
+
+  Widget input(TextEditingController c, String label, [TextInputType type = TextInputType.text, int max = 1]) {
+    return TextField(
+      controller: c,
+      keyboardType: type,
+      maxLines: max,
+      decoration: field(label),
+    );
+  }
+
+  InputDecoration field(String label) {
+    return InputDecoration(
+      labelText: label,
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+    );
+  }
+
+  Widget addBtn(VoidCallback onTap) {
+    return ElevatedButton.icon(
+      icon: const Icon(Icons.add),
+      label: const Text("Add"),
+      onPressed: onTap,
     );
   }
 }

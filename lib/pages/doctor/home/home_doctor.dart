@@ -1,11 +1,18 @@
+import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:university_project/pages/components/chats_list_page.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
+import 'package:university_project/pages/components/chats_list_page.dart' hide baseUrl;
+import 'package:url_launcher/url_launcher.dart';
+import '../../../core/config/app_config.dart';
+import '../../../core/config/app_font.dart';
 import '../../auth/LandingPage.dart';
 import '../ai/upload_image(2).dart';
 import '../appointments/doctor_appointments_page.dart';
 import '../profile/profile_doctor.dart';
 import '../../../core/config/theme.dart';
+import '../records/DoctorRecordsPage.dart';
 ////
 //
 //
@@ -26,7 +33,8 @@ class _HomeDoctorPageState extends State<HomeDoctorPage>
   int _selectedIndex = 0;
   late AnimationController _controller;
   String doctorName = 'Doctor';
-  final List<Widget> _pages = [];
+
+  int totalRecords = 0;
 
   @override
   void initState() {
@@ -36,22 +44,90 @@ class _HomeDoctorPageState extends State<HomeDoctorPage>
       duration: const Duration(seconds: 7),
     )..repeat(reverse: true);
 
-    _pages.addAll([
-      _buildDashboard(),
-      ChatsListPage(
-        userId: widget.userId,
-        token: widget.token,
-      ),
-      UploadImagePage(),
-      DoctorAppointmentsPage(token: widget.token , userId: widget.userId),
-      ProfileDoctorPage(token: widget.token),
-    ]);
+
+
+    _loadDoctorName(); // هنا
+    _loadStats();
+
   }
+
+  Future<void> _loadStats() async {
+    int records = await fetchTotalRecords(widget.token);
+    setState(() {
+      totalRecords = records;
+    });
+  }
+
 
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+  List<Widget> get pages_ {
+    return [
+      _buildDashboard(),
+      ChatsListPage(userId: widget.userId, token: widget.token),
+      UploadImagePage(),
+      DoctorAppointmentsPage(token: widget.token, userId: widget.userId),
+      ProfileDoctorPage(token: widget.token),
+    ];
+  }
+
+
+
+  Future<void> _loadDoctorName() async {
+    final url = Uri.parse("$baseUrl1/doctors/me");
+    final response = await http.get(
+      url,
+      headers: {"Authorization": "Bearer ${widget.token}"},
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      setState(() {
+        doctorName = "${data['first_name']} ${data['last_name']}";
+      });
+    } else {
+      setState(() {
+        doctorName = 'Doctor';
+      });
+    }
+  }
+
+  Future<int> fetchTotalRecords(String token) async {
+    final url = Uri.parse("$baseUrl1/api/v1/doctor/my_created_records?page=1&limit=100");
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      print('Status code: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        // تأكد من وجود المفتاح total_records
+        if (data.containsKey('total_records')) {
+          return data['total_records'] ?? 0;
+        } else {
+          print('Key "total_records" not found in response');
+          return 0;
+        }
+      } else {
+        print('Error fetching records: ${response.statusCode}');
+        return 0;
+      }
+    } catch (e) {
+      print('Exception: $e');
+      return 0;
+    }
   }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -61,7 +137,40 @@ class _HomeDoctorPageState extends State<HomeDoctorPage>
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Scaffold( endDrawer: Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
+            decoration: BoxDecoration(
+              color: AppTheme.doctorElevatedButtonbackgroundColor,
+            ),
+            child: Text(
+              'Menu',
+              style: AppFont.regular(
+                size: 20,
+                weight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ),
+
+          ListTile(
+            leading: Icon(Icons.support_agent, color: Colors.blue),
+            title: Text('Technical Support'),
+            onTap: () {
+              final Uri emailLaunchUri = Uri(
+                scheme: 'mailto',
+                path: 'batainehkamel2@gmail.com',
+                query: 'subject=Support Request',
+              );
+              launchUrl(emailLaunchUri);
+            },
+          ),
+        ],
+      ),
+    ),
+
       appBar: AppBar(
         title: Text(_selectedIndex == 0
             ? 'Dashboard'
@@ -75,14 +184,13 @@ class _HomeDoctorPageState extends State<HomeDoctorPage>
         centerTitle: true,
         backgroundColor: AppTheme.doctorElevatedButtonbackgroundColor,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => LandingPage()),
-              );
-            },
+          Builder(
+            builder: (context) => IconButton(
+              icon: Icon(Icons.menu, color: Colors.white),
+              onPressed: () {
+                Scaffold.of(context).openEndDrawer();
+              },
+            ),
           ),
         ],
       ),
@@ -112,8 +220,10 @@ class _HomeDoctorPageState extends State<HomeDoctorPage>
               );
             },
           ),
-          _pages[_selectedIndex],
-        ],
+          _selectedIndex == 0
+              ? _buildDashboard() // Dashboard يبنى حسب البيانات الجديدة
+              : pages_[_selectedIndex],
+        ]
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
@@ -128,14 +238,14 @@ class _HomeDoctorPageState extends State<HomeDoctorPage>
         ),
         child: Row(
           children: [
-            _buildBottomNavItem(Icons.home_outlined, 'Home', 0),
-            _buildBottomNavItem(Icons.message_outlined, 'Messages', 1),
-            _buildBottomNavItem(Icons.photo, 'Upload', 2),
-            _buildBottomNavItem(
-                Icons.calendar_today_outlined, 'Appointments', 3),
-            _buildBottomNavItem(Icons.person_outline, 'Profile', 4),
+            Expanded(child: _buildBottomNavItem(Icons.home_outlined, 'Home', 0)),
+            Expanded(child: _buildBottomNavItem(Icons.message_outlined, 'Messages', 1)),
+            Expanded(child: _buildBottomNavItem(Icons.photo, 'Upload', 2)),
+            Expanded(child: _buildBottomNavItem(Icons.calendar_today_outlined, 'Appointments', 3)),
+            Expanded(child: _buildBottomNavItem(Icons.person_outline, 'Profile', 4)),
           ],
         ),
+
       ),
     );
   }
@@ -155,7 +265,7 @@ class _HomeDoctorPageState extends State<HomeDoctorPage>
       child: SingleChildScrollView(
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(
-            'Welcome, Dr. $doctorName 👨‍⚕️',
+            'Welcome, Dr. $doctorName',
             style: TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.bold,
@@ -252,46 +362,71 @@ class _HomeDoctorPageState extends State<HomeDoctorPage>
 ////
 ////
 ////
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    if (_selectedIndex == 0) {
+      _loadDoctorName();
+      _loadStats();
+    }
+  }
+
+
+
   Widget _buildBottomNavItem(IconData icon, String label, int index) {
     final bool isSelected = _selectedIndex == index;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() => _selectedIndex = index),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-          decoration: BoxDecoration(
-            color:
-                isSelected ? Colors.white.withOpacity(0.3) : Colors.transparent,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon,
-                  size: 26,
-                  color: isSelected
-                      ? AppTheme.doctorElevatedButtonbackgroundColor
-                      : Colors.grey),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: isSelected
-                      ? AppTheme.doctorElevatedButtonbackgroundColor
-                      : Colors.grey,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                ),
+
+    return GestureDetector(
+      onTap: () => _onItemTapped(index),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? const Color(0xFFF5EEFF)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: isSelected
+              ? [
+            BoxShadow(
+              color:  Colors.indigo.withOpacity(0.65),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            )
+          ]
+              : [],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 26,
+              color: isSelected
+                  ?  Colors.indigo
+                  : Colors.grey.shade500,
+            ),
+            const SizedBox(height: 5),
+            Text(
+              label,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.nunito(
+                fontSize: 12,
+                letterSpacing: 0.3,
+                color: isSelected
+                    ?  Colors.indigo
+                    : Colors.grey.shade600,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
+
 
 ////
 ////
@@ -344,36 +479,20 @@ class _HomeDoctorPageState extends State<HomeDoctorPage>
   Widget _buildStatsCards() {
     final stats = [
       {
-        'label': "Total Patients",
-        'value': "124",
+        'label': "Total Records",
+        'value': totalRecords.toString(),
         'color1': Colors.pink.shade400,
         'color2': Colors.pinkAccent.shade100
       },
-      {
-        'label': "Today's Scans",
-        'value': "8",
-        'color1': Colors.purple.shade400,
-        'color2': Colors.indigo.shade500
-      },
-      {
-        'label': "Pending Review",
-        'value': "3",
-        'color1': Colors.orange.shade400,
-        'color2': Colors.orange.shade600
-      },
-      {
-        'label': "Completed",
-        'value': "115",
-        'color1': Colors.green.shade400,
-        'color2': Colors.green.shade600
-      },
+
+
     ];
 
     return GridView.builder(
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
       itemCount: stats.length,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         mainAxisSpacing: 16,
         crossAxisSpacing: 16,
@@ -381,43 +500,59 @@ class _HomeDoctorPageState extends State<HomeDoctorPage>
       ),
       itemBuilder: (context, index) {
         final stat = stats[index];
-        return Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [stat['color1'] as Color, stat['color2'] as Color],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+
+        // فقط البطاقة الأولى (Total Records) قابلة للنقر
+        return GestureDetector(
+          onTap: () {
+            if (index == 0) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => DoctorRecordsPage(token: widget.token),
+                ),
+              );
+            }
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [stat['color1'] as Color, stat['color2'] as Color],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: (stat['color1'] as Color).withOpacity(0.3),
+                  blurRadius: 12,
+                  offset: const Offset(4, 6),
+                ),
+              ],
             ),
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: (stat['color1'] as Color).withOpacity(0.3),
-                blurRadius: 12,
-                offset: Offset(4, 6),
-              ),
-            ],
-          ),
-          padding: EdgeInsets.all(16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                stat['label'] as String,
-                style: TextStyle(color: Colors.white70, fontSize: 14),
-              ),
-              SizedBox(height: 8),
-              Text(
-                stat['value'] as String,
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold),
-              ),
-            ],
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  stat['label'] as String,
+                  style: const TextStyle(color: Colors.white70, fontSize: 14),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  stat['value'] as String,
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
           ),
         );
       },
     );
+
   }
+
 }

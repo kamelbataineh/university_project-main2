@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../auth/FullScreenImagePage.dart';
-import '../doctor/records/DoctorPatientMedicalRecordsPage.dart';
+import '../doctor/records/DoctorPatientFullRecordPage.dart';
 import '../doctor/records/EditRecordPage.dart';
 import '../doctor/records/add_record_page.dart';
 
@@ -201,18 +201,16 @@ class _ChatPatientProfileState extends State<ChatPatientProfile> {
             buildInfoCard(Icons.email_outlined, 'Email', patient!['email']),
             buildInfoCard(Icons.phone_android_outlined, 'Phone',
                 patient!['phone_number']),
-            buildInfoCard(Icons.male, 'Gender', patient!['gender']),
-            buildInfoCard(Icons.cake, 'Age', "${patient!['age'] ?? ''}"),
-            buildInfoCard(Icons.info_outline, 'Bio', patient!['bio']),
+
             const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                icon: const Icon(Icons.medical_services),
-                label: const Text("سجلات المريض"),
+                icon:  Icon(Icons.medical_services,color: Colors.white,),
+                label:  Text("Patient records",style:TextStyle(color: Colors.white,fontWeight:FontWeight.bold), ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.pinkAccent,
-                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  padding:  EdgeInsets.symmetric(vertical: 15),
                 ),
                 onPressed: () {
                   if (patient != null) {
@@ -236,18 +234,18 @@ class _ChatPatientProfileState extends State<ChatPatientProfile> {
                 },
               ),
             ),
-
+        SizedBox(height: 20,),
             SizedBox(
               width: double.infinity,
               child: loadingRecord
                   ? Center(child: CircularProgressIndicator())
                   : recordExists && recordId != null
                       ? ElevatedButton.icon(
-                          icon: const Icon(Icons.edit),
-                          label: const Text("تعديل السجل الطبي"),
+                          icon:  Icon(Icons.edit ),
+                label:  Text("Modification of the medical record",style:TextStyle(color: Colors.white,fontWeight:FontWeight.bold), ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.orange,
-                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            padding:  EdgeInsets.symmetric(vertical: 15),
                           ),
                           onPressed: () {
                             Navigator.push(
@@ -263,8 +261,8 @@ class _ChatPatientProfileState extends State<ChatPatientProfile> {
                           },
                         )
                       : ElevatedButton.icon(
-                          icon: const Icon(Icons.medical_services),
-                          label: const Text("إضافة سجل طبي"),
+                          icon: const Icon(Icons.medical_services,color: Colors.white,),
+                          label:  Text("Add a medical record",style:TextStyle(color: Colors.white,fontWeight:FontWeight.bold), ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.pinkAccent,
                             padding: const EdgeInsets.symmetric(vertical: 15),
@@ -282,6 +280,8 @@ class _ChatPatientProfileState extends State<ChatPatientProfile> {
                           },
                         ),
             ),
+            SizedBox(height: 100,),
+
           ],
         ),
       ),
