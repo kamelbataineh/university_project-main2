@@ -91,11 +91,14 @@ class _LoginDoctorPageState extends State<LoginDoctorPage>
         await prefs.setString("role", "doctor");
         await prefs.setString("saved_email_doctor", _email.text.trim());
 
-        Navigator.pushReplacement(
+
+
+
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
-            builder: (_) => HomeDoctorPage(token: token, userId: doctorId),
-          ),
+            builder: (_) => HomeDoctorPage(token: token, userId: doctorId)),
+                (route) => false,
         );
       } else {
         final message = data['detail'] ?? 'حدث خطأ، حاول مرة أخرى';

@@ -147,12 +147,13 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
         final reason = app['reason'] ?? "-";
         DateTime? parsedDate;
         try { parsedDate = DateTime.parse(dateTimeStr); } catch (_) { parsedDate = null; }
+        final bool isExpired =
+            parsedDate != null && DateTime.now().isAfter(parsedDate);
 
         String displayStatus = app['status'] ?? "-";
-        if (parsedDate != null && DateTime.now().isAfter(parsedDate) && app['status'] == "Confirmed") {
-          displayStatus = "Completed";
-          app['status'] = "Completed";
-        } else if (app['status'] == "Confirmed") {
+        if (isExpired) {
+          displayStatus = "نفذ الوقت";
+      } else if (app['status'] == "Confirmed") {
           displayStatus = "Approved";
         } else if (app['status'] == "Rejected") {
           displayStatus = "Rejected";
@@ -178,7 +179,16 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
                 const SizedBox(height: 10),
 
                 Row(
+
                   children: [
+                    if (isExpired)
+                      IconButton(
+                        onPressed: () => deleteAppointment(app['appointment_id']),
+                        icon: const Icon(Icons.delete, color: Colors.red, size: 20),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+
                     if (app['status'] == 'Completed')
                       IconButton(
                         onPressed: () => deleteAppointment(app['appointment_id']),
