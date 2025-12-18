@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../auth/EditDoctorProfilePage.dart';
+import '../auth/LoginDoctorPage.dart';
 
 const baseUrl = "http://10.0.2.2:8000/";
 
@@ -45,6 +47,29 @@ class _ProfileDoctorPageState extends State<ProfileDoctorPage> {
       });
     }
   }
+
+
+
+
+  Future<void> logout(String token) async {
+    final response = await http.post(
+      Uri.parse("http://10.0.2.2:8000/doctors/logout"),
+      headers: {"Authorization": "Bearer $token"},
+    );
+
+    if (response.statusCode == 200) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('token');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to logout")),
+      );
+    }
+  }
+
+
+
+
 
   Widget buildOptionalField(
       String title, String? value, IconData icon, VoidCallback onEdit) {
@@ -249,10 +274,36 @@ class _ProfileDoctorPageState extends State<ProfileDoctorPage> {
                   ),
                 ),
 
-                // زر Logout
                 ElevatedButton.icon(
                   onPressed: () {
-                    Navigator.pop(context); // Logout
+                    // إظهار نافذة التأكيد
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text("Logout"),
+                        content: Text("Are you sure you want to logout?"),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop(); // إغلاق النافذة بدون Logout
+                            },
+                            child: Text("No"),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              await logout(widget.token);
+
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (_) => const LoginDoctorPage()),
+                              );
+                            },
+                            child: Text("Yes"),
+                          ),
+
+                        ],
+                      ),
+                    );
                   },
                   icon: Icon(Icons.logout, color: Colors.white, size: 20),
                   label: Text(
@@ -263,12 +314,13 @@ class _ProfileDoctorPageState extends State<ProfileDoctorPage> {
                     backgroundColor: Colors.red.shade400,
                     padding: EdgeInsets.symmetric(horizontal: 28, vertical: 14),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25), // حواف دائرية كبيرة
+                      borderRadius: BorderRadius.circular(25),
                     ),
-                    elevation: 5, // ظل خفيف
+                    elevation: 5,
                     shadowColor: Colors.red.shade200,
                   ),
                 ),
+
               ],
             ),
             SizedBox(height: 30),

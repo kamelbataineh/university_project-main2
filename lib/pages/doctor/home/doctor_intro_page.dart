@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:university_project/core/config/theme.dart';
 import '../../../core/config/app_font.dart';
 import '../auth/RegisterDoctorPage.dart';
+import 'doctor_choice_page.dart';
 
 class DoctorIntroPage extends StatefulWidget {
   const DoctorIntroPage({Key? key}) : super(key: key);
@@ -28,11 +29,12 @@ class _DoctorIntroPageState extends State<DoctorIntroPage> {
               child: Row(
                 children: [
                   IconButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    icon:
-                        Icon(Icons.arrow_back, size: 28, color: Colors.indigo),
+                    icon: Icon(Icons.arrow_back, color: Colors.indigo.shade400),
+                    onPressed: () =>
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => DoctorChoicePage())),
                   ),
                 ],
               ),
@@ -65,8 +67,7 @@ class _DoctorIntroPageState extends State<DoctorIntroPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
-            // ... نفس الكود السابق
+             SizedBox(height: 20),
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),

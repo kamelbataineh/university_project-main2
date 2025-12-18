@@ -240,42 +240,48 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
     int? maxLength,
     bool isNumberOnly = false,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        gradient: LinearGradient(
-            colors: [Colors.white, Colors.pink.shade100.withOpacity(0.3)]),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.pink.shade100.withOpacity(0.9),
-              offset: Offset(6, 6),
-              blurRadius: 12),
-          BoxShadow(
-              color: Colors.white.withOpacity(0.5),
-              offset: Offset(-6, -6),
-              blurRadius: 12),
-        ],
-      ),
-      child: TextFormField(
-        controller: controller,
-        obscureText: obscure,
-        validator: validator,
-        onChanged: onChanged,
-        style: TextStyle(color: Colors.pink.shade900),
-        keyboardType: isNumberOnly ? TextInputType.number : TextInputType.text,
-        inputFormatters: [
-          if (isNumberOnly) FilteringTextInputFormatter.digitsOnly,
-          if (maxLength != null) LengthLimitingTextInputFormatter(maxLength),
-        ],
-        decoration: InputDecoration(
-          contentPadding: EdgeInsets.symmetric(vertical: 16),
-          prefixIcon: Icon(icon, color: Colors.pink.shade200),
-          hintText: hint,
-          suffixIcon: suffixIcon,
-          hintStyle: TextStyle(color: Colors.grey),
-          border: InputBorder.none,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            gradient: LinearGradient(
+                colors: [Colors.white, Colors.pink.shade100.withOpacity(0.3)]),
+            boxShadow: [
+              BoxShadow(
+                  color: Colors.pink.shade100.withOpacity(0.9),
+                  offset: Offset(6, 6),
+                  blurRadius: 12),
+              BoxShadow(
+                  color: Colors.white.withOpacity(0.5),
+                  offset: Offset(-6, -6),
+                  blurRadius: 12),
+            ],
+          ),
+          child: TextFormField(
+            controller: controller,
+            obscureText: obscure,
+            validator: validator,
+            onChanged: onChanged,
+            style: TextStyle(color: Colors.pink.shade900),
+            keyboardType: isNumberOnly ? TextInputType.number : TextInputType.text,
+            inputFormatters: [
+              if (isNumberOnly) FilteringTextInputFormatter.digitsOnly,
+              if (maxLength != null) LengthLimitingTextInputFormatter(maxLength),
+            ],
+            decoration: InputDecoration(
+              contentPadding: EdgeInsets.symmetric(vertical: 16),
+              prefixIcon: Icon(icon, color: Colors.pink.shade200),
+              hintText: hint,
+              suffixIcon: suffixIcon,
+              hintStyle: TextStyle(color: Colors.grey),
+              border: InputBorder.none,
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
 
@@ -487,20 +493,7 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
                               ),
                       ),
                     ),
-                    if (loading) SizedBox(width: 12),
-                    if (loading)
-                      GestureDetector(
-                        onTap: () => setState(() => loading = false),
-                        child: Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.redAccent,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child:
-                              Icon(Icons.close, color: Colors.white, size: 20),
-                        ),
-                      ),
+
                     SizedBox(height: 22),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,

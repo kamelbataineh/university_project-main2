@@ -50,7 +50,7 @@ class _DoctorVerifyOtpPageState extends State<DoctorVerifyOtpPage> {
 
   void startTimer() {
     setState(() {
-      remainingSeconds = 10;
+      remainingSeconds = 60;
     });
     _timer?.cancel();
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
@@ -102,8 +102,7 @@ class _DoctorVerifyOtpPageState extends State<DoctorVerifyOtpPage> {
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop(); // إغلاق النافذة
-                  // الانتقال مباشرة لصفحة تسجيل الدخول
+                  Navigator.of(context).pop();
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (_) => LoginDoctorPage()),

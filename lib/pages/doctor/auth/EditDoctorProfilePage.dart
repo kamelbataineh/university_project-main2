@@ -1,11 +1,13 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
 import 'package:http_parser/http_parser.dart';
+import 'package:university_project/pages/password/pass_doctor/PassDoctorVerifyOtpPage.dart';
 
-import '../../password/VerifyPasswordPage.dart';
 
 const baseUrl = "http://10.0.2.2:8000/";
 
@@ -30,10 +32,8 @@ class _EditDoctorProfilePageState extends State<EditDoctorProfilePage> {
 
   final List<String> _genders = ['male', 'female', 'other'];
   final List<String> _specializations = [
-    'Breast Cancer Nursing',
-    'Oncology Nursing',
-    'Breast Cancer Screening Specialist',
-    'Chemotherapy Care Nurse',
+    'Breast Cancer ',
+
     '--'
   ];
 
@@ -160,27 +160,124 @@ class _EditDoctorProfilePageState extends State<EditDoctorProfilePage> {
   }
 
   Widget _buildField(String label, String field) {
-    // // حالة خاصية Email
-    // if (field == 'email') {
-    //   return Card(
-    //     elevation: 3,
-    //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    //     child: ListTile(
-    //       title: Text(label),
-    //       subtitle: Text(widget.doctorData[field]?.toString() ?? 'Not added'),
-    //       trailing: Icon(Icons.edit_outlined, color: Colors.blue),
-    //       onTap: () {
-    //         // الانتقال إلى صفحة التحقق من كلمة السر
-    //         Navigator.push(
-    //           context,
-    //           MaterialPageRoute(
-    //             builder: (_) => VerifyPasswordPage(token: widget.token),
-    //           ),
-    //         );
-    //       },
-    //     ),
-    //   );
-    // }
+
+    if (field == 'years_of_experience') {
+      return Card(
+        elevation: 3,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: _isEditing[field] == true
+              ? Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _controllers[field],
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly, // يسمح بالأرقام فقط
+                    LengthLimitingTextInputFormatter(2), // خبرة بحد أقصى رقمين
+                  ],
+                  decoration: InputDecoration(
+                    labelText: label,
+                    hintText: '0',
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.check, color: Colors.green),
+                onPressed: () {
+                  final value = _controllers[field]!.text;
+                  if (value.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Please enter experience in years')),
+                    );
+                    return;
+                  }
+                  // كل شيء صحيح → حفظ
+                  _saveOneField(field);
+                },
+              ),
+            ],
+          )
+              : ListTile(
+            title: Text(label),
+            subtitle: Text(widget.doctorData[field]?.toString() ?? 'Not added'),
+            trailing: IconButton(
+              icon: Icon(Icons.edit_outlined, color: Colors.blue),
+              onPressed: () => _toggleEdit(field),
+            ),
+          ),
+        ),
+      );
+    }
+
+
+
+
+
+
+
+
+
+    if (field == 'phone_number') {
+      return Card(
+        elevation: 3,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: _isEditing[field] == true
+              ? Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _controllers[field],
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(10),
+                  ],
+                  decoration: InputDecoration(
+                    labelText: label,
+                    hintText: '07xxxxxxxx',
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.check, color: Colors.green),
+                onPressed: () {
+                  final value = _controllers[field]!.text;
+                  if (value.length != 10) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Phone number must be 10 digits')),
+                    );
+                    return;
+                  }
+                  if (!value.startsWith('07')) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Phone number must start with 07')),
+                    );
+                    return;
+                  }
+                  // لو كل شيء صحيح → حفظ
+                  _saveOneField(field);
+                },
+              ),
+            ],
+          )
+              : ListTile(
+            title: Text(label),
+            subtitle: Text(widget.doctorData[field]?.toString() ?? 'Not added'),
+            trailing: IconButton(
+              icon: Icon(Icons.edit_outlined, color: Colors.blue),
+              onPressed: () => _toggleEdit(field),
+            ),
+          ),
+        ),
+      );
+    }
+
+
 
     // الحقول الخاصة Dropdown
     if (field == 'gender' || field == 'specialization') {
@@ -309,6 +406,61 @@ class _EditDoctorProfilePageState extends State<EditDoctorProfilePage> {
             _buildField('Location', 'location'),
             _buildField('Gender', 'gender'),
             _buildField('Experience (Years)', 'years_of_experience'),
+
+
+            Card(
+              elevation: 3,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: ListTile(
+                title: const Text("Change Password"),
+                trailing: const Icon(Icons.lock_outline, color: Colors.blue),
+                onTap: () async {
+                  final email = widget.doctorData['email'];
+
+                  // 1️⃣ إظهار Loading
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (_) => Center(child: CircularProgressIndicator()),
+                  );
+
+                  try {
+                    // 2️⃣ طلب إرسال OTP
+                    final response = await http.post(
+                      Uri.parse('${baseUrl}doctors/send-otp'),
+                      headers: {'Content-Type': 'application/json'},
+                      body: jsonEncode({'email': email}),
+                    );
+
+                    Navigator.pop(context); // إزالة الـ loading
+
+                    if (response.statusCode == 200) {
+                      // 3️⃣ فتح صفحة التحقق من OTP مباشرة
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Passdoctorverifyotppage(
+                            email: email,
+                            fromProfile: true,
+                          ),
+                        ),
+                      );
+                    } else {
+                      final data = jsonDecode(response.body);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(data['detail'] ?? 'Failed to send OTP')),
+                      );
+                    }
+                  } catch (e) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Connection error')),
+                    );
+                  }
+                },
+              ),
+            )
+
           ],
         ),
       ),

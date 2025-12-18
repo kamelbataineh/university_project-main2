@@ -42,16 +42,10 @@ class _LandingPageState extends State<LandingPage>
     super.dispose();
   }
 
-  // 🌟 اسم التطبيق: الأمل - MediCare Future
-// 📌 نبذة عن المشروع:
-// تطبيق الأمل يساعد المرضى المصابين بالسرطان على متابعة حالتهم الصحية
-// وتحليل البيانات الطبية باستخدام تقنيات الذكاء الاصطناعي.
-// التطبيق يعمل تحت إشراف الطبيب ولا يقوم بالتشخيص تلقائيًا، بل يقدم الدعم
-// والمعلومات ويتيح التواصل المباشر مع الطبيب المتابع للحالة.
 
   List<Map<String, dynamic>> introPages = [
     {
-      "title": "Welcome to MediCare Future",
+      "title": "Welcome to Pink Scan",
       "subtitle":
           "A platform to empower breast cancer patients with AI-assisted insights under doctor supervision.",
       "icon": Icons.favorite,

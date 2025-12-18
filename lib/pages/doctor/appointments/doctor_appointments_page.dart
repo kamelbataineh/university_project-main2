@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
@@ -37,15 +36,11 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
     _tabController.dispose();
     super.dispose();
   }
-
-  // ------------------ التعامل مع طلب إلغاء الحجز ------------------
   Future<void> handleCancellation(Map app, {required bool approve}) async {
     final appointmentId = app['appointment_id'];
 
-    Uri url = Uri.parse("$baseUrl1/appointments/cancel/$appointmentId")
-        .replace(queryParameters: {
-      "approve": approve.toString(),
-    });
+    // رابط جديد للبروت
+    final url = Uri.parse("$baseUrl1/appointments/cancel/approve/$appointmentId");
 
     try {
       final res = await http.post(
@@ -54,6 +49,7 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ${widget.token}',
         },
+        body: jsonEncode({"approve": approve}), // إرسال approve في body
       );
 
       if (res.statusCode == 200) {
@@ -64,23 +60,38 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              approve
-                  ? "تم الموافقة على إلغاء الحجز"
-                  : "تم رفض طلب الإلغاء",
+              approve ? "Cancellation approved" : "Cancellation rejected",
             ),
           ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("❌ خطأ في الطلب: ${res.statusCode}")),
+          SnackBar(content: Text("❌ Request error: ${res.statusCode}")),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("❌ خطأ: $e")),
+        SnackBar(content: Text("❌ Error: $e")),
       );
     }
   }
+
+  final ButtonStyle smallButtonStyle = ElevatedButton.styleFrom(
+    minimumSize: const Size(60, 30),
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    textStyle: const TextStyle(fontSize: 12),
+    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+  );
+
+
+
+
+
+
+
+
+
+
 
   Future<void> fetchAppointments() async {
     setState(() => isLoading = true);
@@ -97,7 +108,7 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
           isLoading = false;
         });
 
-        print("🚀 Appointments: $appointments"); // <-- أضف هذه السطر لتعرف اسم الحقل
+        print("🚀 Appointments: $appointments");
 
         checkAndMarkCompleted();
 
@@ -109,8 +120,6 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
     }
   }
 
-
-  // ------------------ تصفية المواعيد حسب التبويب ------------------
   List getConfirmedOrCompletedAppointments() {
     return appointments.where((app) =>
     app['status'] == 'Confirmed' || app['status'] == 'Completed').toList();
@@ -118,7 +127,7 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
 
   List getPendingOrCancelledAppointments() {
     return appointments.where((app) =>
-    app['status'] == 'Pending').toList(); // فقط المواعيد المعلقة
+    app['status'] == 'Pending').toList();
   }
 
   List getCancellationRequests() {
@@ -127,9 +136,8 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
     ).toList();
   }
 
-  // ------------------ بناء قائمة المواعيد ------------------
   Widget buildAppointmentsList(List apps) {
-    if (apps.isEmpty) return const Center(child: Text("لا يوجد مواعيد"));
+    if (apps.isEmpty) return const Center(child: Text("No appointments available"));
     return ListView.builder(
       itemCount: apps.length,
       itemBuilder: (context, index) {
@@ -140,21 +148,20 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
         DateTime? parsedDate;
         try { parsedDate = DateTime.parse(dateTimeStr); } catch (_) { parsedDate = null; }
 
-        // ------------------ تحديث الحالة بالعربي ------------------
         String displayStatus = app['status'] ?? "-";
         if (parsedDate != null && DateTime.now().isAfter(parsedDate) && app['status'] == "Confirmed") {
-          displayStatus = "انتهى الموعد";
+          displayStatus = "Completed";
           app['status'] = "Completed";
         } else if (app['status'] == "Confirmed") {
-          displayStatus = "تمت الموافقة";
+          displayStatus = "Approved";
         } else if (app['status'] == "Rejected") {
-          displayStatus = "تم الرفض";
+          displayStatus = "Rejected";
         } else if (app['status'] == "Completed") {
-          displayStatus = "تم الإنجاز";
+          displayStatus = "Completed";
         } else if (app['status'] == "Cancelled") {
-          displayStatus = "ملغى";
+          displayStatus = "Cancelled";
         } else if (app['status'] == "Pending") {
-          displayStatus = "في انتظار موافقة الدكتور";
+          displayStatus = "Pending Doctor Approval";
         }
 
         return Card(
@@ -164,73 +171,81 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("المريض: $patientName"),
-                Text('الوقت: ${parsedDate != null ? DateFormat("yyyy-MM-dd HH:mm").format(parsedDate) : "-"}'),
-                Text('الحالة: $displayStatus'),
-                if(reason != "-") Text('السبب: $reason', style: const TextStyle(color: Colors.grey)),
+                Text("Patient: $patientName"),
+                Text('Time: ${parsedDate != null ? DateFormat("yyyy-MM-dd HH:mm").format(parsedDate) : "-"}'),
+                Text('Status: $displayStatus'),
+                if(reason != "-") Text('Reason: $reason', style: const TextStyle(color: Colors.grey)),
                 const SizedBox(height: 10),
 
                 Row(
                   children: [
-                    // زر حذف الموعد المكتمل
                     if (app['status'] == 'Completed')
                       IconButton(
                         onPressed: () => deleteAppointment(app['appointment_id']),
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        tooltip: "حذف الموعد",
+                        icon: const Icon(Icons.delete, color: Colors.red, size: 20),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        tooltip: "Delete appointment",
                       ),
 
-                    // أزرار الموافقة أو الرفض للمواعيد المعلقة
                     if (app['status'] == "Pending") ...[
                       ElevatedButton(
                         onPressed: () => handleApproval(app, approve: true),
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                        child: const Text("موافقة"),
+                        style: smallButtonStyle.copyWith(
+                          backgroundColor: MaterialStateProperty.all(Colors.green),
+                        ),
+                        child: const Text("Approve"),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 6),
                       ElevatedButton(
                         onPressed: () => handleApproval(app, approve: false),
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                        child: const Text("رفض"),
+                        style: smallButtonStyle.copyWith(
+                          backgroundColor: MaterialStateProperty.all(Colors.red),
+                        ),
+                        child: const Text("Reject"),
                       ),
-                    ] else if (app['status'] == "Confirmed") ...[
+                    ]
+
+                    else if (app['status'] == "Confirmed") ...[
                       ElevatedButton(
                         onPressed: () => markCompleted(app, index),
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-                        child: const Text("تم الإنجاز"),
+                        style: smallButtonStyle.copyWith(
+                          backgroundColor: MaterialStateProperty.all(Colors.blue),
+                        ),
+                        child: const Text("Completed"),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 6),
                       ElevatedButton(
                         onPressed: () => handleApproval(app, revert: true),
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-                        child: const Text("إعادة إلى Pending"),
+                        style: smallButtonStyle.copyWith(
+                          backgroundColor: MaterialStateProperty.all(Colors.orange),
+                        ),
+                        child: const Text("Revert"),
                       ),
-                    ] else if (app['status'] == "Rejected") ...[
-                      ElevatedButton(
-                        onPressed: () => handleApproval(app, revert: true),
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-                        child: const Text("إعادة إلى Pending"),
-                      ),
-                    ],
+                    ]
 
-                    // أزرار الموافقة على طلب إلغاء الحجز
+                    else if (app['status'] == "Rejected") ...[
+                        ElevatedButton(
+                          onPressed: () => handleApproval(app, revert: true),
+                          style: smallButtonStyle.copyWith(
+                            backgroundColor: MaterialStateProperty.all(Colors.orange),
+                          ),
+                          child: const Text("Revert"),
+                        ),
+                      ],
+
                     if (app['status'] == "PendingCancellation") ...[
                       ElevatedButton(
                         onPressed: () => handleCancellation(app, approve: true),
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                        child: const Text("موافقة على الإلغاء"),
-                      ),
-                      const SizedBox(width: 10),
-                      ElevatedButton(
-                        onPressed: () => handleCancellation(app, approve: false),
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                        child: const Text("رفض الإلغاء"),
+                        style: smallButtonStyle.copyWith(
+                          backgroundColor: MaterialStateProperty.all(Colors.green),
+                        ),
+                        child: const Text("Approve Cancel"),
                       ),
                     ],
-
-
                   ],
                 ),
+
               ],
             ),
           ),
@@ -239,12 +254,13 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
     );
   }
 
-  // ------------------ الموافقة أو الرفض ------------------
   Future<void> handleApproval(Map app, {bool? approve, bool revert = false}) async {
     final appointmentId = app['appointment_id'];
+
+    // إعداد query parameters
     Map<String, String> queryParams = {};
     if (approve != null) queryParams['approve'] = approve.toString();
-    queryParams['revert'] = revert.toString();
+    queryParams['revert'] = revert.toString(); // دائمًا نرسل revert
 
     Uri url = Uri.parse("$baseUrl1/appointments/approve/$appointmentId")
         .replace(queryParameters: queryParams);
@@ -256,14 +272,16 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ${widget.token}',
         },
+        // لا ترسل body
       );
 
       if (res.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(revert
-                  ? "تمت إعادة الموعد إلى Pending"
-                  : (approve == true ? "تمت الموافقة" : "تم الرفض"))),
+            content: Text(revert
+                ? "Appointment reverted to Pending"
+                : (approve == true ? "Approved" : "Rejected")),
+          ),
         );
 
         setState(() {
@@ -277,17 +295,18 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
         });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("حدث خطأ")),
+          SnackBar(content: Text("An error occurred: ${res.statusCode}")),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("❌ خطأ: $e")),
+        SnackBar(content: Text("❌ Error: $e")),
       );
     }
   }
 
-  // ------------------ تعليم الموعد كمكتمل ------------------
+
+
   Future<void> markCompleted(Map app, int index) async {
     final appointmentId = app['appointment_id'];
     final url = Uri.parse('$completeAppointmentUrl/$appointmentId');
@@ -301,24 +320,23 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
 
       if (res.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("تم تعليم الموعد كمكتمل")),
+          const SnackBar(content: Text("Appointment marked as completed")),
         );
         setState(() {
           app['status'] = "Completed";
         });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("حدث خطأ")),
+          const SnackBar(content: Text("An error occurred")),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("❌ خطأ: $e")),
+        SnackBar(content: Text("❌ Error: $e")),
       );
     }
   }
 
-  // ------------------ حذف الموعد ------------------
   Future<void> deleteAppointment(String appointmentId) async {
     final url = Uri.parse('$baseUrl1/appointments/delete/$appointmentId');
     try {
@@ -329,17 +347,16 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
           });
 
       if (res.statusCode == 200) {
-        print("✅ تم حذف الموعد $appointmentId");
+        print("✅ Appointment deleted $appointmentId");
         fetchAppointments();
       } else {
-        print("❌ حدث خطأ أثناء حذف الموعد $appointmentId");
+        print("❌ Error deleting appointment $appointmentId");
       }
     } catch (e) {
-      print("❌ خطأ: $e");
+      print("❌ Error: $e");
     }
   }
 
-  // ------------------ تعليم المواعيد المكتملة عند انتهاء الوقت ------------------
   void checkAndMarkCompleted() {
     final now = DateTime.now();
     for (var app in appointments) {
@@ -365,9 +382,9 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
         TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(text: "Confirmed/completed"),
+            Tab(text: "Confirmed / Completed"),
             Tab(text: "Outstanding"),
-            Tab(text: "Cancellation requests"),
+            Tab(text: "Cancellation Requests"),
           ],
         ),
         Expanded(

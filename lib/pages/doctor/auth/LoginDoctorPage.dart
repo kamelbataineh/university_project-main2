@@ -5,8 +5,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:university_project/core/config/theme.dart';
 import 'package:university_project/pages/doctor/home/doctor_intro_page.dart';
+import 'package:university_project/pages/password/pass_doctor/DoctorForgotPasswordPage.dart';
 import '../../../core/config/app_config.dart';
 import '../../../core/config/app_font.dart';
+import '../home/doctor_choice_page.dart';
 import '../home/home_doctor.dart';
 import 'package:http/http.dart' as http;
 
@@ -36,6 +38,8 @@ class _LoginDoctorPageState extends State<LoginDoctorPage>
     _iconController =
         AnimationController(vsync: this, duration: Duration(seconds: 2))
           ..repeat(reverse: true);
+    _loadSavedEmail();
+
   }
 
   @override
@@ -45,6 +49,21 @@ class _LoginDoctorPageState extends State<LoginDoctorPage>
     _iconController.dispose();
     super.dispose();
   }
+
+
+  void _loadSavedEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedEmail = prefs.getString("saved_email") ?? "";
+    setState(() {
+      _email.text = savedEmail;
+    });
+  }
+
+
+
+
+
+
 
   void _loginDoctor() async {
     if (!_formKey.currentState!.validate()) return;
@@ -182,6 +201,18 @@ class _LoginDoctorPageState extends State<LoginDoctorPage>
         child: Column(
           children: [
             SizedBox(height: 20),
+
+            Row(
+        children: [
+        IconButton(
+        icon: Icon(Icons.arrow_back, color: Colors.indigo.shade400),
+        onPressed: () =>
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => DoctorChoicePage())),
+      ),]),
+            SizedBox(height: 20),
             floatingHeartIcon(),
             SizedBox(height: 16),
             Text(
@@ -258,7 +289,7 @@ class _LoginDoctorPageState extends State<LoginDoctorPage>
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (_) => ForgotPasswordPage()),
+                                  builder: (_) => Doctorforgotpasswordpage()),
                             );
                           },
                           child:Text(
@@ -299,7 +330,7 @@ class _LoginDoctorPageState extends State<LoginDoctorPage>
                       "Don't have an account? ",
                       style: AppFont.regular(
                         size: 14,
-                        color: Colors.black, // ممكن تغيّري اللون حسب التصميم
+                        color: Colors.black,
                       ),
                     ),
 

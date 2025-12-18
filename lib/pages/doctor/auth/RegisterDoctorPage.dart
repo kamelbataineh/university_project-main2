@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:open_file/open_file.dart';
@@ -30,11 +31,34 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
   final TextEditingController _password = TextEditingController();
   final TextEditingController _phoneNumber = TextEditingController();
   final TextEditingController _confirmPassword = TextEditingController();
-  bool _obscure = true;
+
   bool hasMinLength(String password) => password.length >= 8;
   bool hasNumber(String password) => RegExp(r'\d').hasMatch(password);
-  bool hasSpecialChar(String password) => RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password);
+  bool hasSpecialChar(String password) =>
+      RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password);
+
   bool _showPasswordRequirements = false;
+  bool _obscure = true;
+
+  Widget _buildPasswordRequirement(String text, bool fulfilled) {
+    return Row(
+      children: [
+        Icon(
+          fulfilled ? Icons.check_circle : Icons.cancel,
+          color: fulfilled ? Colors.green : Colors.red,
+          size: 18,
+        ),
+        const SizedBox(width: 6),
+        Text(
+          text,
+          style: AppFont.regular(
+            size: 13,
+            color: fulfilled ? Colors.green : Colors.red,
+          ),
+        ),
+      ],
+    );
+  }
 
 
   bool loading = false;
@@ -48,8 +72,8 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
   void initState() {
     super.initState();
     _iconController =
-    AnimationController(vsync: this, duration: const Duration(seconds: 4))
-      ..repeat(reverse: true);
+        AnimationController(vsync: this, duration: const Duration(seconds: 4))
+          ..repeat(reverse: true);
   }
 
   @override
@@ -65,7 +89,6 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
     if (!emailRegex.hasMatch(val)) return 'Enter a valid email';
     return null;
   }
-
 
   Future<void> pickCV() async {
     print("📌 Pick CV: Start");
@@ -128,10 +151,9 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
       request.fields['email'] = _email.text.trim();
       request.fields['first_name'] = _firstName.text.trim();
       request.fields['last_name'] = _lastName.text.trim();
-      request.fields['password'] =
-          _password.text.trim().substring(0, min(_password.text
-              .trim()
-              .length, 72));
+      request.fields['password'] = _password.text
+          .trim()
+          .substring(0, min(_password.text.trim().length, 72));
       request.fields['role'] = "doctor";
       request.fields['phone_number'] = _phoneNumber.text.trim();
 
@@ -169,12 +191,10 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
           ),
         );
 
-
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("تم إرسال OTP إلى بريدك الإلكتروني ✅")),
         );
-
-    } else {
+      } else {
         print("❌ Registration failed: ${decoded["detail"]}");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -197,31 +217,29 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
     }
   }
 
-
   void _showRoleDialog() {
     showDialog(
       context: context,
-      builder: (context) =>
-          AlertDialog(
-            title: const Text('Choose another account type'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.person),
-                  title: const Text('Patient'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => const RegisterPatientPage()),
-                    );
-                  },
-                ),
-              ],
+      builder: (context) => AlertDialog(
+        title: const Text('Choose another account type'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.person),
+              title: const Text('Patient'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const RegisterPatientPage()),
+                );
+              },
             ),
-          ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -231,7 +249,11 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
     required IconData icon,
     bool obscure = false,
     String? Function(String?)? validator,
-    Widget? suffixIcon, int? maxLength,void Function(String)? onChanged,
+    Widget? suffixIcon,
+    int? maxLength,
+    void Function(String)? onChanged,
+    TextInputType? keyboardType,
+    inputFormatters,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -261,6 +283,10 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
             controller: controller,
             obscureText: obscure,
             validator: validator,
+            keyboardType: keyboardType,
+            onChanged: onChanged,
+
+            inputFormatters: inputFormatters,
             style: TextStyle(color: AppTheme.doctorText),
             decoration: InputDecoration(
               prefixIcon: Icon(icon, color: AppTheme.doctorIcon),
@@ -268,81 +294,31 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
               suffixIcon: suffixIcon,
               hintStyle: TextStyle(color: Colors.grey),
               border: InputBorder.none,
-              errorStyle: const TextStyle(height: 0),
             ),
           ),
         ),
         Builder(
           builder: (context) {
             final errorText =
-            _showErrors ? validator?.call(controller.text) : null;
+                _showErrors ? validator?.call(controller.text) : null;
             return errorText != null
                 ? Padding(
-              padding: const EdgeInsets.only(left: 10, top: 10),
-              child: Text(
-                errorText,
-                style: const TextStyle(
-                  color: Colors.redAccent,
-                  fontSize: 13,
-                ),
-                textAlign: TextAlign.right,
-              ),
-            )
+                    padding: const EdgeInsets.only(left: 10, top: 10),
+                    child: Text(
+                      errorText,
+                      style: const TextStyle(
+                        color: Colors.redAccent,
+                        fontSize: 13,
+                      ),
+                      textAlign: TextAlign.right,
+                    ),
+                  )
                 : const SizedBox.shrink();
           },
         ),
       ],
     );
   }
-
-  //
-  // Widget floatingDoctorIcon() {
-  //   return SizedBox(
-  //     height: 150,
-  //     child: Stack(
-  //       alignment: Alignment.center,
-  //       children: [
-  //         for (int i = 0; i < 3; i++)
-  //           AnimatedBuilder(
-  //             animation: _iconController,
-  //             builder: (context, child) {
-  //               double scale = 0.8 + 0.7 * _iconController.value;
-  //               return Transform.scale(
-  //                 scale: scale,
-  //                 child: Container(
-  //                   width: 60.0 + i * 30,
-  //                   height: 60.0 + i * 30,
-  //                   decoration: BoxDecoration(
-  //                     shape: BoxShape.circle,
-  //                     border: Border.all(
-  //                         color: Colors.pink.shade200.withOpacity(0.3),
-  //                         width: 2),
-  //                   ),
-  //                 ),
-  //               );
-  //             },
-  //           ),
-  //         Container(
-  //           width: 80,
-  //           height: 80,
-  //           decoration: BoxDecoration(
-  //             shape: BoxShape.circle,
-  //             gradient: LinearGradient(
-  //                 colors: [Colors.pink.shade300, Colors.pink.shade500]),
-  //             boxShadow: [
-  //               BoxShadow(
-  //                   color: Colors.pink.shade300.withOpacity(0.6),
-  //                   blurRadius: 20,
-  //                   offset: const Offset(0, 10)),
-  //             ],
-  //           ),
-  //           child: const Icon(Icons.medical_services,
-  //               color: Colors.white, size: 40),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   Widget floatingPatientIcon() {
     return SizedBox(
@@ -359,22 +335,23 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                 height: 80,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: LinearGradient(colors: [
-                    Colors.indigo,
-                    Colors.indigo
-                  ],),
+                  gradient: LinearGradient(
+                    colors: [Colors.indigo, Colors.indigo],
+                  ),
                   boxShadow: [
-                    BoxShadow(color: Colors.indigo.shade200.withOpacity(0.5),
+                    BoxShadow(
+                        color: Colors.indigo.shade200.withOpacity(0.5),
                         blurRadius: 20,
                         offset: Offset(0, 8)),
-                    BoxShadow(color: Colors.white.withOpacity(0.5),
+                    BoxShadow(
+                        color: Colors.white.withOpacity(0.5),
                         blurRadius: 8,
                         offset: Offset(-4, -4),
                         spreadRadius: 1),
                   ],
                 ),
-                child: Icon(
-                    Icons.medical_services, color: Colors.white, size: 40),
+                child:
+                    Icon(Icons.medical_services, color: Colors.white, size: 40),
               ),
             );
           },
@@ -388,20 +365,18 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding:  EdgeInsets.all(16),
         child: Center(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start, // مهم
             children: [
-              const SizedBox(height: 40),
+              SizedBox(height: 40),
               Row(
                 children: [
                   IconButton(
                     icon: Icon(Icons.arrow_back, color: Colors.indigo.shade400),
-                    onPressed: () =>
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => DoctorChoicePage())),
+                    onPressed: () => Navigator.pushReplacement(context,
+                        MaterialPageRoute(builder: (_) => DoctorChoicePage())),
                   ),
                   Spacer(),
                   Text(
@@ -412,10 +387,9 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                       color: Colors.indigo.shade400,
                     ),
                   ),
-                  const Spacer(flex: 2),
                 ],
               ),
-              const SizedBox(height: 20),
+               SizedBox(height: 20),
               floatingPatientIcon(),
               const SizedBox(height: 20),
               Form(
@@ -427,98 +401,100 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                         hint: "First Name",
                         icon: Icons.person,
                         validator: (val) =>
-                        val!.isEmpty ? 'Enter your first name' : null),
-                     SizedBox(height: 20),
+                            val!.isEmpty ? 'Enter your first name' : null),
+                    SizedBox(height: 20),
                     neumorphicTextField(
                         controller: _lastName,
                         hint: "Last Name",
                         icon: Icons.person,
                         validator: (val) =>
-                        val!.isEmpty ? 'Enter your last name' : null),
-                     SizedBox(height: 20),
+                            val!.isEmpty ? 'Enter your last name' : null),
+                    SizedBox(height: 20),
                     neumorphicTextField(
                         controller: _email,
                         hint: "Email",
                         icon: Icons.email,
                         validator: validateEmail),
-                     SizedBox(height: 20),
+                    SizedBox(height: 20),
                     neumorphicTextField(
-                        controller: _phoneNumber,
-                        hint: "Phone Number",
-                        icon: Icons.phone,
-                        validator: (val) =>
-                        val!.isEmpty ? 'Enter phone number' : null),
-                     SizedBox(height: 20),
+                      controller: _phoneNumber,
+                      hint: "Phone Number",
+                      icon: Icons.phone,
+                      keyboardType: TextInputType.phone,
+                      maxLength: 10,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(10), // 🔒 حماية إضافية
+                      ],
+                      validator: (val) {
+                        if (val == null || val.isEmpty) {
+                          return 'Enter phone number';
+                        }
 
+                        if (val.length != 10) {
+                          return 'Phone number must be exactly 10 digits';
+                        }
 
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        neumorphicTextField(
-                          controller: _password,
-                          hint: "Password",
-                          icon: Icons.lock,
-                          obscure: _obscure,
-                          validator: (val) {
-                            if (val!.isEmpty) return 'Enter password';
-                            if (val.length > 20) return 'Password cannot exceed 20 characters';
-                            if (!hasMinLength(val)) return 'Password must be at least 8 characters';
-                            if (!hasNumber(val)) return 'Password must contain at least one number';
-                            if (!hasSpecialChar(val)) return 'Password must contain at least one special character';
-                            return null;
-                          },
-                          onChanged: (val) {
-                            setState(() {
-                              _showPasswordRequirements = val.isNotEmpty;
-                            });
-                          },
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscure ? Icons.visibility_off : Icons.visibility,
-                              color: Colors.pink.shade300,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _obscure = !_obscure;
-                              });
-                            },
-                          ),
-                          maxLength: 20,
+                        if (!val.startsWith('07')) {
+                          return 'Phone number must start with 07';
+                        }
+
+                        return null;
+                      },
+                    ),
+
+                    SizedBox(height: 20),
+                    neumorphicTextField(
+                      controller: _password,
+                      hint: "Password",
+                      icon: Icons.lock,
+                      obscure: _obscure,
+                      validator: (val) {
+                        if (val!.isEmpty) return 'Enter password';
+                        if (val.length > 20) return 'Password cannot exceed 20 characters';
+                        if (!hasMinLength(val)) return 'Password must be at least 8 characters';
+                        if (!hasNumber(val)) return 'Password must contain at least one number';
+                        if (!hasSpecialChar(val)) return 'Password must contain at least one special character';
+                        return null;
+                      },
+                      onChanged: (val) {
+                        setState(() {
+                          _showPasswordRequirements = val.isNotEmpty;
+                        });
+                      },
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscure ? Icons.visibility_off : Icons.visibility,
+                          color: Colors.indigo.shade300,
                         ),
-
-                        // 🔹 Show password requirements dynamically
-                        if (_showPasswordRequirements)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8, left: 12),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  hasMinLength(_password.text) ? "✔ At least 8 characters" : "❌ At least 8 characters",
-                                  style: TextStyle(
-                                    color: hasMinLength(_password.text) ? Colors.green : Colors.redAccent,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                Text(
-                                  hasNumber(_password.text) ? "✔ Contains number" : "❌ Contains number",
-                                  style: TextStyle(
-                                    color: hasNumber(_password.text) ? Colors.green : Colors.redAccent,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                Text(
-                                  hasSpecialChar(_password.text) ? "✔ Contains special character" : "❌ Contains special character",
-                                  style: TextStyle(
-                                    color: hasSpecialChar(_password.text) ? Colors.green : Colors.redAccent,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                        onPressed: () {
+                          setState(() {
+                            _obscure = !_obscure;
+                          });
+                        },
+                      ),
+                      maxLength: 20,
+                      inputFormatters: [
+                        LengthLimitingTextInputFormatter(20), // ← يمنع الكتابة بعد 20 حرف
                       ],
                     ),
+
+                    if (_showPasswordRequirements) ...[
+                      SizedBox(height: 8),
+                      _buildPasswordRequirement(
+                        "At least 8 characters",
+                        hasMinLength(_password.text),
+                      ),
+                      _buildPasswordRequirement(
+                        "Contains letters and numbers",
+                        _password.text.contains(RegExp(r'[A-Za-z]')) && hasNumber(_password.text),
+                      ),
+                      _buildPasswordRequirement(
+                        "Contains at least one special character",
+                        hasSpecialChar(_password.text),
+                      ),
+                      SizedBox(height: 8),
+                    ],
 
                     SizedBox(height: 20),
                     neumorphicTextField(
@@ -550,7 +526,6 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
 
                     const SizedBox(height: 20),
 
-
                     // 📎 رفع السيرة الذاتية مع عرض اسم الملف وحذف وعرضه عند الضغط
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -558,14 +533,18 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                         ElevatedButton.icon(
                           onPressed: pickCV,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppTheme.doctorElevatedButtonbackgroundColor,
+                            backgroundColor:
+                                AppTheme.doctorElevatedButtonbackgroundColor,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                             ),
                           ),
-                          icon: const Icon(Icons.upload_file, color: Colors.white),
+                          icon: const Icon(Icons.upload_file,
+                              color: Colors.white),
                           label: Text(
-                            _cvFile == null ? "Upload CV (PDF/Image)" : "Change CV",
+                            _cvFile == null
+                                ? "Upload CV (PDF/Image)"
+                                : "Change CV",
                             style: AppFont.regular(
                               size: 16,
                               color: Colors.white,
@@ -575,7 +554,8 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                         const SizedBox(height: 8),
                         if (_cvFile != null)
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 8),
                             decoration: BoxDecoration(
                               color: Colors.grey.shade200,
                               borderRadius: BorderRadius.circular(12),
@@ -594,8 +574,11 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                                       }
                                     },
                                     child: Text(
-                                      _cvFile!.path.split('/').last, // اسم الملف فقط
-                                      style: AppFont.regular(size: 14, color: Colors.black87),
+                                      _cvFile!.path
+                                          .split('/')
+                                          .last, // اسم الملف فقط
+                                      style: AppFont.regular(
+                                          size: 14, color: Colors.black87),
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
@@ -606,7 +589,8 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                                       _cvFile = null; // حذف الملف
                                     });
                                   },
-                                  child: const Icon(Icons.close, color: Colors.red),
+                                  child: const Icon(Icons.close,
+                                      color: Colors.red),
                                 ),
                               ],
                             ),
@@ -623,24 +607,22 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                           child: ElevatedButton(
                             onPressed: loading ? null : registerDoctor,
                             style: ElevatedButton.styleFrom(
-                              padding:
-                              const EdgeInsets.symmetric(vertical: 16),
-                              backgroundColor: AppTheme
-                                  .doctorElevatedButtonbackgroundColor,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              backgroundColor:
+                                  AppTheme.doctorElevatedButtonbackgroundColor,
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20)),
                             ),
                             child: loading
-                                ? CircularProgressIndicator(
-                                color: Colors.white)
+                                ? CircularProgressIndicator(color: Colors.white)
                                 : Text(
-                              'Register',
-                              style: AppFont.regular(
-                                size: 18,
-                                weight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
+                                    'Register',
+                                    style: AppFont.regular(
+                                      size: 18,
+                                      weight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
                           ),
                         ),
                       ],
@@ -655,16 +637,15 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                           "Already have an account?",
                           style: AppFont.regular(
                             size: 14,
-                            color: Colors
-                                .black, // ممكن تغيّري اللون حسب التصميم
+                            color:
+                                Colors.black, // ممكن تغيّري اللون حسب التصميم
                           ),
                         ),
                         TextButton(
-                          onPressed: () =>
-                              Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (_) => const LoginDoctorPage())),
+                          onPressed: () => Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const LoginDoctorPage())),
                           child: Text(
                             'Login',
                             style: AppFont.regular(
@@ -673,7 +654,6 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                               color: AppTheme.doctorTextBotton,
                             ),
                           ),
-
                         ),
                       ],
                     ),
