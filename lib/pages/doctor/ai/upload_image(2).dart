@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -12,38 +13,45 @@ class UploadImagePage extends StatefulWidget {
   State<UploadImagePage> createState() => _UploadImagePageState();
 }
 
-class _UploadImagePageState extends State<UploadImagePage> {
+class _UploadImagePageState extends State<UploadImagePage>
+    with SingleTickerProviderStateMixin {
   File? selectedImage;
   final ImagePicker _picker = ImagePicker();
 
+  bool isUploading = false;
+  double uploadProgress = 0;
+
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    )..repeat(reverse: true); // حركة مستمرة
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   // ================================
-  // 📌 1) اختيار صورة من الاستديو فقط
+  // 1) اختيار صورة من المعرض
   // ================================
   Future<void> pickFromGallery() async {
-    print("📌 فتح الاستديو...");
-
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image == null) return;
 
-    if (image == null) {
-      print("❌ لم يتم اختيار أي صورة");
-      return;
-    }
-
-    // تحويل الى ملف
     File file = File(image.path);
-
-    print("📌 تم اختيار صورة: ${file.path}");
-
-    // تشغيل فلتر الميموجرام
     if (!isMammogram(file)) {
-      print("❌ الصورة ليست مموجرام");
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("❌ يرجى رفع صورة ميموجرام فقط")),
+        const SnackBar(content: Text("❌ Please upload a mammogram image only")),
       );
       return;
     }
-
-    print("✅ الصورة مقبولة (ميموجرام)");
 
     setState(() {
       selectedImage = file;
@@ -51,79 +59,119 @@ class _UploadImagePageState extends State<UploadImagePage> {
   }
 
   // ================================
-  // 📌 2) فلتر يتحقق من صورة الميموجرام
+  // 2) فلتر للتحقق من صورة الميموجرام
   // ================================
   bool isMammogram(File file) {
-    final String name = file.path.toLowerCase();
-
-    // الامتدادات المسموحة
+    final name = file.path.toLowerCase();
     final allowedExtensions = ['jpg', 'jpeg', 'png', 'dcm'];
-
     final ext = name.split('.').last;
-
-    print("📌 فحص الامتداد: $ext");
-
     if (!allowedExtensions.contains(ext)) return false;
-
-    // شرط إضافي: اسم الملف يحتوي كلمات معروفة
     if (!(name.contains("mamm") ||
         name.contains("mg") ||
         name.contains("breast") ||
         name.contains("mammo"))) {
-      print("⚠️ الاسم لا يحتوي على كلمات تدل على مموجرام، لكن سنسمح بالامتداد فقط");
       return true;
     }
-
     return true;
   }
 
   // ================================
-  // 📌 3) رفع الصورة الى FastAPI
+  // 3) رفع الصورة الى FastAPI
   // ================================
   Future<Map<String, dynamic>> uploadImage(File imageFile) async {
-    print("📤 بدء رفع الصورة إلى السيرفر...");
-
     var request = http.MultipartRequest(
       'POST',
-        Uri.parse('http://10.0.2.2:8000/predict')
+      Uri.parse('http://10.0.2.2:8000/predict'),
     );
-
-    request.files.add(await http.MultipartFile.fromPath(
-      'file',
-      imageFile.path,
-    ));
-
-    print("📨 تم تجهيز الطلب… الآن سيتم الإرسال");
-
+    request.files.add(await http.MultipartFile.fromPath('file', imageFile.path));
     var response = await request.send();
-
-    print("📥 كود الاستجابة: ${response.statusCode}");
-
     if (response.statusCode == 200) {
       var respStr = await response.stream.bytesToString();
-      print("📌 الرد من السيرفر: $respStr");
       return json.decode(respStr);
     } else {
-      throw Exception("❌ فشل الرفع - كود: ${response.statusCode}");
+      throw Exception("Upload failed - status code: ${response.statusCode}");
     }
   }
 
   // ================================
-  // 📌 4) الانتقال لصفحة النتائج
+  // 4) الانتقال لصفحة النتائج
   // ================================
+  // void goToResultsPage() async {
+  //   if (selectedImage == null) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text("📌 Please select an image first")),
+  //     );
+  //     return;
+  //   }
+  //   try {
+  //     setState(() => isUploading = true);
+  //     var result = await uploadImage(selectedImage!);
+  //     setState(() => isUploading = false);
+  //
+  //     Navigator.push(
+  //       context,
+  //       MaterialPageRoute(
+  //         builder: (context) => ImageResultsPage(
+  //           imageUrl: selectedImage!.path,
+  //           imageName: selectedImage!.path.split('/').last,
+  //           onNavigate: (screen) {
+  //             if (screen == 'upload-image') Navigator.pop(context);
+  //           },
+  //           prediction: result['prediction'],
+  //           probabilities: result['probabilities'],
+  //         ),
+  //       ),
+  //     );
+  //   } catch (e) {
+  //     setState(() => isUploading = false);
+  //     ScaffoldMessenger.of(context)
+  //         .showSnackBar(SnackBar(content: Text("Upload failed: $e")));
+  //   }
+  // }
   void goToResultsPage() async {
     if (selectedImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("📌 يرجى اختيار صورة أولاً")),
+        const SnackBar(content: Text("📌 Please select an image first")),
       );
       return;
     }
 
+    setState(() {
+      isUploading = true;
+      uploadProgress = 0;
+    });
+
+    // ========================
+    // 1) محاكاة progress bar لمدة 3 ثواني
+    // ========================
+    const totalDuration = 3; // 3 ثواني
+    const tickMs = 50;
+    int ticks = (totalDuration * 1000 ~/ tickMs);
+    double increment = 100 / ticks;
+
+    Timer.periodic(Duration(milliseconds: tickMs), (timer) {
+      setState(() {
+        uploadProgress += increment;
+        if (uploadProgress >= 100) {
+          uploadProgress = 100;
+          timer.cancel();
+        }
+      });
+    });
+
+    // ========================
+    // 2) رفع الصورة فعليًا في الخلفية
+    // ========================
     try {
-      print("🚀 بدء معالجة الصورة…");
       var result = await uploadImage(selectedImage!);
 
-      print("🎉 الانتقال لصفحة النتائج…");
+      // تأكد أن الـ progress اكتمل قبل الانتقال
+      if (uploadProgress < 100) {
+        await Future.delayed(
+            Duration(milliseconds: ((100 - uploadProgress) * tickMs ~/ increment)));
+      }
+
+      setState(() => isUploading = false);
 
       Navigator.push(
         context,
@@ -140,77 +188,132 @@ class _UploadImagePageState extends State<UploadImagePage> {
         ),
       );
     } catch (e) {
-      print("❌ خطأ أثناء الرفع: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Upload failed: $e")),
-      );
+      setState(() => isUploading = false);
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("Upload failed: $e")));
     }
   }
 
+
+
+
+  void simulateUpload() {
+    setState(() {
+      isUploading = true;
+      uploadProgress = 0;
+    });
+
+    const totalDuration = 3; // 3 ثواني
+    const tick = 0.05; // تحديث كل 50ms تقريبًا
+    int ticks = (totalDuration / tick).round();
+    double increment = 100 / ticks;
+
+    Timer.periodic(const Duration(milliseconds: 50), (timer) {
+      setState(() {
+        uploadProgress += increment;
+        if (uploadProgress >= 100) {
+          uploadProgress = 100;
+          isUploading = false;
+          timer.cancel();
+        }
+      });
+    });
+  }
+
+
+
+
   // ================================
-  // 📌 5) واجهة المستخدم
+  // Animated Blob Widget
   // ================================
+  Widget animatedBlob(Color color, double size, double xOffset, double yOffset) {
+    double newSize = size * 0.7; // تصغير الحجم
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        double dx = xOffset * _controller.value;
+        double dy = yOffset * _controller.value;
+        return Transform.translate(
+          offset: Offset(dx, dy),
+          child: child,
+        );
+      },
+      child: Container(
+        width: newSize,
+        height: newSize,
+        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final double width = MediaQuery.of(context).size.width;
-
     return Scaffold(
       body: Stack(
         children: [
-          // --- الخلفية ---
+          // Background gradient
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFFFFF0F6), Color(0xFFEDE9FF), Color(0xFFE0E7FF)],
+                colors: [Color(0xFFE3F2FD), Color(0xFFC5CAE9), Color(0xFF9FA8DA)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
             ),
           ),
 
+          // Animated blobs
+          Positioned(
+              top: 50,
+              left: 30,
+              child: animatedBlob(Colors.indigo.withOpacity(0.3), 150, 30, -50)),
+          Positioned(
+              top: 150,
+              right: 20,
+              child: animatedBlob(Colors.indigo.withOpacity(0.3), 150, -30, 50)),
+          Positioned(
+              bottom: -40,
+              left: MediaQuery.of(context).size.width / 2 - 75,
+              child: animatedBlob(Colors.indigo.withOpacity(0.3), 150, 20, -30)),
+
           SafeArea(
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  // ------------------------------
-                  // الهيدر
-                  // ------------------------------
-                  Container(
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.8),
-                      border: Border(
-                        bottom: BorderSide(color: Colors.white.withOpacity(0.4)),
-                      ),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color.fromRGBO(0, 0, 0, 0.05),
-                          blurRadius: 20,
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  const SizedBox(height: 10),
+
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Stack(
+                      alignment: Alignment.center,
                       children: [
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: GestureDetector(
+                            onTap: () => Navigator.pop(context),
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.indigo.withOpacity(0.2),
+                                shape: BoxShape.circle,
+                              ),
+                              child:
+                              const Icon(Icons.arrow_back, color: Colors.indigo),
+                            ),
+                          ),
+                        ),
+
+                        // Centered title
                         Text(
-                          "📤 Upload Mammogram",
+                          "Upload Mammogram",
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                             foreground: Paint()
                               ..shader = const LinearGradient(
-                                colors: [Colors.pink, Colors.red, Colors.purple],
-                              ).createShader(
-                                  const Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
+                                colors: [Colors.indigo, Colors.blue, Colors.indigoAccent],
+                              ).createShader(const Rect.fromLTWH(0, 0, 200, 70)),
                           ),
-                        ),
-                        ElevatedButton(
-                          onPressed: () => Navigator.pop(context),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white.withOpacity(0.6),
-                          ),
-                          child: const Text("Back"),
                         ),
                       ],
                     ),
@@ -218,9 +321,7 @@ class _UploadImagePageState extends State<UploadImagePage> {
 
                   const SizedBox(height: 20),
 
-                  // ------------------------------
-                  // صورة المعاينة
-                  // ------------------------------
+                  // Image preview
                   Container(
                     height: 320,
                     margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -229,11 +330,11 @@ class _UploadImagePageState extends State<UploadImagePage> {
                       borderRadius: BorderRadius.circular(24),
                       boxShadow: const [
                         BoxShadow(
-                            color: Color.fromRGBO(163, 177, 198, 0.4),
+                            color: Color.fromRGBO(163, 177, 198, 0.2),
                             offset: Offset(20, 20),
                             blurRadius: 40),
                         BoxShadow(
-                            color: Color.fromRGBO(255, 255, 255, 0.9),
+                            color: Color.fromRGBO(255, 255, 255, 0.2),
                             offset: Offset(-20, -20),
                             blurRadius: 40),
                       ],
@@ -241,52 +342,136 @@ class _UploadImagePageState extends State<UploadImagePage> {
                     child: selectedImage != null
                         ? ClipRRect(
                       borderRadius: BorderRadius.circular(24),
-                      child: Image.file(
-                        selectedImage!,
-                        fit: BoxFit.contain,
-                      ),
+                      child: Image.file(selectedImage!, fit: BoxFit.contain),
                     )
-                        : const Center(
-                      child: Text("No Image Selected"),
-                    ),
+                        : const Center(child: Text("No Image Selected")),
                   ),
 
                   const SizedBox(height: 16),
 
-                  // ------------------------------
-                  // زر اختيار من المعرض
-                  // ------------------------------
+                  // Button: Gallery only
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: ElevatedButton.icon(
-                      onPressed: pickFromGallery,
-                      icon: const Icon(Icons.image),
-                      label: const Text("Choose from Gallery"),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16)),
-                        backgroundColor: Colors.orange,
+                    child: SizedBox(
+                      width: double.infinity, // يمتد على كامل العرض
+                      child: ElevatedButton.icon(
+                        onPressed: pickFromGallery,
+                        icon: const Icon(Icons.image, color: Colors.white), // أيقونة باللون الأبيض
+                        label: const Text(
+                          "Choose Image",
+                          style: TextStyle(color: Colors.white), // نص أبيض
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 13),
+                          backgroundColor: Colors.indigo.shade400,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
                       ),
                     ),
                   ),
 
                   const SizedBox(height: 16),
 
-                  // ------------------------------
-                  // زر الرفع
-                  // ------------------------------
+                  // Upload button + progress
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: ElevatedButton.icon(
-                      onPressed: goToResultsPage,
-                      icon: const Icon(Icons.upload),
-                      label: const Text("Upload Image"),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16)),
-                        backgroundColor: Colors.pinkAccent,
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            onPressed: (selectedImage == null || isUploading)
+                                ? null // معطل إذا ما في صورة أو أثناء التحميل
+                                : () {
+                              setState(() {
+                                isUploading = true;
+                                uploadProgress = 0;
+                              });
+                              goToResultsPage();
+                            },
+                            icon: const Icon(Icons.upload, color: Colors.white),
+                            label: Text(
+                              isUploading
+                                  ? "Uploading... ${uploadProgress.toInt()}%"
+                                  : "Upload Image",
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 13),
+                              backgroundColor: (selectedImage == null || isUploading)
+                                  ? Colors.grey // لون رمادي إذا معطل
+                                  : Colors.indigo.shade400,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                          ),
+                        ),
+
+
+                        if (isUploading)
+                          Padding(
+                            padding:  EdgeInsets.only(top: 8),
+                            child: LinearProgressIndicator(
+                              value: uploadProgress / 100,
+                              backgroundColor: Colors.grey[300],
+                              color: Colors.indigo,
+                              minHeight: 6,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+
+
+                  const SizedBox(height: 32),
+
+                  // Info Card
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(24),
+                        gradient: LinearGradient(
+                          colors: [Colors.indigo.shade100, Colors.indigo.shade200],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        border: Border.all(color: Colors.indigo.shade300),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: const BoxDecoration(
+                                color: Colors.indigo, shape: BoxShape.circle),
+                            child: const Icon(Icons.check_circle, color: Colors.white),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: const [
+                                Text("Upload Guidelines",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold, fontSize: 16)),
+                                SizedBox(height: 4),
+                                Text(
+                                  "• Supported formats: JPG, PNG, HEIC\n"
+                                      "• Maximum file size: 10MB\n"
+                                      "• Ensure good lighting and clear image quality\n"
+                                      "• AI analysis will be provided after upload",
+                                  style: TextStyle(fontSize: 14),
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
                       ),
                     ),
                   ),

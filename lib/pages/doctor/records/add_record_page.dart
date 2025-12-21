@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/config/app_font.dart';
 import '../../../services/medical_record_service.dart';
 
 class AddRecordPage extends StatefulWidget {
@@ -89,7 +90,7 @@ class _AddRecordPageState extends State<AddRecordPage> {
       appBar: AppBar(
         title: const Text("Add Medical Record"),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.indigo.shade400,
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -146,7 +147,8 @@ class _AddRecordPageState extends State<AddRecordPage> {
                   const SizedBox(height: 8),
                   input(medDoseCtrl, "Dose"),
                   addBtn(() {
-                    if (medNameCtrl.text.isNotEmpty && medDoseCtrl.text.isNotEmpty) {
+                    if (medNameCtrl.text.isNotEmpty &&
+                        medDoseCtrl.text.isNotEmpty) {
                       setState(() {
                         medications.add({
                           "name": medNameCtrl.text,
@@ -157,7 +159,9 @@ class _AddRecordPageState extends State<AddRecordPage> {
                       });
                     }
                   }),
-                  listView(medications.map((m) => "${m['name']} - ${m['dose']}").toList(),
+                  listView(medications
+                      .map((m) => "${m['name']} - ${m['dose']}")
+                      .toList(),
                           (i) => setState(() => medications.removeAt(i))),
                 ],
               ),
@@ -172,9 +176,25 @@ class _AddRecordPageState extends State<AddRecordPage> {
                   input(surgeryTypeCtrl, "Surgery Type"),
                   const SizedBox(height: 8),
                   ElevatedButton(
-                    child: Text(surgeryDate == null
-                        ? "Select Surgery Date"
-                        : surgeryDate!.toLocal().toString().split(' ')[0]),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.indigo.shade400,
+                      // لون الخلفية اللي تحبه
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 6),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(7), // حواف دائرية
+                      ),
+                      elevation: 2,
+                    ),
+                    child: Text(
+                      surgeryDate == null
+                          ? "Select Surgery Date"
+                          : surgeryDate!.toLocal().toString().split(' ')[0],
+                      style: const TextStyle(
+                        color: Colors.white, // نص باللون الأبيض
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     onPressed: () async {
                       final date = await showDatePicker(
                         context: context,
@@ -185,12 +205,28 @@ class _AddRecordPageState extends State<AddRecordPage> {
                       if (date != null) setState(() => surgeryDate = date);
                     },
                   ),
+
                   const SizedBox(height: 8),
                   ElevatedButton.icon(
-                    icon: const Icon(Icons.add),
-                    label: const Text("Add Surgery"),
+
+                    icon: const Icon(Icons.add, color: Colors.white,),
+                    label: const Text(
+                      "Add Surgery",
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.indigo.shade400,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14), // حواف دائرية
+                      ),
+                      elevation: 3,
+                    ),
                     onPressed: () {
-                      if (surgeryTypeCtrl.text.isNotEmpty && surgeryDate != null) {
+                      if (surgeryTypeCtrl.text.isNotEmpty &&
+                          surgeryDate != null) {
                         setState(() {
                           surgeries.add({
                             "type": surgeryTypeCtrl.text,
@@ -206,10 +242,12 @@ class _AddRecordPageState extends State<AddRecordPage> {
                     children: List.generate(surgeries.length, (i) {
                       final s = surgeries[i];
                       return ListTile(
-                        title: Text("${s['type']} - ${s['date'].substring(0, 10)}"),
+                        title: Text("${s['type']} - ${s['date'].substring(
+                            0, 10)}"),
                         trailing: IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => setState(() => surgeries.removeAt(i)),
+                          onPressed: () =>
+                              setState(() => surgeries.removeAt(i)),
                         ),
                       );
                     }),
@@ -264,18 +302,43 @@ class _AddRecordPageState extends State<AddRecordPage> {
             const SizedBox(height: 30),
 
             SizedBox(
-              width: double.infinity,
+              width: MediaQuery
+                  .of(context)
+                  .size
+                  .width / 2.2,
               child: ElevatedButton(
                 onPressed: isLoading ? null : saveRecord,
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  backgroundColor: Colors.indigo.shade400,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 6),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  elevation: 3,
+                  shadowColor: Colors.white,
+                  minimumSize: const Size(120, 38), // نفس حجم الأزرار الصغيرة
                 ),
                 child: isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text("Save Medical Record"),
+                    ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
+                    : Text(
+                  "Save Medical Record",
+                  style: AppFont.regular(
+                    size: 13,
+                    weight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
+
             const SizedBox(height: 100),
           ],
         ),
@@ -284,7 +347,8 @@ class _AddRecordPageState extends State<AddRecordPage> {
   }
 
   // -------- Components --------
-  Widget sectionCard({required IconData icon, required String title, required Widget child}) {
+  Widget sectionCard(
+      {required IconData icon, required String title, required Widget child}) {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 8,
@@ -297,11 +361,12 @@ class _AddRecordPageState extends State<AddRecordPage> {
             Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: Colors.pink,
-                  child: Icon(icon, color: Colors.white),
+                  backgroundColor: Colors.indigo.shade100,
+                  child: Icon(icon, color: Colors.indigo.shade400),
                 ),
                 const SizedBox(width: 12),
-                Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text(title, style: const TextStyle(
+                    fontSize: 18, fontWeight: FontWeight.bold)),
               ],
             ),
             const SizedBox(height: 16),
@@ -312,7 +377,9 @@ class _AddRecordPageState extends State<AddRecordPage> {
     );
   }
 
-  Widget sectionList({required String title, required IconData icon, required TextEditingController controller, required List<String> list, required String hint}) {
+  Widget sectionList(
+      {required String title, required IconData icon, required TextEditingController controller, required List<
+          String> list, required String hint}) {
     return sectionCard(
       icon: icon,
       title: title,
@@ -322,16 +389,30 @@ class _AddRecordPageState extends State<AddRecordPage> {
             children: [
               Expanded(child: input(controller, hint)),
               const SizedBox(width: 8),
-              addBtn(() {
-                if (controller.text.isNotEmpty) {
-                  setState(() {
-                    list.add(controller.text);
-                    controller.clear();
-                  });
-                }
-              }),
+              ElevatedButton(
+                onPressed: () {
+                  if (controller.text.isNotEmpty) {
+                    setState(() {
+                      list.add(controller.text);
+                      controller.clear();
+                    });
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.indigo.shade400,
+                  // لون الخلفية اللي تحبه
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14), // حواف دائرية
+                  ),
+                  elevation: 2,
+                ),
+                child: const Icon(Icons.add, color: Colors.white, size: 18),
+              ),
             ],
           ),
+
           listView(list, (i) => setState(() => list.removeAt(i))),
         ],
       ),
@@ -352,7 +433,8 @@ class _AddRecordPageState extends State<AddRecordPage> {
     );
   }
 
-  Widget input(TextEditingController c, String label, [TextInputType type = TextInputType.text, int max = 1]) {
+  Widget input(TextEditingController c, String label,
+      [TextInputType type = TextInputType.text, int max = 1]) {
     return TextField(
       controller: c,
       keyboardType: type,
@@ -369,10 +451,21 @@ class _AddRecordPageState extends State<AddRecordPage> {
   }
 
   Widget addBtn(VoidCallback onTap) {
-    return ElevatedButton.icon(
-      icon: const Icon(Icons.add),
-      label: const Text("Add"),
+    return ElevatedButton(
       onPressed: onTap,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.indigo.shade400,
+        // لون الخلفية
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14), // حواف مستديرة
+        ),
+        padding: const EdgeInsets.all(12),
+        // حجم الكبسة
+        elevation: 3,
+        shadowColor: Colors.white,
+        minimumSize: const Size(50, 38), // حجم الزر
+      ),
+      child: const Icon(Icons.add, size: 18, color: Colors.white),
     );
   }
 }

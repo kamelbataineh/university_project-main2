@@ -9,6 +9,7 @@ import '../../../core/config/app_config.dart';
 import '../../../core/config/app_font.dart';
 import '../../auth/LandingPage.dart';
 import '../ai/upload_image(2).dart';
+import '../ai/upload_page(1).dart';
 import '../appointments/doctor_appointments_page.dart';
 import '../profile/profile_doctor.dart';
 import '../../../core/config/theme.dart';
@@ -68,7 +69,7 @@ class _HomeDoctorPageState extends State<HomeDoctorPage>
     return [
       _buildDashboard(),
       ChatsListPage(userId: widget.userId, token: widget.token),
-      UploadImagePage(),
+      UploadPage(),
       DoctorAppointmentsPage(token: widget.token, userId: widget.userId),
       ProfileDoctorPage(token: widget.token),
     ];
@@ -180,7 +181,7 @@ class _HomeDoctorPageState extends State<HomeDoctorPage>
                     ? 'Upload Image'
                     : _selectedIndex == 3
                         ? 'Appointments'
-                        : 'Profile'),
+                        : 'Profile',style: TextStyle(color: Colors.white),),
         centerTitle: true,
         backgroundColor: AppTheme.doctorElevatedButtonbackgroundColor,
         actions: [

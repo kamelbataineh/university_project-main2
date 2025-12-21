@@ -204,7 +204,7 @@ class _EditDoctorProfilePageState extends State<EditDoctorProfilePage> {
             title: Text(label),
             subtitle: Text(widget.doctorData[field]?.toString() ?? 'Not added'),
             trailing: IconButton(
-              icon: Icon(Icons.edit_outlined, color: Colors.blue),
+              icon: Icon(Icons.edit_outlined, color: Colors.indigo.shade400),
               onPressed: () => _toggleEdit(field),
             ),
           ),
@@ -269,7 +269,7 @@ class _EditDoctorProfilePageState extends State<EditDoctorProfilePage> {
             title: Text(label),
             subtitle: Text(widget.doctorData[field]?.toString() ?? 'Not added'),
             trailing: IconButton(
-              icon: Icon(Icons.edit_outlined, color: Colors.blue),
+              icon: Icon(Icons.edit_outlined, color: Colors.indigo.shade400),
               onPressed: () => _toggleEdit(field),
             ),
           ),
@@ -321,7 +321,7 @@ class _EditDoctorProfilePageState extends State<EditDoctorProfilePage> {
                   subtitle:
                       Text(widget.doctorData[field]?.toString() ?? 'Not added'),
                   trailing: IconButton(
-                    icon: Icon(Icons.edit_outlined, color: Colors.blue),
+                    icon: Icon(Icons.edit_outlined, color: Colors.indigo.shade400),
                     onPressed: () => _toggleEdit(field),
                   ),
                 ),
@@ -355,7 +355,7 @@ class _EditDoctorProfilePageState extends State<EditDoctorProfilePage> {
                 subtitle:
                     Text(widget.doctorData[field]?.toString() ?? 'Not added'),
                 trailing: IconButton(
-                  icon: Icon(Icons.edit_outlined, color: Colors.blue),
+                  icon: Icon(Icons.edit_outlined, color: Colors.indigo.shade400),
                   onPressed: () => _toggleEdit(field),
                 ),
               ),
@@ -389,7 +389,7 @@ class _EditDoctorProfilePageState extends State<EditDoctorProfilePage> {
                     child: CircleAvatar(
                       radius: 15,
                       backgroundColor: Colors.white,
-                      child: Icon(Icons.edit, size: 18, color: Colors.blue),
+                      child: Icon(Icons.edit, size: 18, color: Colors.indigo.shade400),
                     ),
                   ),
                 )
@@ -412,8 +412,8 @@ class _EditDoctorProfilePageState extends State<EditDoctorProfilePage> {
               elevation: 3,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               child: ListTile(
-                title: const Text("Change Password"),
-                trailing: const Icon(Icons.lock_outline, color: Colors.blue),
+                title:  Text("Change Password"),
+                trailing:  Icon(Icons.lock_outline, color: Colors.indigo.shade400),
                 onTap: () async {
                   final email = widget.doctorData['email'];
 
@@ -460,6 +460,7 @@ class _EditDoctorProfilePageState extends State<EditDoctorProfilePage> {
                 },
               ),
             )
+,            SizedBox(height: 70),
 
           ],
         ),

@@ -69,36 +69,38 @@ class _DoctorIntroPageState extends State<DoctorIntroPage> {
             ),
              SizedBox(height: 20),
 
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              child: _currentPage == introPages.length - 1
-                  ? ElevatedButton(
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const RegisterDoctorPage()));
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            AppTheme.doctorElevatedButtonbackgroundColor,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20)),
-                        minimumSize: const Size(double.infinity, 50),
-                      ),
-                      child: Text(
-                        "Register Now",
-                        style: AppFont.regular(
-                          size: 18,
-                          color: Colors.white,
-                          weight: FontWeight.bold,
-                        ),
-                      ),
-                    )
-                  : const SizedBox(),
+      Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: _currentPage == introPages.length - 1
+              ? ElevatedButton(
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const RegisterDoctorPage()),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.doctorElevatedButtonbackgroundColor,
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              minimumSize: const Size(140, 40),
             ),
-          ],
+            child: Text(
+              "Register Now",
+              style: AppFont.regular(
+                size: 13,
+                color: Colors.white,
+                weight: FontWeight.bold,
+              ),
+            ),
+          )
+              : SizedBox.shrink(),
+        ),
+      ),
+              ],
         ),
       ),
     );

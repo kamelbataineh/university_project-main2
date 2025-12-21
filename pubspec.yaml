@@ -49,6 +49,7 @@ dependencies:
   pdfx: ^2.6.0
   tflite_flutter: ^0.12.1
   open_file: ^3.5.10
+  marquee: ^2.3.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

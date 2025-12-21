@@ -307,25 +307,38 @@ class _LoginDoctorPageState extends State<LoginDoctorPage>
                   ),
                   SizedBox(height: 16),
                   SizedBox(
-                    width: double.infinity,
-                    height: 50,
+                    width: MediaQuery.of(context).size.width / 2.2,
+                    height: 38,
                     child: ElevatedButton(
                       onPressed: loading ? null : _loginDoctor,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            AppTheme.doctorElevatedButtonbackgroundColor,
+                        backgroundColor: AppTheme.doctorElevatedButtonbackgroundColor,
+                        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20)),
+                          borderRadius: BorderRadius.circular(14), // متناسق مع الأزرار الأخرى
+                        ),
+                        minimumSize: const Size(120, 38),
                       ),
                       child: loading
-                          ? CircularProgressIndicator(color: Colors.white)
-                          : Text('Sign In',
-                              style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white)),
+                          ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                          : Text(
+                        'Sign In',
+                        style: AppFont.regular(
+                          size: 13,
+                          weight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
+
                   SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,

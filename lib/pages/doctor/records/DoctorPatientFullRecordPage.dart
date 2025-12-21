@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../../../core/config/app_config.dart';
 import 'package:intl/intl.dart';
-
+import 'package:marquee/marquee.dart';
+import '../../../core/config/app_font.dart';
 import 'EditRecordPage.dart';
 
 class DoctorPatientFullRecordPage extends StatefulWidget {
@@ -177,7 +178,7 @@ class _DoctorPatientFullRecordPageState
           .map(
             (e) => Chip(
           label: Text(e),
-          backgroundColor: Colors.purple.shade50,
+          backgroundColor: Colors.indigo.shade50,
         ),
       )
           .toList(),
@@ -204,8 +205,8 @@ class _DoctorPatientFullRecordPageState
             Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: Colors.purple.shade100,
-                  child: Icon(icon, color: Colors.purple),
+                  backgroundColor: Colors.indigo.shade100,
+                  child: Icon(icon, color: Colors.indigo.shade400),
                 ),
                 const SizedBox(width: 12),
                 Text(title,
@@ -226,10 +227,29 @@ class _DoctorPatientFullRecordPageState
     final data = record?['data'] ?? {};
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Medical Record - $patientName"),
-        backgroundColor: Colors.purple,
+      appBar:AppBar(
+        backgroundColor: Colors.indigo.shade400,
         centerTitle: true,
+        title: SizedBox(
+          height: 25,
+          child: Marquee(
+            text: "Medical Record - $patientName",
+            style: const TextStyle(
+              fontSize: 16, // 🟢 تصغير حجم الخط
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+            scrollAxis: Axis.horizontal,
+            blankSpace: 20,
+            velocity: 30, // 🟢 سرعة الحركة
+            pauseAfterRound: const Duration(seconds: 1),
+            startPadding: 10,
+            accelerationDuration: const Duration(seconds: 1),
+            accelerationCurve: Curves.linear,
+            decelerationDuration: const Duration(seconds: 1),
+            decelerationCurve: Curves.easeOut,
+          ),
+        ),
       ),
       body: loading
           ?  Center(child: CircularProgressIndicator())
@@ -298,22 +318,28 @@ class _DoctorPatientFullRecordPageState
             ),
             SizedBox(height: 20,),
             ElevatedButton.icon(
-              icon: const Icon(Icons.edit),
-              label: const Text(
+              icon: const Icon(Icons.edit, color: Colors.white, size: 18),
+              label: Text(
                 "Modification of the medical record",
-                style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold),
+                style: AppFont.regular(
+                  size: 13,
+                  weight: FontWeight.w600,
+                  color: Colors.white,
+                ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                padding:
-                const EdgeInsets.symmetric(vertical: 15),
+                backgroundColor: Colors.indigo.shade400,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                elevation: 3,
+                shadowColor: Colors.white,
+                minimumSize: const Size(120, 38), // نفس حجم الأزرار الصغيرة
               ),
               onPressed: () {
                 final rawId = record!['_id'];
-                final recordId =
-                rawId is Map ? rawId['\$oid'] : rawId.toString();
+                final recordId = rawId is Map ? rawId['\$oid'] : rawId.toString();
 
                 Navigator.push(
                   context,
@@ -327,6 +353,8 @@ class _DoctorPatientFullRecordPageState
                 );
               },
             ),
+
+            SizedBox(height: 50,)
           ],
         ),
       ),

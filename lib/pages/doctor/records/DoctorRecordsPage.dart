@@ -119,9 +119,16 @@ class _DoctorRecordsPageState extends State<DoctorRecordsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("My Records"),
-        backgroundColor: Colors.indigo,
+        centerTitle: true,
+        title: const Text("My Records"
+        ,
+          style: TextStyle(
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: Colors.indigo.shade400,
       ),
+
       body: loading
           ? const Center(child: CircularProgressIndicator())
           : records.isEmpty

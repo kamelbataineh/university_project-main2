@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import '../../../core/config/app_font.dart';
 import '../../../services/medical_record_service.dart';
 
 class EditRecordPage extends StatefulWidget {
@@ -190,8 +191,8 @@ class _EditRecordPageState extends State<EditRecordPage> {
             Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: Colors.purple,
-                  child: Icon(icon, color: Colors.white),
+                  backgroundColor: Colors.indigo.shade100,
+                  child: Icon(icon, color: Colors.indigo.shade400),
                 ),
                 const SizedBox(width: 12),
                 Text(title,
@@ -215,11 +216,24 @@ class _EditRecordPageState extends State<EditRecordPage> {
     return Row(
       children: [
         Expanded(
-            child: TextField(controller: controller, decoration: field(hint))),
+          child: TextField(
+            controller: controller,
+            decoration: field(hint),
+          ),
+        ),
         const SizedBox(width: 10),
-        ElevatedButton(onPressed: onAdd, child: const Text("Add")),
+        ElevatedButton(
+          onPressed: onAdd,
+          child: const Text("+", style: TextStyle(fontSize: 18 ,color: Colors.white)),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.indigo.shade400,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          ),
+        ),
       ],
     );
+
   }
 
   Widget removableList(List<String> items, Function(int) onDelete) {
@@ -259,8 +273,8 @@ class _EditRecordPageState extends State<EditRecordPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Edit Medical Record"),
-        backgroundColor: Colors.purple,
+        title:  Text("Edit Medical Record",style: TextStyle(color: Colors.white),),
+        backgroundColor: Colors.indigo.shade400,
         centerTitle: true,
       ),
       body: loading
@@ -349,6 +363,7 @@ class _EditRecordPageState extends State<EditRecordPage> {
                         ],
                       ),
                     ),
+                     SizedBox(height: 8),
 
                     // ===== Medications =====
                     sectionCard(
@@ -359,10 +374,12 @@ class _EditRecordPageState extends State<EditRecordPage> {
                           TextField(
                               controller: medNameCtrl,
                               decoration: field("Medication Name")),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 15),
                           TextField(
                               controller: medDoseCtrl,
                               decoration: field("Dose")),
+                          const SizedBox(height: 15),
+
                           ElevatedButton(
                             onPressed: () {
                               if (medNameCtrl.text.isNotEmpty &&
@@ -377,7 +394,17 @@ class _EditRecordPageState extends State<EditRecordPage> {
                                 });
                               }
                             },
-                            child: const Text("Add Medication"),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.indigo.shade400,
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              elevation: 3,
+                              shadowColor: Colors.white,
+                              minimumSize:  Size(50, 38),
+                            ),
+                            child:  Text("Add Medication",style: TextStyle(color: Colors.white),),
                           ),
                           removableMapList(
                               medications,
@@ -393,46 +420,67 @@ class _EditRecordPageState extends State<EditRecordPage> {
                       Column(
                         children: [
                           TextField(
-                              controller: surgeryTypeCtrl,
-                              decoration: field("Surgery Type")),
+                            controller: surgeryTypeCtrl,
+                            decoration: field("Surgery Type"),
+                          ),
                           const SizedBox(height: 8),
                           ElevatedButton(
-                            child: Text(surgeryDate == null
-                                ? "Select Surgery Date"
-                                : DateFormat('yyyy/MM/dd')
-                                    .format(surgeryDate!)),
-                            // الشكل الجديد
                             onPressed: () async {
                               final date = await showDatePicker(
-                                  context: context,
-                                  initialDate: DateTime.now(),
-                                  firstDate: DateTime(1900),
-                                  lastDate: DateTime.now());
-                              if (date != null)
-                                setState(() => surgeryDate = date);
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime(1900),
+                                lastDate: DateTime.now(),
+                              );
+                              if (date != null) setState(() => surgeryDate = date);
                             },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.indigo.shade400, // لون الخلفية الجديد
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14), // حواف مستديرة
+                              ),
+                              minimumSize: const Size(150, 38), // الحجم الجديد
+                            ),
+                            child: Text(
+                              surgeryDate == null
+                                  ? "Select Surgery Date"
+                                  : DateFormat('yyyy/MM/dd').format(surgeryDate!),
+                              style: const TextStyle(fontSize: 14, color: Colors.white),
+                            ),
                           ),
+                          const SizedBox(height: 8),
                           ElevatedButton(
                             onPressed: () {
-                              if (surgeryTypeCtrl.text.isNotEmpty &&
-                                  surgeryDate != null) {
+                              if (surgeryTypeCtrl.text.isNotEmpty && surgeryDate != null) {
                                 setState(() {
                                   surgeries.add({
                                     "type": surgeryTypeCtrl.text,
-                                    "date": DateFormat('yyyy-MM-dd')
-                                        .format(surgeryDate!), // استخدم - بدل /
+                                    "date": DateFormat('yyyy-MM-dd').format(surgeryDate!),
                                   });
                                   surgeryTypeCtrl.clear();
                                   surgeryDate = null;
                                 });
                               }
                             },
-                            child: const Text("Add Surgery"),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.indigo.shade400, // لون الخلفية الجديد
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              minimumSize: const Size(150, 38),
+                            ),
+                            child: const Text(
+                              "Add Surgery",
+                              style: TextStyle(fontSize: 14, color: Colors.white),
+                            ),
                           ),
                           removableMapList(
-                              surgeries,
-                              (i) => setState(() => surgeries.removeAt(i)),
-                              "Surgery"),
+                            surgeries,
+                                (i) => setState(() => surgeries.removeAt(i)),
+                            "Surgery",
+                          ),
                         ],
                       ),
                     ),
@@ -508,16 +556,39 @@ class _EditRecordPageState extends State<EditRecordPage> {
                     ),
 
                     const SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
+
+                ElevatedButton(
                         onPressed: loading ? null : updateRecord,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.indigo.shade400,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          elevation: 3,
+                          shadowColor: Colors.white,
+                          minimumSize: const Size(120, 38), // نفس حجم الأزرار الصغيرة
+                        ),
                         child: loading
-                            ? const CircularProgressIndicator(
-                                color: Colors.white)
-                            : const Text("Update Medical Record"),
+                            ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                            : Text(
+                          "Update Medical Record",
+                          style: AppFont.regular(
+                            size: 13,
+                            weight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
-                    ),
+                    SizedBox(height: 50),
+
                   ],
                 ),
               ),

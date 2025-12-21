@@ -19,16 +19,16 @@ class UploadPage extends StatelessWidget {
         ),
         child: Center(
           child: Container(
-            padding: const EdgeInsets.all(24),
-            margin: const EdgeInsets.symmetric(horizontal: 24),
+            padding: const EdgeInsets.all(16),
+            margin: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.9),
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
                   color: Colors.purple.withOpacity(0.2),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
+                  blurRadius: 16,
+                  offset: const Offset(0, 8),
                 ),
               ],
             ),
@@ -36,52 +36,53 @@ class UploadPage extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: const BoxDecoration(
+                  padding:  EdgeInsets.all(16),
+                  decoration:  BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: LinearGradient(
-                      colors: [Colors.orange, Colors.deepOrange],
+                      colors: [Colors.indigo, Colors.indigo.shade300],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                   ),
-                  child: const Icon(Icons.upload, color: Colors.white, size: 40),
+                  child:  Icon(Icons.upload, color: Colors.white, size: 32),
                 ),
-                const SizedBox(height: 16),
-                const Text(
+                 SizedBox(height: 12),
+                 Text(
                   "Upload Medical Images",
                   style: TextStyle(
-                    color: Colors.orange,
-                    fontSize: 20,
+                    color: Colors.indigo.shade400,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 const Text(
-                  "Upload X-rays, CT scans, MRI images, or other medical imaging for AI-powered analysis",
+                  "Upload X-rays, CT scans, MRI, or other medical imaging for AI-powered analysis",
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.black54, fontSize: 14),
+                  style: TextStyle(color: Colors.black54, fontSize: 12),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => UploadImagePage()
+                          builder: (context) => UploadImagePage()
                       ),
-                    );                  },
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                    backgroundColor: Colors.indigo.shade400,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    elevation: 8,
+                    elevation: 6,
                   ),
-                  child: const Text(
+                  child:  Text(
                     "Start Upload",
-                    style: TextStyle(fontSize: 16),
+                    style: TextStyle(fontSize: 14,color: Colors.white),
                   ),
                 ),
               ],

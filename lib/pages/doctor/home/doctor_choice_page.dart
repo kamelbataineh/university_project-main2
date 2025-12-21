@@ -94,7 +94,7 @@ class _DoctorChoicePageState extends State<DoctorChoicePage>
               ),
               SizedBox(height: 32),
               Text(
-                "Welcome to MediCare",
+                "Welcome to Pink Scan",
                 style: AppFont.regular(
                   size: 28,
                   weight: FontWeight.bold,
@@ -104,61 +104,68 @@ class _DoctorChoicePageState extends State<DoctorChoicePage>
               ),
 
                SizedBox(height: 40),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushReplacement(
+              Center(
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width / 2.2,
+                  height: 38,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(
-                            builder: (_) =>  LoginDoctorPage()));
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.doctorElevatedButtonbackgroundColor,
-                    padding:  EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20)),
-                    minimumSize:  Size(double.infinity, 50),
-                  ),
-                  child: Text(
-                  "Login",
-                  style: AppFont.regular(
-                    size: 18,
-                    color: Colors.white,
-                    weight: FontWeight.bold,
+                        MaterialPageRoute(builder: (_) => DoctorIntroPage()),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.doctorElevatedButtonbackgroundColor,
+                      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      minimumSize: const Size(120, 38),
+                    ),
+                    child: Text(
+                    "Login",
+                      style: AppFont.regular(
+                        size: 13,
+                        color: Colors.white,
+                        weight: FontWeight.w400,
+                      ),
                   ),
                 ),
-              ),
+                ),
               ),
                SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushReplacement(
+              Center(
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width / 2.2,
+                  height: 38,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(
-                            builder: (_) =>  DoctorIntroPage()));
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.indigo.shade200,
-                    padding:  EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20)),
-                    minimumSize:  Size(double.infinity, 50),
-                  ),
-                  child:Text(
-                    "Register",
-                    style: AppFont.regular(
-                      size: 18,
-                      color: Colors.white,
-                      weight: FontWeight.w400,
+                        MaterialPageRoute(builder: (_) => DoctorIntroPage()),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.doctorElevatedButtonbackgroundColor,
+                      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      minimumSize: const Size(120, 38),
+                    ),
+                    child: Text(
+                      "Register",
+                      style: AppFont.regular(
+                        size: 13,
+                        color: Colors.white,
+                        weight: FontWeight.w400,
+                      ),
                     ),
                   ),
-                )
                 ),
+              ),
+
             ],
           ),
         ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import '../../../core/config/app_font.dart';
 import '../auth/EditDoctorProfilePage.dart';
 import '../auth/LoginDoctorPage.dart';
 
@@ -77,7 +78,7 @@ class _ProfileDoctorPageState extends State<ProfileDoctorPage> {
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: ListTile(
-        leading: Icon(icon, color: Colors.blue),
+        leading: Icon(icon, color: Colors.indigo.shade400),
         title: Text(title),
         subtitle: value != null && value.isNotEmpty
             ? Text(value)
@@ -85,7 +86,7 @@ class _ProfileDoctorPageState extends State<ProfileDoctorPage> {
         // تعديل هنا:
         trailing: (value == null || value.isEmpty)
             ? IconButton(
-          icon: Icon(Icons.add, color: Colors.blue),
+          icon: Icon(Icons.add, color: Colors.indigo.shade400),
           onPressed: onEdit,
         )
             : null, // إذا موجود القيمة، لا يظهر أي زر
@@ -99,7 +100,7 @@ class _ProfileDoctorPageState extends State<ProfileDoctorPage> {
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: ListTile(
-        leading: Icon(icon, color: Colors.blue),
+        leading: Icon(icon, color: Colors.indigo.shade400),
         title: Text(title),
         subtitle: Text(subtitle),
       ),
@@ -128,7 +129,7 @@ class _ProfileDoctorPageState extends State<ProfileDoctorPage> {
                       ? NetworkImage("${baseUrl}${doctorData!['profile_image_url']}")
                       : null,
                   child: doctorData!['profile_image_url'] == null
-                      ? Icon(Icons.person_outline, size: 70, color: Colors.blue)
+                      ? Icon(Icons.person_outline, size: 70, color: Colors.indigo.shade400)
                       : null,
                 ),
                 Positioned(
@@ -147,7 +148,7 @@ class _ProfileDoctorPageState extends State<ProfileDoctorPage> {
                     child: CircleAvatar(
                       radius: 15,
                       backgroundColor: Colors.white,
-                      child: Icon(Icons.edit, size: 18, color: Colors.blue),
+                      child: Icon(Icons.edit, size: 18, color: Colors.indigo.shade400),
                     ),
                   ),
                 ),
@@ -247,32 +248,39 @@ class _ProfileDoctorPageState extends State<ProfileDoctorPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                // زر Edit Profile
                 ElevatedButton.icon(
                   onPressed: () {
                     Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => EditDoctorProfilePage(
-                              doctorData: doctorData!,
-                              token: widget.token,
-                            )));
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => EditDoctorProfilePage(
+                          doctorData: doctorData!,
+                          token: widget.token,
+                        ),
+                      ),
+                    );
                   },
-                  icon: Icon(Icons.edit_outlined, color: Colors.white, size: 20),
+                  icon: const Icon(Icons.edit_outlined, color: Colors.white, size: 18),
                   label: Text(
                     'Edit Profile',
-                    style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                    style: AppFont.regular(
+                      size: 13, // حجم الخط متناسق مع باقي الأزرار الصغيرة
+                      weight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue.shade600,
-                    padding: EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                    backgroundColor: Colors.indigo.shade400,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25), // حواف دائرية كبيرة
+                      borderRadius: BorderRadius.circular(14), // حواف دائرية متناسقة
                     ),
-                    elevation: 5, // ظل خفيف
-                    shadowColor: Colors.blue.shade200,
+                    elevation: 3,
+                    shadowColor: Colors.indigo.shade200,
+                    minimumSize: const Size(120, 38), // نفس حجم الأزرار الصغيرة
                   ),
                 ),
+
 
                 ElevatedButton.icon(
                   onPressed: () {
@@ -280,44 +288,47 @@ class _ProfileDoctorPageState extends State<ProfileDoctorPage> {
                     showDialog(
                       context: context,
                       builder: (context) => AlertDialog(
-                        title: Text("Logout"),
-                        content: Text("Are you sure you want to logout?"),
+                        title: const Text("Logout"),
+                        content: const Text("Are you sure you want to logout?"),
                         actions: [
                           TextButton(
                             onPressed: () {
                               Navigator.of(context).pop(); // إغلاق النافذة بدون Logout
                             },
-                            child: Text("No"),
+                            child: const Text("No"),
                           ),
                           TextButton(
                             onPressed: () async {
                               await logout(widget.token);
-
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(builder: (_) => const LoginDoctorPage()),
                               );
                             },
-                            child: Text("Yes"),
+                            child: const Text("Yes"),
                           ),
-
                         ],
                       ),
                     );
                   },
-                  icon: Icon(Icons.logout, color: Colors.white, size: 20),
+                  icon: const Icon(Icons.logout, color: Colors.white, size: 18),
                   label: Text(
                     'Logout',
-                    style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                    style: AppFont.regular(
+                      size: 13,
+                      weight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red.shade400,
-                    padding: EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
+                      borderRadius: BorderRadius.circular(14),
                     ),
-                    elevation: 5,
-                    shadowColor: Colors.red.shade200,
+                    elevation: 3,
+                    shadowColor: Colors.white,
+                    minimumSize: const Size(120, 38), // نفس حجم الأزرار الصغيرة
                   ),
                 ),
 

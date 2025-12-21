@@ -176,7 +176,6 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
         String cvUrl = decoded["cv_url"] ?? "No CV URL returned";
         print("✅ Registration successful, CV URL: $cvUrl");
 
-        // 🎯 الانتقال مباشرة إلى صفحة التحقق من OTP
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -268,7 +267,7 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.indigo.shade100.withOpacity(0.6),
+                color: Colors.indigo.shade200.withOpacity(0.6),
                 offset: const Offset(6, 6),
                 blurRadius: 12,
               ),
@@ -289,10 +288,10 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
             inputFormatters: inputFormatters,
             style: TextStyle(color: AppTheme.doctorText),
             decoration: InputDecoration(
-              prefixIcon: Icon(icon, color: AppTheme.doctorIcon),
+              prefixIcon: Icon(icon, color: Colors.indigo.shade300),
               hintText: hint,
               suffixIcon: suffixIcon,
-              hintStyle: TextStyle(color: Colors.grey),
+              hintStyle: TextStyle(color: Colors.grey.shade600),
               border: InputBorder.none,
             ),
           ),
@@ -322,7 +321,7 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
 
   Widget floatingPatientIcon() {
     return SizedBox(
-      height: 120,
+      height: 130,
       child: Center(
         child: AnimatedBuilder(
           animation: _iconController,
@@ -371,14 +370,17 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
             crossAxisAlignment: CrossAxisAlignment.start, // مهم
             children: [
               SizedBox(height: 40),
-              Row(
+              Stack(
+                alignment: Alignment.center,
                 children: [
-                  IconButton(
-                    icon: Icon(Icons.arrow_back, color: Colors.indigo.shade400),
-                    onPressed: () => Navigator.pushReplacement(context,
-                        MaterialPageRoute(builder: (_) => DoctorChoicePage())),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: IconButton(
+                      icon: Icon(Icons.arrow_back, color: Colors.indigo.shade400),
+                      onPressed: () => Navigator.pushReplacement(
+                          context, MaterialPageRoute(builder: (_) => DoctorChoicePage())),
+                    ),
                   ),
-                  Spacer(),
                   Text(
                     'Doctor Registration',
                     style: AppFont.regular(
@@ -389,7 +391,8 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                   ),
                 ],
               ),
-               SizedBox(height: 20),
+
+              SizedBox(height: 20),
               floatingPatientIcon(),
               const SizedBox(height: 20),
               Form(
@@ -514,7 +517,7 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscure ? Icons.visibility_off : Icons.visibility,
-                          color: Colors.indigo.shade200,
+                          color: Colors.indigo.shade300,
                         ),
                         onPressed: () {
                           setState(() {
@@ -524,38 +527,36 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                       ),
                     ),
 
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20),
 
-                    // 📎 رفع السيرة الذاتية مع عرض اسم الملف وحذف وعرضه عند الضغط
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ElevatedButton.icon(
-                          onPressed: pickCV,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                AppTheme.doctorElevatedButtonbackgroundColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
+                        SizedBox(
+                          height: 38, // نفس ارتفاع الأزرار الصغيرة
+                          child: ElevatedButton.icon(
+                            onPressed: pickCV,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.doctorElevatedButtonbackgroundColor,
+                              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14), // متناسق مع الأزرار الأخرى
+                              ),
                             ),
-                          ),
-                          icon: const Icon(Icons.upload_file,
-                              color: Colors.white),
-                          label: Text(
-                            _cvFile == null
-                                ? "Upload CV (PDF/Image)"
-                                : "Change CV",
-                            style: AppFont.regular(
-                              size: 16,
-                              color: Colors.white,
+                            icon: const Icon(Icons.upload_file, color: Colors.white, size: 18),
+                            label: Text(
+                              _cvFile == null ? "Upload CV (PDF/Image)" : "Change CV",
+                              style: AppFont.regular(
+                                size: 13, // حجم الخط صغير ومتناسق
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                         ),
                         const SizedBox(height: 8),
                         if (_cvFile != null)
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                             decoration: BoxDecoration(
                               color: Colors.grey.shade200,
                               borderRadius: BorderRadius.circular(12),
@@ -566,19 +567,14 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                                 Expanded(
                                   child: GestureDetector(
                                     onTap: () async {
-                                      // فتح الملف باستخدام تطبيق افتراضي
                                       if (_cvFile != null) {
                                         final path = _cvFile!.path;
-                                        // تستخدم package مثل open_file
                                         await OpenFile.open(path);
                                       }
                                     },
                                     child: Text(
-                                      _cvFile!.path
-                                          .split('/')
-                                          .last, // اسم الملف فقط
-                                      style: AppFont.regular(
-                                          size: 14, color: Colors.black87),
+                                      _cvFile!.path.split('/').last,
+                                      style: AppFont.regular(size: 14, color: Colors.black87),
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
@@ -586,11 +582,10 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                                 GestureDetector(
                                   onTap: () {
                                     setState(() {
-                                      _cvFile = null; // حذف الملف
+                                      _cvFile = null;
                                     });
                                   },
-                                  child: const Icon(Icons.close,
-                                      color: Colors.red),
+                                  child: const Icon(Icons.close, color: Colors.red),
                                 ),
                               ],
                             ),
@@ -600,36 +595,43 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
 
                     const SizedBox(height: 20),
 
-                    // زر التسجيل
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: loading ? null : registerDoctor,
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              backgroundColor:
-                                  AppTheme.doctorElevatedButtonbackgroundColor,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20)),
+                    Center(
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width / 2.2,
+                        height: 38,
+                        child: ElevatedButton(
+                          onPressed: loading ? null : registerDoctor,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.doctorElevatedButtonbackgroundColor,
+                            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
                             ),
-                            child: loading
-                                ? CircularProgressIndicator(color: Colors.white)
-                                : Text(
-                                    'Register',
-                                    style: AppFont.regular(
-                                      size: 18,
-                                      weight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
+                            minimumSize: const Size(120, 38),
+                          ),
+                          child: loading
+                              ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                              : Text(
+                            'Register',
+                            style: AppFont.regular(
+                              size: 13,
+                              weight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
-                      ],
+                      ),
                     ),
-                    const SizedBox(height: 16),
 
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 20),
+
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -655,8 +657,10 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                             ),
                           ),
                         ),
+
                       ],
                     ),
+                         SizedBox(height: 46),
                   ],
                 ),
               ),
