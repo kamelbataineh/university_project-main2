@@ -67,14 +67,13 @@ class _BookAppointmentPageDoctorState extends State<BookAppointmentPageDoctor> {
   }
 
 
-  // جلب الأوقات المتاحة
   Future<void> fetchAvailableTimes() async {
     if (selectedDate == null) return;
 
     final dateStr =
-        "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(
-        2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}";
+        "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2,'0')}-${selectedDate!.day.toString().padLeft(2,'0')}";
     try {
+      // جلب كل الأوقات المتاحة
       final response = await http.get(
         Uri.parse('$availableSlotsUrl/${widget.doctorId}?date=$dateStr'),
         headers: {'Authorization': 'Bearer ${widget.token}'},
@@ -82,8 +81,28 @@ class _BookAppointmentPageDoctorState extends State<BookAppointmentPageDoctor> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+
+        // جلب المواعيد المحجوزة لنفس اليوم
+        final bookedResponse = await http.get(
+          Uri.parse(myAppointmentsUrl + "?doctor_id=${widget.doctorId}&date=$dateStr"),
+          headers: {'Authorization': 'Bearer ${widget.token}'},
+        );
+
+        final bookedData = bookedResponse.statusCode == 200
+            ? jsonDecode(bookedResponse.body)
+            : [];
+
+        // فلترة الأوقات المحجوزة
+        List<String> bookedTimes = [];
+        for (var appt in bookedData) {
+          final dt = DateTime.parse(appt['date_time']);
+          bookedTimes.add("${dt.hour.toString().padLeft(2,'0')}:${dt.minute.toString().padLeft(2,'0')}");
+        }
+
         setState(() {
-          availableTimes = List<String>.from(data);
+          availableTimes = List<String>.from(data)
+              .where((time) => !bookedTimes.contains(time))
+              .toList();
         });
       } else {
         print("❌ Failed to fetch slots: ${response.body}");
@@ -94,30 +113,21 @@ class _BookAppointmentPageDoctorState extends State<BookAppointmentPageDoctor> {
   }
 
   Future<void> bookAppointment() async {
-    // تحقق من وجود موعد مسبق
-    final existingAppointmentsResponse = await http.get(
-      Uri.parse(myAppointmentsUrl),
-      headers: {"Authorization": "Bearer ${widget.token}"},
-    );
-
-    final existingAppointments = existingAppointmentsResponse.statusCode == 200
-        ? json.decode(existingAppointmentsResponse.body)
-        : [];
-
-    if (existingAppointments.isNotEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("You already have an appointment booked."),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
-      return; // يمنع الحجز
-    }
-
-    // متابعة الحجز
+    // تحقق من اختيار التاريخ والوقت
     if (selectedDate == null || selectedTime == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please select date and time")),
+      );
+      return;
+    }
+
+    // تحقق أن الوقت لا يزال متاح
+    if (!availableTimes.contains(selectedTime)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("This time is already booked, please select another time."),
+          backgroundColor: Colors.redAccent,
+        ),
       );
       return;
     }
@@ -130,7 +140,28 @@ class _BookAppointmentPageDoctorState extends State<BookAppointmentPageDoctor> {
       int.parse(selectedTime!.split(":")[1]),
     );
 
+    // تحقق من وجود موعد مسبق للمريض
     try {
+      final existingAppointmentsResponse = await http.get(
+        Uri.parse(myAppointmentsUrl),
+        headers: {"Authorization": "Bearer ${widget.token}"},
+      );
+
+      final existingAppointments = existingAppointmentsResponse.statusCode == 200
+          ? json.decode(existingAppointmentsResponse.body)
+          : [];
+
+      if (existingAppointments.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("You already have an appointment booked."),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+        return; // يمنع الحجز
+      }
+
+      // متابعة الحجز
       final response = await http.post(
         Uri.parse(bookAppointmentUrl),
         headers: {
@@ -149,9 +180,8 @@ class _BookAppointmentPageDoctorState extends State<BookAppointmentPageDoctor> {
           const SnackBar(content: Text("Appointment booked successfully 🌸")),
         );
         setState(() {
-          selectedDate = null;
+          availableTimes.remove(selectedTime); // إزالة الوقت المحجوز
           selectedTime = null;
-          availableTimes = [];
           reasonController.clear();
         });
       } else {
@@ -198,8 +228,8 @@ class _BookAppointmentPageDoctorState extends State<BookAppointmentPageDoctor> {
         title: Text(
           "Book Appointment",
           style: AppFont.regular(
-            size: 20,
-            weight: FontWeight.w600,
+            size: 18,
+            weight: FontWeight.bold,
             color: Colors.black87,
           ),
         ),
@@ -212,7 +242,7 @@ class _BookAppointmentPageDoctorState extends State<BookAppointmentPageDoctor> {
         padding: const EdgeInsets.all(16),
         child: ListView(
           children: [
-            // 🩺 Card لاسم الدكتور
+            const SizedBox(height: 20),
             neumorphicCard(
               child: Row(
                 children: [
@@ -307,47 +337,50 @@ class _BookAppointmentPageDoctorState extends State<BookAppointmentPageDoctor> {
               ),
             ),
             const SizedBox(height: 30),
-            // ✅ زر تأكيد الحجز
-            GestureDetector(
-              onTap: bookAppointment,
-              child: Container(
-                height: 58,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppTheme.patientElevatedButtonbackgroundColor.withOpacity(
-                          0.9),
-                      AppTheme.patientElevatedButtonbackgroundColor
+            Center(
+              child: GestureDetector(
+                onTap: bookAppointment,
+                child: Container(
+                  height: 48,
+                  width: MediaQuery.of(context).size.width / 2.2,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppTheme.patientElevatedButtonbackgroundColor.withOpacity(0.9),
+                        AppTheme.patientElevatedButtonbackgroundColor,
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.pinkAccent.withOpacity(0.35),
+                        offset: const Offset(0, 4),
+                        blurRadius: 10,
+                      ),
+                      BoxShadow(
+                        color: Colors.white.withOpacity(0.18),
+                        offset: const Offset(-2, -2),
+                        blurRadius: 5,
+                        spreadRadius: 1,
+                      ),
                     ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
                   ),
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.pinkAccent.withOpacity(0.4),
-                      offset: const Offset(0, 6),
-                      blurRadius: 12,
+                  alignment: Alignment.center,
+                  child: Text(
+                    "Confirm Booking",
+                    style: AppFont.regular(
+                      size: 14,
+                      weight: FontWeight.w600,
+                      color: Colors.white,
                     ),
-                    BoxShadow(
-                      color: Colors.white.withOpacity(0.2),
-                      offset: const Offset(-2, -2),
-                      blurRadius: 6,
-                      spreadRadius: 1,
-                    ),
-                  ],
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  "Confirm Booking",
-                  style: AppFont.regular(
-                    size: 18,
-                    weight: FontWeight.w600,
-                    color: Colors.white,
                   ),
                 ),
               ),
             ),
+            const SizedBox(height: 80),
+
           ],
         ),
       ),

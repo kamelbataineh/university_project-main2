@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:marquee/marquee.dart';
 import '../auth/FullScreenImagePage.dart';
 import '../doctor/records/DoctorPatientFullRecordPage.dart';
 import '../doctor/records/EditRecordPage.dart';
@@ -105,7 +106,7 @@ class _ChatPatientProfileState extends State<ChatPatientProfile> {
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: ListTile(
-        leading: Icon(icon, color: Colors.pink),
+        leading: Icon(icon, color: Colors.indigo.shade400),
         title: Text(title),
         subtitle: Text(value != null && value.isNotEmpty ? value : 'Not added'),
       ),
@@ -118,7 +119,7 @@ class _ChatPatientProfileState extends State<ChatPatientProfile> {
       return Scaffold(
         appBar: AppBar(
           title: const Text("Loading..."),
-          backgroundColor: Colors.pink,
+          backgroundColor: Colors.indigo.shade400,
           centerTitle: true,
         ),
         body: const Center(child: CircularProgressIndicator()),
@@ -129,7 +130,7 @@ class _ChatPatientProfileState extends State<ChatPatientProfile> {
       return Scaffold(
         appBar: AppBar(
           title: const Text("Patient Profile"),
-          backgroundColor: Colors.pink,
+          backgroundColor: Colors.indigo.shade400,
           centerTitle: true,
         ),
         body: const Center(child: Text("Patient not found")),
@@ -148,10 +149,32 @@ class _ChatPatientProfileState extends State<ChatPatientProfile> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(fullName.isNotEmpty ? fullName : "Patient Profile"),
-        backgroundColor: Colors.pink,
+        backgroundColor: Colors.indigo.shade400,
         centerTitle: true,
+        title: SizedBox(
+          height: 25,
+          child: Marquee(
+            text: fullName.isNotEmpty
+                ? "Patient $fullName"
+                : "Patient Profile",
+            style: const TextStyle(
+              fontSize: 16,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+            scrollAxis: Axis.horizontal,
+            blankSpace: 50, // المسافة الفارغة بعد النص
+            velocity: 30,   // سرعة التحرك
+            pauseAfterRound: const Duration(seconds: 1),
+            startPadding: 10,
+            accelerationDuration: const Duration(seconds: 1),
+            accelerationCurve: Curves.linear,
+            decelerationDuration: const Duration(seconds: 1),
+            decelerationCurve: Curves.easeOut,
+          ),
+        ),
       ),
+
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(15),
         child: Column(
@@ -187,7 +210,7 @@ class _ChatPatientProfileState extends State<ChatPatientProfile> {
                       ),
                     )
                   : const Icon(Icons.person_outline,
-                      size: 70, color: Colors.pink),
+                      size: 70, color: Colors.indigo),
             ),
 
             const SizedBox(height: 20),
@@ -204,13 +227,26 @@ class _ChatPatientProfileState extends State<ChatPatientProfile> {
 
             const SizedBox(height: 20),
             SizedBox(
-              width: double.infinity,
+              height: 38,
               child: ElevatedButton.icon(
-                icon:  Icon(Icons.medical_services,color: Colors.white,),
-                label:  Text("Patient records",style:TextStyle(color: Colors.white,fontWeight:FontWeight.bold), ),
+                icon: const Icon(Icons.medical_services, color: Colors.white),
+                label: const Text(
+                  "Patient Records",
+                  style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
+                ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.pinkAccent,
-                  padding:  EdgeInsets.symmetric(vertical: 15),
+                  backgroundColor: Colors.indigo.shade400,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  elevation: 3,
+                  shadowColor: Colors.white,
+                  minimumSize: const Size(0, 38),
                 ),
                 onPressed: () {
                   if (patient != null) {
@@ -218,69 +254,97 @@ class _ChatPatientProfileState extends State<ChatPatientProfile> {
                       context,
                       MaterialPageRoute(
                         builder: (_) => DoctorPatientFullRecordPage(
-                            token: widget.token,
-                            patientId: patientId,
-                            patientName: fullName),
+                          token: widget.token,
+                          patientId: patientId,
+                          patientName: fullName,
+                        ),
                       ),
                     );
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content:
-                            Text("❌ المريض غير موجود، لا يمكن عرض السجلات"),
+                        content: Text("❌ Patient not found, cannot display records"),
                       ),
                     );
                   }
                 },
               ),
             ),
-        SizedBox(height: 20,),
+
+            SizedBox(height: 20,),
             SizedBox(
-              width: double.infinity,
+              height: 38,
               child: loadingRecord
-                  ? Center(child: CircularProgressIndicator())
+                  ? const Center(child: CircularProgressIndicator())
                   : recordExists && recordId != null
-                      ? ElevatedButton.icon(
-                          icon:  Icon(Icons.edit ),
-                label:  Text("Modification of the medical record",style:TextStyle(color: Colors.white,fontWeight:FontWeight.bold), ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange,
-                            padding:  EdgeInsets.symmetric(vertical: 15),
-                          ),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => EditRecordPage(
-                                  token: widget.token,
-                                  patientId: patientId,
-                                  recordId: recordId!,
-                                ),
-                              ),
-                            );
-                          },
-                        )
-                      : ElevatedButton.icon(
-                          icon: const Icon(Icons.medical_services,color: Colors.white,),
-                          label:  Text("Add a medical record",style:TextStyle(color: Colors.white,fontWeight:FontWeight.bold), ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.pinkAccent,
-                            padding: const EdgeInsets.symmetric(vertical: 15),
-                          ),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => AddRecordPage(
-                                  token: widget.token,
-                                  patientId: patientId,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
+                  ? ElevatedButton.icon(
+                icon: const Icon(Icons.edit, size: 18, color: Colors.white),
+                label: const Text(
+                  "Modification of the medical record",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.indigo.shade400,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  elevation: 3,
+                  shadowColor: Colors.white,
+                  minimumSize: const Size(0, 38), // العرض ديناميكي حسب النص
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => EditRecordPage(
+                        token: widget.token,
+                        patientId: patientId,
+                        recordId: recordId!,
+                      ),
+                    ),
+                  );
+                },
+              )
+                  : ElevatedButton.icon(
+                icon: const Icon(Icons.medical_services, size: 18, color: Colors.white),
+                label: const Text(
+                  "Add a medical record",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.indigo.shade400,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  elevation: 3,
+                  shadowColor: Colors.white,
+                  minimumSize: const Size(0, 38), // العرض ديناميكي حسب النص
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => AddRecordPage(
+                        token: widget.token,
+                        patientId: patientId,
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
-            SizedBox(height: 100,),
+            const SizedBox(height: 100),
+
 
           ],
         ),

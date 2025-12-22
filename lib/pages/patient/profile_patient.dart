@@ -92,14 +92,14 @@ class _ProfilePatientPageState extends State<ProfilePatientPage> {
                     },
                     child: CircleAvatar(
                       radius: 55,
-                      backgroundColor: Colors.blue.shade100,
+                      backgroundColor: Colors.pinkAccent.shade100,
                       backgroundImage: patientData!['profile_image_url'] != null
                           ? NetworkImage("${baseUrl}${patientData!['profile_image_url']}?t=${DateTime.now().millisecondsSinceEpoch}")
                           : null,
 
                       child: (patientData!['profile_image_url'] == null ||
                           patientData!['profile_image_url'].isEmpty)
-                          ? const Icon(Icons.person_outline, size: 70, color: Colors.blue)
+                          ? const Icon(Icons.person_outline, size: 70, color: Color(0xFFE91E63))
                           : null,
                     ),
                   )
@@ -118,7 +118,7 @@ class _ProfilePatientPageState extends State<ProfilePatientPage> {
                       child: CircleAvatar(
                         radius: 15,
                         backgroundColor: Colors.white,
-                        child: Icon(Icons.edit, size: 18, color: Colors.blue),
+                        child: Icon(Icons.edit, size: 18, color: Colors.pinkAccent.shade200),
                       ),
                     ),
                   ),
@@ -148,6 +148,33 @@ class _ProfilePatientPageState extends State<ProfilePatientPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
+
+
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => EditPatientProfilePage(patientData: patientData!, token: widget.token),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.pinkAccent.shade200,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      elevation: 3,
+                      shadowColor: Colors.white,
+                      minimumSize:  Size(120, 38), // نفس حجم الأزرار الصغيرة
+                    ),
+                    label:  Text('Edit', style: TextStyle(color: Colors.white, fontSize: 16)),
+                    icon:  Icon(Icons.edit, color: Colors.white),
+                  ),
+
+
+
                   ElevatedButton.icon(
                     onPressed: () async {
                       // عرض نافذة التأكيد
@@ -193,31 +220,21 @@ class _ProfilePatientPageState extends State<ProfilePatientPage> {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.patientAppbar,
-                      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      backgroundColor: Colors.red.shade400,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      elevation: 3,
+                      shadowColor: Colors.white,
+                      minimumSize: const Size(120, 38), // نفس حجم الأزرار الصغيرة
                     ),
                     icon: const Icon(Icons.logout, color: Colors.white),
                     label: const Text('Logout', style: TextStyle(color: Colors.white, fontSize: 16)),
                   ),
 
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => EditPatientProfilePage(patientData: patientData!, token: widget.token),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.patientAppbar,
-                      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                    ),
-                    icon: const Icon(Icons.edit, color: Colors.white),
-                    label: const Text('Edit', style: TextStyle(color: Colors.white, fontSize: 16)),
-                  ),
+
+
                 ],
               ),
               const SizedBox(height: 30),

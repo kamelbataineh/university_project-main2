@@ -9,6 +9,7 @@ import '../../core/config/app_font.dart';
 import '../../core/config/theme.dart';
 import '../patient/home_patient.dart';
 import '../password/pass_patient/PatientForgotPasswordPage.dart';
+import 'LandingPage.dart';
 import 'RegisterPatientPage.dart';
 
 class PatientLoginPage extends StatefulWidget {
@@ -153,7 +154,7 @@ class _PatientLoginPageState extends State<PatientLoginPage>
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(20),
           gradient: LinearGradient(
               colors: [Colors.white, Colors.pink.shade50.withOpacity(0.3)]),
           boxShadow: [
@@ -227,11 +228,30 @@ class _PatientLoginPageState extends State<PatientLoginPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: Column(
           children: [
+            SizedBox(height: 20),
+            Align(
+            alignment: Alignment.centerLeft,
+            child: IconButton(
+              icon: const Icon(
+                Icons.arrow_back,
+                color: Colors.pinkAccent,
+                size: 22,
+              ),
+              onPressed: () {
+
+                 Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => LandingPage()));
+                      },
+            ),
+          ),
+
             SizedBox(height: 20),
             floatingHeartIcon(),
             SizedBox(height: 16),
@@ -258,106 +278,114 @@ class _PatientLoginPageState extends State<PatientLoginPage>
             ),
 
             SizedBox(height: 24),
-            Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  neumorphicTextField(
-                      controller: _email,
-                      hint: 'Email',
-                      icon: Icons.email_outlined,
-                      validator: (val) =>
-                          val!.isEmpty ? 'Please enter your email' : null),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  neumorphicTextField(
-                    controller: _password,
-                    hint: "Password",
-                    icon: Icons.lock,
-                    obscure: _obscure,
-                    validator: (val) => val!.isEmpty ? 'Enter password' : null,
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscure ? Icons.visibility_off : Icons.visibility,
-                        color: Colors.pink.shade300,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscure = !_obscure;
-                        });
-                      },
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    neumorphicTextField(
+                        controller: _email,
+                        hint: 'Email',
+                        icon: Icons.email_outlined,
+                        validator: (val) =>
+                            val!.isEmpty ? 'Please enter your email' : null),
+                    SizedBox(
+                      height: 20,
                     ),
-                  ),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          // Checkbox(
-                          //   value: rememberMe,
-                          //   onChanged: (val) =>
-                          //       setState(() => rememberMe = val ?? false),
-                          //   activeColor: Colors.pink.shade200,
-                          // ),
-                          // Text('Remember me',
-                          //     style: TextStyle(color: Colors.grey.shade700)),
-                        ],
+                    neumorphicTextField(
+                      controller: _password,
+                      hint: "Password",
+                      icon: Icons.lock,
+                      obscure: _obscure,
+                      validator: (val) => val!.isEmpty ? 'Enter password' : null,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscure ? Icons.visibility_off : Icons.visibility,
+                          color: Colors.pink.shade300,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscure = !_obscure;
+                          });
+                        },
                       ),
-                      TextButton(
-                          onPressed: () {
-                            Navigator.push(
+                    ),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            // Checkbox(
+                            //   value: rememberMe,
+                            //   onChanged: (val) =>
+                            //       setState(() => rememberMe = val ?? false),
+                            //   activeColor: Colors.pink.shade200,
+                            // ),
+                            // Text('Remember me',
+                            //     style: TextStyle(color: Colors.grey.shade700)),
+                          ],
+                        ),
+                        TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => ForgotPasswordPage()),
+                              );
+                            },
+                            child: Text('Forgot Password?',
+                                style: TextStyle(
+                                    color: AppTheme.patientTextBotton))),
+                      ],
+                    ),
+                    SizedBox(height: 16),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width / 2.2,
+                      height: 38,
+                      child: ElevatedButton(
+                        onPressed: loading ? null : _login,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                          AppTheme.patientElevatedButtonbackgroundColor,
+                          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14), // متناسق مع الأزرار الأخرى
+                          ),
+                          minimumSize: const Size(120, 38),
+                        ),
+                        child: loading
+                            ? CircularProgressIndicator(color: Colors.white)
+                            : Text('Sign In',
+                                style: AppFont.regular(
+                          size: 14,
+                          weight: FontWeight.bold,
+                          color: Colors.white,
+                        ),  ),),
+                    ),
+                    SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("Don't have an account? "),
+                        TextButton(
+                          onPressed: () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (_) => ForgotPasswordPage()),
-                            );
-                          },
-                          child: Text('Forgot Password?',
-                              style: TextStyle(
-                                  color: AppTheme.patientTextBotton))),
-                    ],
-                  ),
-                  SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: loading ? null : _login,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            AppTheme.patientElevatedButtonbackgroundColor,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20)),
-                      ),
-                      child: loading
-                          ? CircularProgressIndicator(color: Colors.white)
-                          : Text('Sign In',
-                              style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.patientElevatedButtonText)),
+                                  builder: (_) => RegisterPatientPage())),
+                          child: Text('Register',
+                              style:
+                                  TextStyle(color: AppTheme.patientTextBotton)),
+                        ),
+                      ],
                     ),
-                  ),
-                  SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("Don't have an account? "),
-                      TextButton(
-                        onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => RegisterPatientPage())),
-                        child: Text('Register',
-                            style:
-                                TextStyle(color: AppTheme.patientTextBotton)),
-                      ),
-                    ],
-                  ),
-                ],
+            SizedBox(height: 80),
+                  ],
+                ),
               ),
             ),
+
           ],
         ),
       ),

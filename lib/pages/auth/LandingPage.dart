@@ -9,6 +9,7 @@ import 'package:university_project/pages/doctor/home/doctor_choice_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/config/app_font.dart';
+import '../../core/config/theme.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
@@ -108,7 +109,7 @@ class _LandingPageState extends State<LandingPage>
           style: AppFont.regular(
             size: 28,
             weight: FontWeight.w600,
-            color: Colors.pink,
+            color: AppTheme.patientAppbar,
           ),
         ),
         SizedBox(height: 16),
@@ -141,7 +142,7 @@ class _LandingPageState extends State<LandingPage>
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
-                    colors: [Colors.pink.shade200, Colors.pinkAccent.shade200],
+                    colors: [Colors.pink.shade100, Colors.pinkAccent.shade100],
                   ),
                   boxShadow: [
                     BoxShadow(
@@ -270,8 +271,8 @@ class _LandingPageState extends State<LandingPage>
                                 "Access healthcare services, manage health records, and connect with professionals",
                             icon: Icons.person,
                             gradient: [
-                              Colors.pink.shade200,
-                              Colors.pinkAccent.shade200,
+                              Colors.pinkAccent.shade100,
+                              Colors.pinkAccent.shade100,
                             ],
 
                             onCreate: () => Navigator.pushReplacement(
@@ -368,17 +369,17 @@ class _LandingPageState extends State<LandingPage>
                               mode: LaunchMode.externalApplication,
                             );
                           },
-                          icon: const Icon(
+                          icon:  Icon(
                             Icons.support_agent,
                             size: 18,
-                            color: Colors.pink,
+                            color: Colors.pinkAccent.shade200,
                           ),
                           label: Text(
                             'Contact Technical Support',
                             style: AppFont.regular(
                               size: 13,
                               weight: FontWeight.w600,
-                              color: Colors.pink,
+                              color: Colors.pinkAccent.shade200,
                             ),
                           ),
                         ),
@@ -511,7 +512,7 @@ class _LandingPageState extends State<LandingPage>
               OutlinedButton(
                 onPressed: onLogin,
                 style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: gradient[0].withOpacity(0.7)),
+                  side: BorderSide(color:Colors.pinkAccent.shade100.withOpacity(0.7)),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20)),
                   backgroundColor: Colors.white.withOpacity(0.8),
@@ -521,7 +522,7 @@ class _LandingPageState extends State<LandingPage>
                   style: AppFont.regular(
                     size: 13,
                     weight: FontWeight.w600,
-                    color: gradient[0],
+                    color: Colors.pinkAccent.shade100,
                   ),
                 ),
               ),

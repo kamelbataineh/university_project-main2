@@ -278,6 +278,8 @@ class _EditPatientProfilePageState extends State<EditPatientProfilePage> {
 
               ),
             ),
+             SizedBox(height: 80),
+
           ],
         ),
       ),

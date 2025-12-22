@@ -246,9 +246,9 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
       children: [
         Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(20),
             gradient: LinearGradient(
-                colors: [Colors.white, Colors.pink.shade100.withOpacity(0.3)]),
+                colors: [Colors.white, Colors.pink.shade50.withOpacity(0.3)]),
             boxShadow: [
               BoxShadow(
                   color: Colors.pink.shade100.withOpacity(0.9),
@@ -359,61 +359,105 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
               SizedBox(height: 20),
               floatingPatientIcon(),
               SizedBox(height: 20),
-              Form(
-                key: _formKey,
-                child: Column(
-                  children: [
+              Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      neumorphicTextField(
+                        controller: _firstName,
+                        hint: "First Name",
+                        icon: Icons.person,
+                        validator: (val) =>
+                        val!.isEmpty ? 'Enter your first name' : null,
+                      ),
+                      SizedBox(height: 20),
+                      neumorphicTextField(
+                        controller: _lastName,
+                        hint: "Last Name",
+                        icon: Icons.person,
+                        validator: (val) =>
+                        val!.isEmpty ? 'Enter your last name' : null,
+                      ),
+                      SizedBox(height: 20),
+                      neumorphicTextField(
+                        controller: _email,
+                        hint: "Email",
+                        icon: Icons.email,
+                        validator: validateEmail,
+                      ),
+                      SizedBox(height: 20),
+                      neumorphicTextField(
+                        controller: _phoneNumber,
+                        hint: "Phone Number",
+                        icon: Icons.phone,
+                        validator: (val) =>
+                        val!.isEmpty ? 'Enter phone number' : null,
+                        maxLength: 15,
+                        isNumberOnly: true,
+                      ),
+                      SizedBox(height: 20),
+                      neumorphicTextField(
+                        controller: _password,
+                        hint: "Password",
+                        icon: Icons.lock,
+                        obscure: _obscure,
+                        validator: (val) {
+                          if (val!.isEmpty) return 'Enter password';
+                          if (val.length > 20) return 'Password cannot exceed 20 characters';
+                          if (!hasMinLength(val)) return 'Password must be at least 8 characters';
+                          if (!hasNumber(val)) return 'Password must contain at least one number';
+                          if (!hasSpecialChar(val)) return 'Password must contain at least one special character';
+                          return null;
+                        },
+                        onChanged: (val) {
+                          setState(() {
+                            _showPasswordRequirements = val.isNotEmpty;
+                          });
+                        },
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscure ? Icons.visibility_off : Icons.visibility,
+                            color: Colors.pink.shade300,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscure = !_obscure;
+                            });
+                          },
+                        ),
+                        maxLength: 20,
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(height: 8),
+                          if (_showPasswordRequirements) ...[
+                            _buildPasswordRequirement(
+                              "At least 8 characters",
+                              hasMinLength(_password.text),
+                            ),
+                            _buildPasswordRequirement(
+                              "Contains letters and numbers",
+                              _password.text.contains(RegExp(r'[A-Za-z]')) && hasNumber(_password.text),
+                            ),
+                            _buildPasswordRequirement(
+                              "Contains at least one special character",
+                              hasSpecialChar(_password.text),
+                            ),
+                            SizedBox(height: 2),
+                          ],
+                        ],
+                      ),
+
+                      SizedBox(height: 12),
                     neumorphicTextField(
-                      controller: _firstName,
-                      hint: "First Name",
-                      icon: Icons.person,
-                      validator: (val) =>
-                      val!.isEmpty ? 'Enter your first name' : null,
-                    ),
-                    SizedBox(height: 20),
-                    neumorphicTextField(
-                      controller: _lastName,
-                      hint: "Last Name",
-                      icon: Icons.person,
-                      validator: (val) =>
-                      val!.isEmpty ? 'Enter your last name' : null,
-                    ),
-                    SizedBox(height: 20),
-                    neumorphicTextField(
-                      controller: _email,
-                      hint: "Email",
-                      icon: Icons.email,
-                      validator: validateEmail,
-                    ),
-                    SizedBox(height: 20),
-                    neumorphicTextField(
-                      controller: _phoneNumber,
-                      hint: "Phone Number",
-                      icon: Icons.phone,
-                      validator: (val) =>
-                      val!.isEmpty ? 'Enter phone number' : null,
-                      maxLength: 15,
-                      isNumberOnly: true, // ← هنا الرقم فقط
-                    ),
-                    SizedBox(height: 20),
-                    neumorphicTextField(
-                      controller: _password,
-                      hint: "Password",
+                      controller: _confirmPassword,
+                      hint: "Confirm Password",
                       icon: Icons.lock,
                       obscure: _obscure,
-                      validator: (val) {
-                        if (val!.isEmpty) return 'Enter password';
-                        if (val.length > 20) return 'Password cannot exceed 20 characters';
-                        if (!hasMinLength(val)) return 'Password must be at least 8 characters';
-                        if (!hasNumber(val)) return 'Password must contain at least one number';
-                        if (!hasSpecialChar(val)) return 'Password must contain at least one special character';
-                        return null;
-                      },
-                      onChanged: (val) {
-                        setState(() {
-                          _showPasswordRequirements = val.isNotEmpty;
-                        });
-                      },
+                      validator: validateConfirmPassword,
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscure ? Icons.visibility_off : Icons.visibility,
@@ -427,110 +471,71 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
                       ),
                       maxLength: 20,
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(height: 8),
-                        if (_showPasswordRequirements) ...[
-                          _buildPasswordRequirement(
-                            "At least 8 characters",
-                            hasMinLength(_password.text),
+                      SizedBox(height: 30),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width / 2.2,
+                        height: 38,
+                        child: ElevatedButton(
+                          onPressed: loading ? null : sendOtpAndGoToVerification,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                AppTheme.patientElevatedButtonbackgroundColor,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20)),
                           ),
-                          _buildPasswordRequirement(
-                            "Contains letters and numbers",
-                            _password.text.contains(RegExp(r'[A-Za-z]')) && hasNumber(_password.text),
-                          ),
-                          _buildPasswordRequirement(
-                            "Contains at least one special character",
-                            hasSpecialChar(_password.text),
-                          ),
-                          SizedBox(height: 2),
-                        ],
-                      ],
-                    ),
-
-                    SizedBox(height: 12),
-                  neumorphicTextField(
-                    controller: _confirmPassword,
-                    hint: "Confirm Password",
-                    icon: Icons.lock,
-                    obscure: _obscure,
-                    validator: validateConfirmPassword,
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscure ? Icons.visibility_off : Icons.visibility,
-                        color: Colors.pink.shade300,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscure = !_obscure;
-                        });
-                      },
-                    ),
-                    maxLength: 20,
-                  ),
-                    SizedBox(height: 30),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: loading ? null : sendOtpAndGoToVerification,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              AppTheme.patientElevatedButtonbackgroundColor,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20)),
+                          child: loading
+                              ? CircularProgressIndicator(color: Colors.white)
+                              : Text(
+                                  'Register',
+                                  style: AppFont.regular(
+                                    size: 14,
+                                    weight: FontWeight.w600,
+                                    color: AppTheme.patientElevatedButtonText,
+                                  ),
+                                ),
                         ),
-                        child: loading
-                            ? CircularProgressIndicator(color: Colors.white)
-                            : Text(
-                                'Register',
-                                style: AppFont.regular(
-                                  size: 18,
-                                  weight: FontWeight.w600,
-                                  color: AppTheme.patientElevatedButtonText,
+                      ),
+
+                      SizedBox(height: 22),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Already have an account?",
+                            style: AppFont.regular(
+                              size: 14,
+                              color: Colors.black, // ممكن تغيّري اللون حسب التصميم
+                            ),
+                          ),
+
+                          TextButton(
+                            onPressed: () =>Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => PatientLoginPage(
                                 ),
                               ),
-                      ),
-                    ),
 
-                    SizedBox(height: 22),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Already have an account?",
-                          style: AppFont.regular(
-                            size: 14,
-                            color: Colors.black, // ممكن تغيّري اللون حسب التصميم
-                          ),
-                        ),
-
-                        TextButton(
-                          onPressed: () =>Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => PatientLoginPage(
+                              ),
+                            child: Text(
+                              'Login',
+                              style: AppFont.regular(
+                                color: AppTheme.patientTextBotton,
+                                size: 14,
+                                weight: FontWeight.bold// ممكن تحددي الحجم حسب التصميم
                               ),
                             ),
 
-                            ),
-                          child: Text(
-                            'Login',
-                            style: AppFont.regular(
-                              color: AppTheme.patientTextBotton,
-                              size: 14,
-                              weight: FontWeight.bold// ممكن تحددي الحجم حسب التصميم
-                            ),
                           ),
-
-                        ),
-                        SizedBox(height: 22),
-                      ],
-                    ),
-                  ],
+                          SizedBox(height: 10),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
+              SizedBox(height: 50),
+
             ],
           ),
         ),

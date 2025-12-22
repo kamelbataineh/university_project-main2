@@ -256,10 +256,10 @@ class _HomePatientPageState extends State<HomePatientPage>
               icon,
               size: 26,
               color: isSelected
-                  ? const Color(0xFFE91E63)   // وردي طبي أنثوي
+                  ?  Color(0xFFE91E63)   // وردي طبي أنثوي
                   : Colors.grey.shade500,
             ),
-            const SizedBox(height: 5),
+             SizedBox(height: 5),
             Text(
               label,
               overflow: TextOverflow.ellipsis,
@@ -267,7 +267,7 @@ class _HomePatientPageState extends State<HomePatientPage>
                 fontSize: 12,
                 letterSpacing: 0.3,
                 color: isSelected
-                    ? const Color(0xFFE91E63)
+                    ?  Color(0xFFE91E63)
                     : Colors.grey.shade600,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
               ),

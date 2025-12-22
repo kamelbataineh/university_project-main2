@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:file_picker/file_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/config/app_config.dart';
-import 'PatientDoctorProfile_OR_ChatDoctorProfile.dart';
+import '../patient/PatientDoctorProfile_OR_ChatDoctorProfile.dart';
 import 'ChatPatientProfile.dart';
 
 class ChatPage extends StatefulWidget {
@@ -63,7 +63,6 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
               senderId = msg["sender_id"].toString();
             }
 
-            // المقارنة بعد إزالة المسافات
             bool isMe = senderId.trim() == widget.userId.trim();
 
             return {
@@ -366,7 +365,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                       child: TextField(
                         controller: _controller,
                         decoration: const InputDecoration(
-                          hintText: "اكتب رسالة...",
+                          hintText: "   Write ...",
                           border: InputBorder.none,
                         ),
                         minLines: 1,

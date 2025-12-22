@@ -2,8 +2,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:university_project/pages/patient/BookAppointmentPage_doctor.dart';
+import '../../core/config/app_font.dart';
+import '../../core/config/theme.dart';
 import '../auth/FullScreenImagePage.dart';
-import 'chat_page.dart';
+import '../components/chat_page.dart';
 
 const baseUrl = "http://10.0.2.2:8000";
 
@@ -107,8 +109,13 @@ class _ChatDoctorProfileState extends State<PatientdoctorprofileOrChatdoctorprof
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(fullName.isNotEmpty ? fullName : "Doctor Profile"),
-        backgroundColor: Colors.pink,
+        title: Text(fullName.isNotEmpty ? "Dr. $fullName" : "Doctor Profile",
+          style:  AppFont.regular(
+                size: 18,
+          color: Colors.white,
+          weight: FontWeight.bold,
+        ),),
+        backgroundColor: AppTheme.patientAppbar,
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -182,40 +189,56 @@ class _ChatDoctorProfileState extends State<PatientdoctorprofileOrChatdoctorprof
                   ),
                 );
               },
-              icon: const Icon(Icons.calendar_today),
-              label: const Text("Book Appointment"),
+              icon: const Icon(Icons.calendar_today ,color: Colors.white,),
+              label:  Text("Book Appointment",  style: AppFont.regular(
+                size: 15,
+                color: Colors.white,
+                weight: FontWeight.w400,
+              ),),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.pink,
-                foregroundColor: Colors.white,
-                minimumSize: const Size(double.infinity, 50),
+                backgroundColor: AppTheme.patientAppbar,
+                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(14),
                 ),
+                minimumSize: const Size(120, 38),
               ),
             ),
+
+            const SizedBox(height: 80),
 
           ],
 
         ),
       ),
 
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.pinkAccent,
-        child: const Icon(Icons.chat),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ChatPage(
-                name: fullName,
-                userId: widget.userId,
-                otherId: doctorId,
-                token: widget.token,
+      floatingActionButton: SizedBox(
+        width: 47,
+        height: 47,
+        child: FloatingActionButton(
+          backgroundColor: Colors.pinkAccent.shade200,
+          elevation: 6,
+          child: const Icon(
+            Icons.chat,
+            color: Colors.white,
+            size: 20,
+          ),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ChatPage(
+                  name: fullName,
+                  userId: widget.userId,
+                  otherId: doctorId,
+                  token: widget.token,
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
+
     );
   }
 }
