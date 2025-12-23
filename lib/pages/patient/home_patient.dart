@@ -137,16 +137,16 @@ class _HomePatientPageState extends State<HomePatientPage>
         centerTitle: true,
         title: Text(
           _selectedIndex == 0
-              ? 'Main page'
+              ? 'Home page'
               : _selectedIndex == 1
               ? 'Messages'
               : _selectedIndex == 2
               ? 'My appointments'
               : _selectedIndex == 3
               ? 'list doctor'
-              : 'Personal profile',
+              : 'profile',
           style: AppFont.regular(
-            size: 18,
+            size: 20,
             weight: FontWeight.bold,
             color: Colors.white,
           ), ),
@@ -309,7 +309,7 @@ class _HomePatientPageState extends State<HomePatientPage>
       ),
            SizedBox(height: 10),
           Text(
-            'Manage your appointments, upload medical images, and view results easily.',
+            'Easily book appointments, chat with your doctor, and view your medical records.',
             style: AppFont.regular(
               size: 16,
               color: Colors.grey.shade700,

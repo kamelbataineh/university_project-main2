@@ -293,6 +293,8 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
               suffixIcon: suffixIcon,
               hintStyle: TextStyle(color: Colors.grey.shade600),
               border: InputBorder.none,
+              contentPadding: EdgeInsets.symmetric(vertical: 16),
+
             ),
           ),
         ),
@@ -395,273 +397,276 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
               SizedBox(height: 20),
               floatingPatientIcon(),
               const SizedBox(height: 20),
-              Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    neumorphicTextField(
-                        controller: _firstName,
-                        hint: "First Name",
-                        icon: Icons.person,
-                        validator: (val) =>
-                            val!.isEmpty ? 'Enter your first name' : null),
-                    SizedBox(height: 20),
-                    neumorphicTextField(
-                        controller: _lastName,
-                        hint: "Last Name",
-                        icon: Icons.person,
-                        validator: (val) =>
-                            val!.isEmpty ? 'Enter your last name' : null),
-                    SizedBox(height: 20),
-                    neumorphicTextField(
-                        controller: _email,
-                        hint: "Email",
-                        icon: Icons.email,
-                        validator: validateEmail),
-                    SizedBox(height: 20),
-                    neumorphicTextField(
-                      controller: _phoneNumber,
-                      hint: "Phone Number",
-                      icon: Icons.phone,
-                      keyboardType: TextInputType.phone,
-                      maxLength: 10,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                        LengthLimitingTextInputFormatter(10), // 🔒 حماية إضافية
-                      ],
-                      validator: (val) {
-                        if (val == null || val.isEmpty) {
-                          return 'Enter phone number';
-                        }
+              Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      neumorphicTextField(
+                          controller: _firstName,
+                          hint: "First Name",
+                          icon: Icons.person,
+                          validator: (val) =>
+                              val!.isEmpty ? 'Enter your first name' : null),
+                      SizedBox(height: 20),
+                      neumorphicTextField(
+                          controller: _lastName,
+                          hint: "Last Name",
+                          icon: Icons.person,
+                          validator: (val) =>
+                              val!.isEmpty ? 'Enter your last name' : null),
+                      SizedBox(height: 20),
+                      neumorphicTextField(
+                          controller: _email,
+                          hint: "Email",
+                          icon: Icons.email,
+                          validator: validateEmail),
+                      SizedBox(height: 20),
+                      neumorphicTextField(
+                        controller: _phoneNumber,
+                        hint: "Phone Number",
+                        icon: Icons.phone,
+                        keyboardType: TextInputType.phone,
+                        maxLength: 10,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(10), // 🔒 حماية إضافية
+                        ],
+                        validator: (val) {
+                          if (val == null || val.isEmpty) {
+                            return 'Enter phone number';
+                          }
 
-                        if (val.length != 10) {
-                          return 'Phone number must be exactly 10 digits';
-                        }
+                          if (val.length != 10) {
+                            return 'Phone number must be exactly 10 digits';
+                          }
 
-                        if (!val.startsWith('07')) {
-                          return 'Phone number must start with 07';
-                        }
+                          if (!val.startsWith('07')) {
+                            return 'Phone number must start with 07';
+                          }
 
-                        return null;
-                      },
-                    ),
-
-                    SizedBox(height: 20),
-                    neumorphicTextField(
-                      controller: _password,
-                      hint: "Password",
-                      icon: Icons.lock,
-                      obscure: _obscure,
-                      validator: (val) {
-                        if (val!.isEmpty) return 'Enter password';
-                        if (val.length > 20) return 'Password cannot exceed 20 characters';
-                        if (!hasMinLength(val)) return 'Password must be at least 8 characters';
-                        if (!hasNumber(val)) return 'Password must contain at least one number';
-                        if (!hasSpecialChar(val)) return 'Password must contain at least one special character';
-                        return null;
-                      },
-                      onChanged: (val) {
-                        setState(() {
-                          _showPasswordRequirements = val.isNotEmpty;
-                        });
-                      },
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscure ? Icons.visibility_off : Icons.visibility,
-                          color: Colors.indigo.shade300,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscure = !_obscure;
-                          });
+                          return null;
                         },
                       ),
-                      maxLength: 20,
-                      inputFormatters: [
-                        LengthLimitingTextInputFormatter(20), // ← يمنع الكتابة بعد 20 حرف
-                      ],
-                    ),
 
-                    if (_showPasswordRequirements) ...[
-                      SizedBox(height: 8),
-                      _buildPasswordRequirement(
-                        "At least 8 characters",
-                        hasMinLength(_password.text),
-                      ),
-                      _buildPasswordRequirement(
-                        "Contains letters and numbers",
-                        _password.text.contains(RegExp(r'[A-Za-z]')) && hasNumber(_password.text),
-                      ),
-                      _buildPasswordRequirement(
-                        "Contains at least one special character",
-                        hasSpecialChar(_password.text),
-                      ),
-                      SizedBox(height: 8),
-                    ],
-
-                    SizedBox(height: 20),
-                    neumorphicTextField(
-                      controller: _confirmPassword,
-                      hint: "Confirm Password",
-                      icon: Icons.lock_outline,
-                      obscure: _obscure,
-                      maxLength: 20,
-                      // الحد الأقصى 20 حرف
-                      validator: (val) {
-                        if (val == null || val.isEmpty)
-                          return 'Confirm your password';
-                        if (val != _password.text)
-                          return 'Passwords do not match';
-                        return null;
-                      },
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscure ? Icons.visibility_off : Icons.visibility,
-                          color: Colors.indigo.shade300,
-                        ),
-                        onPressed: () {
+                      SizedBox(height: 20),
+                      neumorphicTextField(
+                        controller: _password,
+                        hint: "Password",
+                        icon: Icons.lock,
+                        obscure: _obscure,
+                        validator: (val) {
+                          if (val!.isEmpty) return 'Enter password';
+                          if (val.length > 20) return 'Password cannot exceed 20 characters';
+                          if (!hasMinLength(val)) return 'Password must be at least 8 characters';
+                          if (!hasNumber(val)) return 'Password must contain at least one number';
+                          if (!hasSpecialChar(val)) return 'Password must contain at least one special character';
+                          return null;
+                        },
+                        onChanged: (val) {
                           setState(() {
-                            _obscure = !_obscure;
+                            _showPasswordRequirements = val.isNotEmpty;
                           });
                         },
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscure ? Icons.visibility_off : Icons.visibility,
+                            color: Colors.indigo.shade300,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscure = !_obscure;
+                            });
+                          },
+                        ),
+                        maxLength: 20,
+                        inputFormatters: [
+                          LengthLimitingTextInputFormatter(20), // ← يمنع الكتابة بعد 20 حرف
+                        ],
                       ),
-                    ),
 
-                    SizedBox(height: 20),
+                      if (_showPasswordRequirements) ...[
+                        SizedBox(height: 8),
+                        _buildPasswordRequirement(
+                          "At least 8 characters",
+                          hasMinLength(_password.text),
+                        ),
+                        _buildPasswordRequirement(
+                          "Contains letters and numbers",
+                          _password.text.contains(RegExp(r'[A-Za-z]')) && hasNumber(_password.text),
+                        ),
+                        _buildPasswordRequirement(
+                          "Contains at least one special character",
+                          hasSpecialChar(_password.text),
+                        ),
+                        SizedBox(height: 8),
+                      ],
 
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          height: 38, // نفس ارتفاع الأزرار الصغيرة
-                          child: ElevatedButton.icon(
-                            onPressed: pickCV,
+                      SizedBox(height: 20),
+                      neumorphicTextField(
+                        controller: _confirmPassword,
+                        hint: "Confirm Password",
+                        icon: Icons.lock_outline,
+                        obscure: _obscure,
+                        maxLength: 20,
+                        // الحد الأقصى 20 حرف
+                        validator: (val) {
+                          if (val == null || val.isEmpty)
+                            return 'Confirm your password';
+                          if (val != _password.text)
+                            return 'Passwords do not match';
+                          return null;
+                        },
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscure ? Icons.visibility_off : Icons.visibility,
+                            color: Colors.indigo.shade300,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscure = !_obscure;
+                            });
+                          },
+                        ),
+                      ),
+
+                      SizedBox(height: 20),
+
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                            height: 38, // نفس ارتفاع الأزرار الصغيرة
+                            child: ElevatedButton.icon(
+                              onPressed: pickCV,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppTheme.doctorElevatedButtonbackgroundColor,
+                                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14), // متناسق مع الأزرار الأخرى
+                                ),
+                              ),
+                              icon: const Icon(Icons.upload_file, color: Colors.white, size: 18),
+                              label: Text(
+                                _cvFile == null ? "Upload CV (PDF/Image)" : "Change CV",
+                                style: AppFont.regular(
+                                  size: 13, // حجم الخط صغير ومتناسق
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          if (_cvFile != null)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade200,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: () async {
+                                        if (_cvFile != null) {
+                                          final path = _cvFile!.path;
+                                          await OpenFile.open(path);
+                                        }
+                                      },
+                                      child: Text(
+                                        _cvFile!.path.split('/').last,
+                                        style: AppFont.regular(size: 14, color: Colors.black87),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        _cvFile = null;
+                                      });
+                                    },
+                                    child: const Icon(Icons.close, color: Colors.red),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      Center(
+                        child: SizedBox(
+                          width: MediaQuery.of(context).size.width / 2.2,
+                          height: 38,
+                          child: ElevatedButton(
+                            onPressed: loading ? null : registerDoctor,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppTheme.doctorElevatedButtonbackgroundColor,
                               padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14), // متناسق مع الأزرار الأخرى
+                                borderRadius: BorderRadius.circular(14),
                               ),
+                              minimumSize: const Size(120, 38),
                             ),
-                            icon: const Icon(Icons.upload_file, color: Colors.white, size: 18),
-                            label: Text(
-                              _cvFile == null ? "Upload CV (PDF/Image)" : "Change CV",
+                            child: loading
+                                ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                                : Text(
+                              'Register',
                               style: AppFont.regular(
-                                size: 13, // حجم الخط صغير ومتناسق
+                                size: 13,
+                                weight: FontWeight.bold,
                                 color: Colors.white,
                               ),
                             ),
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        if (_cvFile != null)
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade200,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: GestureDetector(
-                                    onTap: () async {
-                                      if (_cvFile != null) {
-                                        final path = _cvFile!.path;
-                                        await OpenFile.open(path);
-                                      }
-                                    },
-                                    child: Text(
-                                      _cvFile!.path.split('/').last,
-                                      style: AppFont.regular(size: 14, color: Colors.black87),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      _cvFile = null;
-                                    });
-                                  },
-                                  child: const Icon(Icons.close, color: Colors.red),
-                                ),
-                              ],
-                            ),
-                          ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    Center(
-                      child: SizedBox(
-                        width: MediaQuery.of(context).size.width / 2.2,
-                        height: 38,
-                        child: ElevatedButton(
-                          onPressed: loading ? null : registerDoctor,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppTheme.doctorElevatedButtonbackgroundColor,
-                            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            minimumSize: const Size(120, 38),
-                          ),
-                          child: loading
-                              ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          )
-                              : Text(
-                            'Register',
-                            style: AppFont.regular(
-                              size: 13,
-                              weight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
                       ),
-                    ),
 
-                    const SizedBox(height: 20),
+                      const SizedBox(height: 20),
 
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Already have an account?",
-                          style: AppFont.regular(
-                            size: 14,
-                            color:
-                                Colors.black, // ممكن تغيّري اللون حسب التصميم
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => const LoginDoctorPage())),
-                          child: Text(
-                            'Login',
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Already have an account?",
                             style: AppFont.regular(
                               size: 14,
-                              weight: FontWeight.bold,
-                              color: AppTheme.doctorTextBotton,
+                              color:
+                                  Colors.black, // ممكن تغيّري اللون حسب التصميم
                             ),
                           ),
-                        ),
+                          TextButton(
+                            onPressed: () => Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => const LoginDoctorPage())),
+                            child: Text(
+                              'Login',
+                              style: AppFont.regular(
+                                size: 14,
+                                weight: FontWeight.bold,
+                                color: AppTheme.doctorTextBotton,
+                              ),
+                            ),
+                          ),
 
-                      ],
-                    ),
-                         SizedBox(height: 46),
-                  ],
+                        ],
+                      ),
+                           SizedBox(height: 46),
+                    ],
+                  ),
                 ),
               ),
             ],

@@ -88,7 +88,7 @@ class _LandingPageState extends State<LandingPage>
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Container(
-          width: 120,
+          width: 90,
           height: 120,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
@@ -100,7 +100,7 @@ class _LandingPageState extends State<LandingPage>
                   offset: Offset(0, 10))
             ],
           ),
-          child: Icon(page["icon"], color: Colors.white, size: 60),
+          child: Icon(page["icon"], color: Colors.white, size: 50),
         ),
         SizedBox(height: 32),
         Text(
@@ -113,13 +113,16 @@ class _LandingPageState extends State<LandingPage>
           ),
         ),
         SizedBox(height: 16),
-        Text(
-          page["subtitle"],
-          textAlign: TextAlign.center,
-          style: AppFont.regular(
-            size: 16,
-            weight: FontWeight.w600,
-            color: Colors.grey,
+        Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Text(
+            page["subtitle"],
+            textAlign: TextAlign.center,
+            style: AppFont.regular(
+              size: 15,
+              weight: FontWeight.w600,
+              color: Colors.grey,
+            ),
           ),
         ),
       ],
@@ -170,258 +173,261 @@ class _LandingPageState extends State<LandingPage>
     final width = MediaQuery.of(context).size.width;
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          if (currentIndex == introPages.length)
-            Align(
-              alignment: Alignment.topRight, // 🔝 الزاوية
-              child: Padding(
-                padding: const EdgeInsets.only(top: 8, right: 8),
-                child: GestureDetector(
-                  onTap: () {
-                    // حماية ضد النقر السريع
-                    final now = DateTime.now();
-                    if (_lastTapTime != null &&
-                        now.difference(_lastTapTime!) <
-                            const Duration(milliseconds: 400)) {
-                      return;
-                    }
-                    _lastTapTime = now;
-
-                    setState(() {
-                      _adminTapCount++;
-
-                      // 🔓 تفعيل وضع الأدمن بعد 3 كبسات
-                      if (_adminTapCount == 3) {
-                        _showAdminIcon = true;
-
-                        // SnackBar لإعلام المستخدم
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Admin mode activated'),
-                            duration: Duration(seconds: 2),
-                          ),
-                        );
-
-                        // ⏳ إخفاء تلقائي بعد 10 ثواني
-                        _adminTimer?.cancel();
-                        _adminTimer = Timer(const Duration(seconds: 10), () {
-                          if (mounted) {
-                            setState(() {
-                              _adminTapCount = 0;
-                              _showAdminIcon = false;
-                            });
-                          }
-                        });
+      body: Padding(
+        padding: const EdgeInsets.all(18.0),
+        child: Column(
+          children: [
+            if (currentIndex == introPages.length)
+              Align(
+                alignment: Alignment.topRight, // 🔝 الزاوية
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 8, right: 8),
+                  child: GestureDetector(
+                    onTap: () {
+                      // حماية ضد النقر السريع
+                      final now = DateTime.now();
+                      if (_lastTapTime != null &&
+                          now.difference(_lastTapTime!) <
+                              const Duration(milliseconds: 400)) {
+                        return;
                       }
-                    });
+                      _lastTapTime = now;
 
-                    // 🔐 بعد التفعيل: أي كبسة تفتح صفحة الأدمن
-                    if (_showAdminIcon && _adminTapCount > 3) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => AdminLoginPage()),
-                      );
-                    }
-                  },
-                  child: AnimatedOpacity(
-                    duration: const Duration(milliseconds: 300),
-                    opacity: _showAdminIcon ? 1.0 : 0.05,
-                    child: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.black12.withOpacity(0.04),
-                      ),
-                      child: const Icon(
-                        Icons.admin_panel_settings,
-                        size: 22,
-                        color: Colors.orange,
+                      setState(() {
+                        _adminTapCount++;
+
+                        // 🔓 تفعيل وضع الأدمن بعد 3 كبسات
+                        if (_adminTapCount == 3) {
+                          _showAdminIcon = true;
+
+                          // SnackBar لإعلام المستخدم
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Admin mode activated'),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+
+                          // ⏳ إخفاء تلقائي بعد 10 ثواني
+                          _adminTimer?.cancel();
+                          _adminTimer = Timer(const Duration(seconds: 10), () {
+                            if (mounted) {
+                              setState(() {
+                                _adminTapCount = 0;
+                                _showAdminIcon = false;
+                              });
+                            }
+                          });
+                        }
+                      });
+
+                      // 🔐 بعد التفعيل: أي كبسة تفتح صفحة الأدمن
+                      if (_showAdminIcon && _adminTapCount > 3) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => AdminLoginPage()),
+                        );
+                      }
+                    },
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 300),
+                      opacity: _showAdminIcon ? 1.0 : 0.05,
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.black12.withOpacity(0.04),
+                        ),
+                        child: const Icon(
+                          Icons.admin_panel_settings,
+                          size: 22,
+                          color: Colors.orange,
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
 
-          Expanded(
-            child: PageView.builder(
-              controller: _pageController,
-              itemCount: introPages.length + 1, // آخر صفحة للاختيار
-              onPageChanged: (index) => setState(() => currentIndex = index),
-              itemBuilder: (context, index) {
-                if (index < introPages.length) {
-                  return _buildPage(introPages[index]);
-                } else {
-                  // الصفحة الأخيرة: كرت المريض فقط + نص للدكاترة
-                  return SingleChildScrollView(
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 32),
-                    child: Column(
-                      children: [
-                        // Text(
-                        //   "Get Started",
-                        //   style: TextStyle(
-                        //       fontSize: 28, fontWeight: FontWeight.bold),
-                        // ),
-                        SizedBox(
-                          width: width > 600 ? width / 2 - 24 : width - 32,
-                          child: _roleCard(
-                            title: "User",
-                            description:
-                                "Access healthcare services, manage health records, and connect with professionals",
-                            icon: Icons.person,
-                            gradient: [
-                              Colors.pinkAccent.shade100,
-                              Colors.pinkAccent.shade100,
-                            ],
-
-                            onCreate: () => Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) => RegisterPatientPage())),
-                            // التسجيل كعضو
-                            onLogin: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) =>
-                                        PatientLoginPage())), // تسجيل الدخول
-                          ),
-                        ),
-
-                        SizedBox(height: 24),
-                        // نص دعائي للدكاترة
-                        GestureDetector(
-                          onTap: () => Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => DoctorChoicePage())),
-                          child: Container(
-                            padding: EdgeInsets.all(24),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(32),
-                              gradient: LinearGradient(colors: [
-                                Colors.purple.shade100.withOpacity(0.3),
-                                Colors.indigo.shade100.withOpacity(0.3)
-                              ]),
-                              boxShadow: [
-                                BoxShadow(
-                                    color: Colors.grey.shade200,
-                                    blurRadius: 12,
-                                    offset: Offset(8, 8)),
-                                BoxShadow(
-                                    color: Colors.white,
-                                    blurRadius: 12,
-                                    offset: Offset(-8, -8)),
+            Expanded(
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: introPages.length + 1, // آخر صفحة للاختيار
+                onPageChanged: (index) => setState(() => currentIndex = index),
+                itemBuilder: (context, index) {
+                  if (index < introPages.length) {
+                    return _buildPage(introPages[index]);
+                  } else {
+                    // الصفحة الأخيرة: كرت المريض فقط + نص للدكاترة
+                    return SingleChildScrollView(
+                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 32),
+                      child: Column(
+                        children: [
+                          // Text(
+                          //   "Get Started",
+                          //   style: TextStyle(
+                          //       fontSize: 28, fontWeight: FontWeight.bold),
+                          // ),
+                          SizedBox(
+                            width: width > 600 ? width / 2 - 24 : width - 32,
+                            child: _roleCard(
+                              title: "User",
+                              description:
+                                  "Access healthcare services, manage health records, and connect with professionals",
+                              icon: Icons.person,
+                              gradient: [
+                                Colors.pinkAccent.shade100,
+                                Colors.pinkAccent.shade100,
                               ],
-                            ),
-                            child: Column(
-                              children: [
-                                Icon(Icons.medical_services,
-                                    color: Colors.indigo, size: 36),
-                                SizedBox(height: 12),
-                                Text(
-                                  "Are you a doctor?",
-                                  textAlign: TextAlign.center,
-                                  style: AppFont.regular(
-                                    size: 17,
-                                    weight: FontWeight.w800,
-                                    color: Colors.indigo,
-                                  ),
-                                ),
-                                SizedBox(height: 8),
-                                Text(
-                                  "Join our platform to help patients and make a difference in healthcare!",
-                                  textAlign: TextAlign.center,
-                                  style: AppFont.regular(
-                                    size: 14,
-                                    weight: FontWeight.w600,
-                                    color: Colors.grey[700]!,
-                                  ),
-                                )
-                              ],
+
+                              onCreate: () => Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => RegisterPatientPage())),
+                              // التسجيل كعضو
+                              onLogin: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) =>
+                                          PatientLoginPage())), // تسجيل الدخول
                             ),
                           ),
-                        ),
-                        SizedBox(height: 24),
-                        Text(
-                          'By continuing, you agree to our Terms of Service and Privacy Policy',
-                          textAlign: TextAlign.center,
-                          style: AppFont.regular(
-                            size: 12,
-                            weight: FontWeight.w600,
-                            color: Colors.grey[500]!,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
 
-                        TextButton.icon(
-                          onPressed: () async {
-                            final Uri emailUri = Uri(
-                              scheme: 'mailto',
-                              path: 'batainehkamel2@gmail.com',
-                              queryParameters: {
-                                'subject': 'Support Request',
-                              },
-                            );
-
-                            await launchUrl(
-                              emailUri,
-                              mode: LaunchMode.externalApplication,
-                            );
-                          },
-                          icon:  Icon(
-                            Icons.support_agent,
-                            size: 18,
-                            color: Colors.pinkAccent.shade200,
+                          SizedBox(height: 24),
+                          // نص دعائي للدكاترة
+                          GestureDetector(
+                            onTap: () => Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => DoctorChoicePage())),
+                            child: Container(
+                              padding: EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(32),
+                                gradient: LinearGradient(colors: [
+                                  Colors.purple.shade100.withOpacity(0.3),
+                                  Colors.indigo.shade100.withOpacity(0.3)
+                                ]),
+                                boxShadow: [
+                                  BoxShadow(
+                                      color: Colors.grey.shade200,
+                                      blurRadius: 12,
+                                      offset: Offset(8, 8)),
+                                  BoxShadow(
+                                      color: Colors.white,
+                                      blurRadius: 12,
+                                      offset: Offset(-8, -8)),
+                                ],
+                              ),
+                              child: Column(
+                                children: [
+                                  Icon(Icons.medical_services,
+                                      color: Colors.indigo, size: 36),
+                                  SizedBox(height: 12),
+                                  Text(
+                                    "Are you a doctor?",
+                                    textAlign: TextAlign.center,
+                                    style: AppFont.regular(
+                                      size: 17,
+                                      weight: FontWeight.w800,
+                                      color: Colors.indigo,
+                                    ),
+                                  ),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    "Join our platform to help patients and make a difference in healthcare!",
+                                    textAlign: TextAlign.center,
+                                    style: AppFont.regular(
+                                      size: 14,
+                                      weight: FontWeight.w600,
+                                      color: Colors.grey[700]!,
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
                           ),
-                          label: Text(
-                            'Contact Technical Support',
+                          SizedBox(height: 24),
+                          Text(
+                            'By continuing, you agree to our Terms of Service and Privacy Policy',
+                            textAlign: TextAlign.center,
                             style: AppFont.regular(
-                              size: 13,
+                              size: 12,
                               weight: FontWeight.w600,
+                              color: Colors.grey[500]!,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          TextButton.icon(
+                            onPressed: () async {
+                              final Uri emailUri = Uri(
+                                scheme: 'mailto',
+                                path: 'batainehkamel2@gmail.com',
+                                queryParameters: {
+                                  'subject': 'Support Request',
+                                },
+                              );
+
+                              await launchUrl(
+                                emailUri,
+                                mode: LaunchMode.externalApplication,
+                              );
+                            },
+                            icon:  Icon(
+                              Icons.support_agent,
+                              size: 18,
                               color: Colors.pinkAccent.shade200,
                             ),
+                            label: Text(
+                              'Contact Technical Support',
+                              style: AppFont.regular(
+                                size: 13,
+                                weight: FontWeight.w600,
+                                color: Colors.pinkAccent.shade200,
+                              ),
+                            ),
                           ),
-                        ),
 
-                      ],
-                    ),
-                  );
-                }
-              },
+                        ],
+                      ),
+                    );
+                  }
+                },
+              ),
             ),
-          ),
-          // نقاط التقدم
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(introPages.length + 1, (index) {
-              return Container(
-                margin: EdgeInsets.all(4),
-                width: currentIndex == index ? 16 : 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: currentIndex == index ? Colors.pink : Colors.grey[300],
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              );
-            }),
-          ),
-          SizedBox(height: 16),
-          // // زر التالي
-          // if (currentIndex < introPages.length)
-          //   ElevatedButton(
-          //     onPressed: () {
-          //       _pageController.nextPage(
-          //           duration: Duration(milliseconds: 500),
-          //           curve: Curves.easeInOut);
-          //     },
-          //     style: ElevatedButton.styleFrom(
-          //       padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          //       backgroundColor: Colors.pink.shade400,
-          //     ),
-          //     child: const Text("Next", style: TextStyle(color: Colors.white)),
-          //   ),
-        ],
+            // نقاط التقدم
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(introPages.length + 1, (index) {
+                return Container(
+                  margin: EdgeInsets.all(4),
+                  width: currentIndex == index ? 16 : 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: currentIndex == index ? Colors.pink : Colors.grey[300],
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                );
+              }),
+            ),
+            SizedBox(height: 16),
+            // // زر التالي
+            // if (currentIndex < introPages.length)
+            //   ElevatedButton(
+            //     onPressed: () {
+            //       _pageController.nextPage(
+            //           duration: Duration(milliseconds: 500),
+            //           curve: Curves.easeInOut);
+            //     },
+            //     style: ElevatedButton.styleFrom(
+            //       padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            //       backgroundColor: Colors.pink.shade400,
+            //     ),
+            //     child: const Text("Next", style: TextStyle(color: Colors.white)),
+            //   ),
+          ],
+        ),
       ),
     );
   }

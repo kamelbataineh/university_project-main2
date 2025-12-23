@@ -357,7 +357,7 @@ class _PatientLoginPageState extends State<PatientLoginPage>
                         ),
                         child: loading
                             ? CircularProgressIndicator(color: Colors.white)
-                            : Text('Sign In',
+                            : Text('Login',
                                 style: AppFont.regular(
                           size: 14,
                           weight: FontWeight.bold,

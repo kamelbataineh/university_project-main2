@@ -112,7 +112,7 @@ class _DoctorChoicePageState extends State<DoctorChoicePage>
                     onPressed: () {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (_) => DoctorIntroPage()),
+                        MaterialPageRoute(builder: (_) => LoginDoctorPage()),
                       );
                     },
                     style: ElevatedButton.styleFrom(

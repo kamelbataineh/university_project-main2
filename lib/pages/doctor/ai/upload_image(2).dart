@@ -457,20 +457,26 @@ class _UploadImagePageState extends State<UploadImagePage>
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: const [
-                                Text("Upload Guidelines",
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold, fontSize: 16)),
+                                Text(
+                                  "Upload Guidelines",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16
+                                  ),
+                                ),
                                 SizedBox(height: 4),
                                 Text(
-                                  "• Supported formats: JPG, PNG, HEIC\n"
+                                  "• Only mammogram images\n"
+                                      "• Supported formats: JPG, PNG\n"
                                       "• Maximum file size: 10MB\n"
-                                      "• Ensure good lighting and clear image quality\n"
-                                      "• AI analysis will be provided after upload",
+                                      "• Ensure clear image quality\n"
+                                      "• AI analysis provided after upload",
                                   style: TextStyle(fontSize: 14),
                                 ),
                               ],
                             ),
                           )
+
                         ],
                       ),
                     ),

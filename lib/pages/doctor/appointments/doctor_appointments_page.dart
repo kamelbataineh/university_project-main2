@@ -152,7 +152,7 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
 
         String displayStatus = app['status'] ?? "-";
         if (isExpired) {
-          displayStatus = "نفذ الوقت";
+          displayStatus = "Running out of time";
       } else if (app['status'] == "Confirmed") {
           displayStatus = "Approved";
         } else if (app['status'] == "Rejected") {

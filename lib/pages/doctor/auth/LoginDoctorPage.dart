@@ -126,16 +126,21 @@ class _LoginDoctorPageState extends State<LoginDoctorPage>
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: LinearGradient(
-            colors: [Colors.white, Colors.indigo.shade50.withOpacity(0.3)]),
+          colors: [Colors.indigo.shade50, Colors.white],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         boxShadow: [
           BoxShadow(
-              color: Colors.indigo.shade100.withOpacity(0.4),
-              offset: Offset(6, 6),
-              blurRadius: 12),
+            color: Colors.indigo.shade200.withOpacity(0.6),
+            offset: const Offset(6, 6),
+            blurRadius: 12,
+          ),
           BoxShadow(
-              color: Colors.white.withOpacity(0.8),
-              offset: Offset(-6, -6),
-              blurRadius: 12),
+            color: Colors.white.withOpacity(0.8),
+            offset: const Offset(-6, -6),
+            blurRadius: 12,
+          ),
         ],
       ),
       child: TextFormField(
@@ -144,12 +149,12 @@ class _LoginDoctorPageState extends State<LoginDoctorPage>
         validator: validator,
         style: TextStyle(color: AppTheme.doctorText),
         decoration: InputDecoration(
-          prefixIcon: Icon(icon, color: AppTheme.doctorIcon),
+          prefixIcon: Icon(icon, color: Colors.indigo.shade300),
           hintText: hint,
           suffixIcon: suffixIcon,
           hintStyle: TextStyle(color: Colors.grey),
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(vertical: 18),
+          contentPadding: EdgeInsets.symmetric(vertical: 16),
         ),
       ),
     );
@@ -244,128 +249,131 @@ class _LoginDoctorPageState extends State<LoginDoctorPage>
             ),
 
             SizedBox(height: 24),
-            Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  neumorphicTextField(
-                      controller: _email,
-                      hint: 'Email',
-                      icon: Icons.email_outlined,
-                      validator: (val) =>
-                          val!.isEmpty ? 'Please enter your email' : null),
-                  neumorphicTextField(
-                    controller: _password,
-                    hint: "Password",
-                    icon: Icons.lock,
-                    obscure: _obscure,
-                    validator: (val) => val!.isEmpty ? 'Enter password' : null,
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscure ? Icons.visibility_off : Icons.visibility,
-                        color: Colors.indigo.shade200,
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    neumorphicTextField(
+                        controller: _email,
+                        hint: 'Email',
+                        icon: Icons.email_outlined,
+                        validator: (val) =>
+                            val!.isEmpty ? 'Please enter your email' : null),
+                    neumorphicTextField(
+                      controller: _password,
+                      hint: "Password",
+                      icon: Icons.lock,
+                      obscure: _obscure,
+                      validator: (val) => val!.isEmpty ? 'Enter password' : null,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscure ? Icons.visibility_off : Icons.visibility,
+                          color: Colors.indigo.shade200,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscure = !_obscure;
+                          });
+                        },
                       ),
-                      onPressed: () {
-                        setState(() {
-                          _obscure = !_obscure;
-                        });
-                      },
                     ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          // Checkbox(
-                          //   value: rememberMe,
-                          //   onChanged: (val) =>
-                          //       setState(() => rememberMe = val ?? false),
-                          //   activeColor: Colors.pink.shade200,
-                          // ),
-                          // Text('Remember me',
-                          //     style: TextStyle(color: Colors.grey.shade700)),
-                        ],
-                      ),
-                      TextButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => Doctorforgotpasswordpage()),
-                            );
-                          },
-                          child:Text(
-                            'Forgot Password?',
-                            style: AppFont.regular(
-                              color: AppTheme.doctorTextBotton,
-                              size: 14
-                                ,weight: FontWeight.bold
-                            ),
-                          ),)
-                        ],
-                  ),
-                  SizedBox(height: 16),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width / 2.2,
-                    height: 38,
-                    child: ElevatedButton(
-                      onPressed: loading ? null : _loginDoctor,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.doctorElevatedButtonbackgroundColor,
-                        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14), // متناسق مع الأزرار الأخرى
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            // Checkbox(
+                            //   value: rememberMe,
+                            //   onChanged: (val) =>
+                            //       setState(() => rememberMe = val ?? false),
+                            //   activeColor: Colors.pink.shade200,
+                            // ),
+                            // Text('Remember me',
+                            //     style: TextStyle(color: Colors.grey.shade700)),
+                          ],
                         ),
-                        minimumSize: const Size(120, 38),
-                      ),
-                      child: loading
-                          ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
+                        TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => Doctorforgotpasswordpage()),
+                              );
+                            },
+                            child:Text(
+                              'Forgot Password?',
+                              style: AppFont.regular(
+                                color: AppTheme.doctorTextBotton,
+                                size: 14
+                                  ,weight: FontWeight.bold
+                              ),
+                            ),)
+                          ],
+                    ),
+                    SizedBox(height: 16),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width / 2.2,
+                      height: 38,
+                      child: ElevatedButton(
+                        onPressed: loading ? null : _loginDoctor,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.doctorElevatedButtonbackgroundColor,
+                          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14), // متناسق مع الأزرار الأخرى
+                          ),
+                          minimumSize: const Size(120, 38),
                         ),
-                      )
-                          : Text(
-                        'Sign In',
+                        child: loading
+                            ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                            : Text(
+                          'Login',
+                          style: AppFont.regular(
+                            size: 13,
+                            weight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [Text(
+                        "Don't have an account? ",
                         style: AppFont.regular(
-                          size: 13,
-                          weight: FontWeight.bold,
-                          color: Colors.white,
+                          size: 14,
+                          color: Colors.black,
                         ),
                       ),
-                    ),
-                  ),
 
-                  SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [Text(
-                      "Don't have an account? ",
-                      style: AppFont.regular(
-                        size: 14,
-                        color: Colors.black,
-                      ),
+                        TextButton(
+                  onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => DoctorIntroPage())),
+                  child: Text(
+                    'Register',
+                    style: AppFont.regular(
+                      color: AppTheme.doctorTextBotton,
+                      size: 14,
+                      weight: FontWeight.bold// ممكن تحددي الحجم حسب التصميم
                     ),
-
-                      TextButton(
-                onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => DoctorIntroPage())),
-                child: Text(
-                  'Register',
-                  style: AppFont.regular(
-                    color: AppTheme.doctorTextBotton,
-                    size: 14,
-                    weight: FontWeight.bold// ممكن تحددي الحجم حسب التصميم
                   ),
                 ),
-              ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

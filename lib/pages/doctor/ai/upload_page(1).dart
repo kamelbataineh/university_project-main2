@@ -49,7 +49,7 @@ class UploadPage extends StatelessWidget {
                 ),
                  SizedBox(height: 12),
                  Text(
-                  "Upload Medical Images",
+                  "Upload Mammogram",
                   style: TextStyle(
                     color: Colors.indigo.shade400,
                     fontSize: 18,
@@ -58,8 +58,7 @@ class UploadPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 const Text(
-                  "Upload X-rays, CT scans, MRI, or other medical imaging for AI-powered analysis",
-                  textAlign: TextAlign.center,
+                  "Upload a mammogram for AI-powered analysis",                  textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.black54, fontSize: 12),
                 ),
                 const SizedBox(height: 16),

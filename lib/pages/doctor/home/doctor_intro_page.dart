@@ -114,7 +114,7 @@ class _DoctorIntroPageState extends State<DoctorIntroPage> {
 
   final List<Map<String, dynamic>> introPages = [
     {
-      "title": "Welcome to MediCare Future",
+      "title": "Welcome to Pink Scan",
       "subtitle": "Advanced healthcare at your fingertips.",
       "icon": Icons.favorite,
       "gradient": [
@@ -151,7 +151,7 @@ class _DoctorIntroPageState extends State<DoctorIntroPage> {
       children: [
         // Gradient Circle Icon
         Container(
-          width: 120,
+          width: 90,
           height: 120,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
@@ -163,22 +163,23 @@ class _DoctorIntroPageState extends State<DoctorIntroPage> {
                   offset: const Offset(0, 10))
             ],
           ),
-          child: Icon(page["icon"], color: Colors.white, size: 60),
+          child: Icon(page["icon"], color: Colors.white, size: 50),
         ),
-        const SizedBox(height: 32),
+         SizedBox(height: 12),
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Text(
             page["title"],
             textAlign: TextAlign.center,
             style: AppFont.regular(
+              color: Colors.indigo.shade800,
               size: 26,
               weight: FontWeight.bold,
             ),
           ),
         ),
 
-        const SizedBox(height: 16),
+         SizedBox(height: 16),
 
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -186,7 +187,7 @@ class _DoctorIntroPageState extends State<DoctorIntroPage> {
             page["subtitle"],
             textAlign: TextAlign.center,
             style: AppFont.regular(
-              size: 16,
+              size: 15,
               color: Colors.grey,
             ),
           ),

@@ -174,15 +174,19 @@ class _HomeDoctorPageState extends State<HomeDoctorPage>
 
       appBar: AppBar(
         title: Text(_selectedIndex == 0
-            ? 'Dashboard'
+            ? 'Home page'
             : _selectedIndex == 1
                 ? 'Messages'
                 : _selectedIndex == 2
                     ? 'Upload Image'
                     : _selectedIndex == 3
                         ? 'Appointments'
-                        : 'Profile',style: TextStyle(color: Colors.white),),
-        centerTitle: true,
+                        : 'Profile',
+          style: AppFont.regular(
+            size: 20,
+            weight: FontWeight.bold,
+            color: Colors.white,
+          ), ),  centerTitle: true,
         backgroundColor: AppTheme.doctorElevatedButtonbackgroundColor,
         actions: [
           Builder(
@@ -280,9 +284,10 @@ class _HomeDoctorPageState extends State<HomeDoctorPage>
             ),
           ),
           const SizedBox(height: 10),
-          const Text(
-            'Manage patients, check your appointments, and view your profile.',
-            style: TextStyle(fontSize: 16, color: Colors.black54),
+           Text(
+            'Track patients, stay up to date with appointments, and perform AI-powered scans.'
+          ,
+            style: TextStyle(fontSize: 15, color: Colors.black54),
           ),
           SizedBox(height: 30),
           _buildStatsCards(),
