@@ -191,7 +191,7 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
         );
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("تم إرسال OTP إلى بريدك الإلكتروني ✅")),
+          SnackBar(content: Text("OTP has been sent to your email ✅")),
         );
       } else {
         print("❌ Registration failed: ${decoded["detail"]}");
@@ -537,7 +537,7 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           SizedBox(
-                            height: 38, // نفس ارتفاع الأزرار الصغيرة
+                            height: 38,
                             child: ElevatedButton.icon(
                               onPressed: pickCV,
                               style: ElevatedButton.styleFrom(
@@ -551,7 +551,7 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                               label: Text(
                                 _cvFile == null ? "Upload CV (PDF/Image)" : "Change CV",
                                 style: AppFont.regular(
-                                  size: 13, // حجم الخط صغير ومتناسق
+                                  size: 13,
                                   color: Colors.white,
                                 ),
                               ),
@@ -644,7 +644,7 @@ class _RegisterDoctorPageState extends State<RegisterDoctorPage>
                             style: AppFont.regular(
                               size: 14,
                               color:
-                                  Colors.black, // ممكن تغيّري اللون حسب التصميم
+                                  Colors.black,
                             ),
                           ),
                           TextButton(

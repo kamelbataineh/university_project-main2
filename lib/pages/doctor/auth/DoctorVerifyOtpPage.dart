@@ -95,9 +95,9 @@ class _DoctorVerifyOtpPageState extends State<DoctorVerifyOtpPage> {
           context: context,
           barrierDismissible: false, // لا يمكن الإغلاق بالنقر خارج النافذة
           builder: (context) => AlertDialog(
-            title: const Text("تم إرسال معلوماتك ✅"),
+            title: const Text("Your information has been sent ✅"),
             content: const Text(
-                "تم بعث معلوماتك للادمن، عند الموافقة سوف يصلك رسالة على الإيميل"
+                "Your information has been sent to the addict, upon approval you will receive an e-mail message"
             ),
             actions: [
               TextButton(
@@ -108,7 +108,7 @@ class _DoctorVerifyOtpPageState extends State<DoctorVerifyOtpPage> {
                     MaterialPageRoute(builder: (_) => LoginDoctorPage()),
                   );
                 },
-                child: const Text("موافق"),
+                child: const Text("OK"),
               ),
             ],
           ),
@@ -182,9 +182,9 @@ class _DoctorVerifyOtpPageState extends State<DoctorVerifyOtpPage> {
       context: context,
       barrierDismissible: false, // لا يمكن إغلاقه بالنقر خارج النافذة
       builder: (context) => AlertDialog(
-        title: const Text("تم إرسال معلوماتك ✅"),
+        title: const Text("Your information has been sent ✅"),
         content: const Text(
-            "تم بعث معلوماتك للادمن، عند الموافقة سوف يصلك رسالة على الإيميل"
+            "Your information has been sent to the addict, upon approval you will receive an e-mail message"
         ),
         actions: [
           TextButton(
@@ -196,7 +196,7 @@ class _DoctorVerifyOtpPageState extends State<DoctorVerifyOtpPage> {
                 MaterialPageRoute(builder: (_) => PatientLoginPage()),
               );
             },
-            child: const Text("موافق"),
+            child: const Text("OK"),
           ),
         ],
       ),

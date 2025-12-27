@@ -14,6 +14,7 @@ import '../appointments/doctor_appointments_page.dart';
 import '../profile/profile_doctor.dart';
 import '../../../core/config/theme.dart';
 import '../records/DoctorRecordsPage.dart';
+import 'YoutubeVideoPage.dart';
 ////
 //
 //
@@ -292,6 +293,18 @@ class _HomeDoctorPageState extends State<HomeDoctorPage>
           SizedBox(height: 30),
           _buildStatsCards(),
           SizedBox(height: 30),
+
+          // ElevatedButton(
+          //   onPressed: () {
+          //     Navigator.push(
+          //       context,
+          //       MaterialPageRoute(builder: (_) => const YoutubeVideoPage()),
+          //     );
+          //   },
+          //   child: const Text('Watch Awareness Video'),
+          // ),
+
+          SizedBox(height: 30),
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -324,6 +337,7 @@ class _HomeDoctorPageState extends State<HomeDoctorPage>
                         blurRadius: 15,
                         offset: const Offset(5, 8),
                       ),
+
                     ],
                   ),
                   child: Column(

@@ -11,6 +11,7 @@ import '../../core/config/app_config.dart';
 import '../../core/config/app_font.dart';
 import '../../core/config/theme.dart';
 import '../components/chats_list_page.dart';
+import '../doctor/home/YoutubeVideoPage.dart';
 import 'MyMedicalRecordsPage.dart';
 import 'book_appointment_page.dart';
 import 'doctors_list_page.dart';
@@ -288,6 +289,13 @@ class _HomePatientPageState extends State<HomePatientPage>
         "color1": Colors.teal.shade400,
         "color2": Colors.teal.shade300,
         "page": MyMedicalRecordsPage(userId: userId, token: widget.token),
+      },
+      {
+        "title": "Awareness Video",
+        "icon": Icons.play_circle_fill_rounded,
+        "color1": Colors.pink.shade400,
+        "color2": Colors.pinkAccent.shade100,
+        "page":  YoutubeVideoPage(),
       },
 
     ];

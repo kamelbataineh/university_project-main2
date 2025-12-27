@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:university_project/pages/auth/LandingPage.dart';
 import 'package:university_project/pages/doctor/auth/LoginDoctorPage.dart';
 void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  InAppWebViewController.setWebContentsDebuggingEnabled(true);
 
   runApp(const MyApp());
 }
