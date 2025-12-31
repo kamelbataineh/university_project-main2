@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:pdfx/pdfx.dart';
 
+import '../../core/config/app_config.dart';
+
 class PdfViewerPage extends StatefulWidget {
   final String url;
   const PdfViewerPage({super.key, required this.url});
@@ -25,7 +27,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
     try {
       final fullUrl = widget.url.startsWith("http")
           ? widget.url
-          : "http://10.0.2.2:8000${widget.url}";
+          : "$baseUrl1${widget.url}";
 
       // تحقق من الامتداد لتحديد نوع الملف
       final ext = fullUrl.split('.').last.toLowerCase();
@@ -73,7 +75,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
         child: Image.network(
           widget.url.startsWith("http")
               ? widget.url
-              : "http://10.0.2.2:8000${widget.url}",
+              : "$baseUrl1${widget.url}",
           fit: BoxFit.contain,
           errorBuilder: (context, error, stackTrace) {
             return const Text("فشل تحميل الصورة");

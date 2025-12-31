@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import '../../../core/config/app_config.dart';
 import '../../../core/config/app_font.dart';
 import '../../../services/medical_record_service.dart';
 
@@ -26,7 +27,7 @@ class _EditRecordPageState extends State<EditRecordPage> {
 
   // ===== Controllers =====
   final ageCtrl = TextEditingController();
-  String gender = "Male";
+  String gender = "Female";
 
   final diseaseCtrl = TextEditingController();
   List<String> diseases = [];
@@ -81,7 +82,7 @@ class _EditRecordPageState extends State<EditRecordPage> {
   Future<void> fetchRecord() async {
     try {
       final service = MedicalRecordService(
-          baseUrl: "http://10.0.2.2:8000", token: widget.token);
+          baseUrl: "$baseUrl1", token: widget.token);
 
       final record = await service.getRecord(widget.recordId);
       final data = record["data"];
@@ -126,7 +127,7 @@ class _EditRecordPageState extends State<EditRecordPage> {
 
     try {
       final service = MedicalRecordService(
-          baseUrl: "http://10.0.2.2:8000", token: widget.token);
+          baseUrl: "$baseUrl1", token: widget.token);
 
       final data = {
         "basic_info": {
@@ -306,7 +307,7 @@ class _EditRecordPageState extends State<EditRecordPage> {
                             value: gender,
                             decoration: field("Gender"),
                             items: const [
-                              // DropdownMenuItem(value: "Male", child: Text("Male")),
+                              DropdownMenuItem(value: "Male", child: Text("Male")),
                               DropdownMenuItem(
                                   value: "Female", child: Text("Female")),
                             ],

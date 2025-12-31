@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../core/config/app_config.dart';
 import 'AdminPatientProfilePage.dart';
 
 class AdminPatientListPage extends StatefulWidget {
@@ -17,7 +18,6 @@ class _AdminPatientListPageState extends State<AdminPatientListPage>
   late TabController _tabController;
   List patients = [];
   bool loading = false;
-  final String baseUrl = "http://10.0.2.2:8000"; // API
   late String adminToken; // ✅ تخزين التوكن
 
   @override
@@ -37,7 +37,7 @@ class _AdminPatientListPageState extends State<AdminPatientListPage>
     setState(() => loading = true);
     try {
       final response = await http.get(
-        Uri.parse("$baseUrl/admin/patients"),
+        Uri.parse("$baseUrl1/admin/patients"),
         headers: {"Authorization": "Bearer $adminToken"},
       );
 
@@ -67,7 +67,7 @@ class _AdminPatientListPageState extends State<AdminPatientListPage>
     setState(() => loading = true);
     try {
       final response = await http.put(
-        Uri.parse("$baseUrl/admin/patient/$patientId/toggle_active"),
+        Uri.parse("$baseUrl1/admin/patient/$patientId/toggle_active"),
         headers: {
           "Authorization": "Bearer $adminToken",
           "Content-Type": "application/json",

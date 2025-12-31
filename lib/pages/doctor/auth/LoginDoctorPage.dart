@@ -82,36 +82,54 @@ class _LoginDoctorPageState extends State<LoginDoctorPage>
         body: body,
       );
 
-      final data = jsonDecode(response.body);
+      final data = jsonDecode(utf8.decode(response.bodyBytes)); // 🔹 للتأكد من UTF-8
 
       if (response.statusCode == 200) {
-        final token = data['access_token'];
-        final doctorId = data['doctor_id'];
+        final token = data['access_token'] ?? '';
+        final doctorId = data['doctor_id'] ?? '';
+
+        if (token.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("لم يتم استلام التوكن من الخادم")),
+          );
+          return;
+        }
+
         final prefs = await SharedPreferences.getInstance();
+        await prefs.setString("token", token);
         await prefs.setString("role", "doctor");
         await prefs.setString("saved_email_doctor", _email.text.trim());
+        await prefs.setString("doctor_id", doctorId.toString());
 
-
-
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.green,
+            content: Text('Welcome Doctor!'),
+          ),
+        );
 
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
-            builder: (_) => HomeDoctorPage(token: token, userId: doctorId)),
-                (route) => false,
+            builder: (_) => HomeDoctorPage(token: token, userId: doctorId),
+          ),
+              (route) => false,
         );
       } else {
         final message = data['detail'] ?? 'حدث خطأ، حاول مرة أخرى';
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(message)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message)),
+        );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('خطأ في الاتصال بالخادم')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('خطأ في الاتصال بالخادم: $e')),
+      );
     } finally {
       setState(() => loading = false);
     }
   }
+
 
   Widget neumorphicTextField({
     required TextEditingController controller,

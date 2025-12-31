@@ -8,8 +8,9 @@ import 'package:mime/mime.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:university_project/pages/password/pass_doctor/PassDoctorVerifyOtpPage.dart';
 
+import '../../../core/config/app_config.dart';
 
-const baseUrl = "http://10.0.2.2:8000/";
+
 
 class EditDoctorProfilePage extends StatefulWidget {
   final Map<String, dynamic> doctorData;

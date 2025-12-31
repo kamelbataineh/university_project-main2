@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import '../../../core/config/app_config.dart';
 import '../../../core/config/app_font.dart';
 import '../auth/EditDoctorProfilePage.dart';
 import '../auth/LoginDoctorPage.dart';
 
-const baseUrl = "http://10.0.2.2:8000/";
 
 class ProfileDoctorPage extends StatefulWidget {
   final String token;
@@ -54,7 +54,7 @@ class _ProfileDoctorPageState extends State<ProfileDoctorPage> {
 
   Future<void> logout(String token) async {
     final response = await http.post(
-      Uri.parse("http://10.0.2.2:8000/doctors/logout"),
+      Uri.parse("$baseUrl1/doctors/logout"),
       headers: {"Authorization": "Bearer $token"},
     );
 

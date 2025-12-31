@@ -45,13 +45,11 @@ class _DoctorRecordsPageState extends State<DoctorRecordsPage> {
     try {
       if (dateField == null) return '';
 
-      // الحالة 1: MongoDB Map {$date}
       if (dateField is Map && dateField.containsKey('\$date')) {
         final dateTime = DateTime.parse(dateField['\$date']);
         return "${dateTime.year}/${dateTime.month}/${dateTime.day}";
       }
 
-      // الحالة 2: String ISO
       if (dateField is String) {
         final dateTime = DateTime.parse(dateField);
         return "${dateTime.year}/${dateTime.month}/${dateTime.day}";
@@ -62,7 +60,6 @@ class _DoctorRecordsPageState extends State<DoctorRecordsPage> {
       return '';
     }
   }
-
 
   // ================== جلب سجلات الدكتور ==================
   Future<void> _fetchRecords() async {
@@ -120,15 +117,12 @@ class _DoctorRecordsPageState extends State<DoctorRecordsPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text("My Records"
-        ,
-          style: TextStyle(
-            color: Colors.white,
-          ),
+        title: const Text(
+          "My Records",
+          style: TextStyle(color: Colors.white),
         ),
         backgroundColor: Colors.indigo.shade400,
       ),
-
       body: loading
           ? const Center(child: CircularProgressIndicator())
           : records.isEmpty
@@ -138,42 +132,102 @@ class _DoctorRecordsPageState extends State<DoctorRecordsPage> {
         itemBuilder: (context, index) {
           final record = records[index];
 
-          return Card(
-            margin: const EdgeInsets.symmetric(
-                horizontal: 16, vertical: 8),
-            child: ListTile(
-              leading: const Icon(Icons.folder_shared),
-              title: Text(
-                "Patient: ${record['patient_name'] ?? 'Unknown'}",
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              subtitle: Text(
-                "Created at: ${formatDate(record['created_at'])}",
-              ),
-              trailing:
-              const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {
-                String patientId = '';
+          String patientId = '';
+          final patientIdRaw = record['patient_id'];
+          if (patientIdRaw is Map && patientIdRaw.containsKey('\$oid')) {
+            patientId = patientIdRaw['\$oid'];
+          } else if (patientIdRaw is String) {
+            patientId = patientIdRaw;
+          }
 
-                final patientIdRaw = record['patient_id'];
-                if (patientIdRaw is Map && patientIdRaw.containsKey('\$oid')) {
-                  patientId = patientIdRaw['\$oid'];
-                } else if (patientIdRaw is String) {
-                  patientId = patientIdRaw;
-                }
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => DoctorPatientFullRecordPage(
-                      token: widget.token,
-                      patientId: patientId,
-                      patientName: record['patient_name'],
+          return Dismissible(
+            key: Key(record['_id']),
+            direction: DismissDirection.endToStart,
+
+            background: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Container(
+                alignment: Alignment.centerRight,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                color: Colors.red,
+                child: const Icon(Icons.delete, color: Colors.white),
+              ),
+            ),
+            confirmDismiss: (direction) async {
+              final result = await showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text("Confirm deletion"),
+                  content: const Text(
+                      "Are you sure you want to delete this record? "),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text("No"),
                     ),
-                  ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: const Text("Yes"),
+                    ),
+                  ],
+                ),
+              );
+              return result ?? false;
+            },
+            onDismissed: (direction) async {
+              final recordId = record['_id'];
+              final url = Uri.parse("$baseUrl1/api/v1/medical_records/$recordId");
+
+              final response = await http.delete(
+                url,
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": "Bearer ${widget.token}",
+                },
+              );
+
+              if (response.statusCode == 200) {
+                setState(() {
+                  records.removeAt(index);
+                });
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text("The history was successfully deleted")),
                 );
-
-              },
-
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Deletion failed")),
+                );
+              }
+            },
+            child: Card(
+              margin: const EdgeInsets.symmetric(
+                  horizontal: 16, vertical: 8),
+              child: ListTile(
+                leading: const Icon(Icons.folder_shared),
+                title: Text(
+                  "Patient: ${record['patient_name'] ?? 'Unknown'}",
+                  style:
+                  const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text(
+                  "Created at: ${formatDate(record['created_at'])}",
+                ),
+                trailing:
+                const Icon(Icons.arrow_forward_ios, size: 16),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => DoctorPatientFullRecordPage(
+                        token: widget.token,
+                        patientId: patientId,
+                        patientName: record['patient_name'],
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
           );
         },

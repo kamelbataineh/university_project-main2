@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/config/app_config.dart';
 import '../../../core/config/app_font.dart';
 import '../../../services/medical_record_service.dart';
 
@@ -31,7 +32,7 @@ class _AddRecordPageState extends State<AddRecordPage> {
   final notesCtrl = TextEditingController();
   final diagnosisCtrl = TextEditingController();
 
-  String gender = "Male";
+  String gender = "Female";
   DateTime? surgeryDate;
 
   List<String> diseases = [];
@@ -69,7 +70,7 @@ class _AddRecordPageState extends State<AddRecordPage> {
     };
 
     final service = MedicalRecordService(
-      baseUrl: "http://10.0.2.2:8000",
+      baseUrl: "$baseUrl1",
       token: widget.token,
     );
 

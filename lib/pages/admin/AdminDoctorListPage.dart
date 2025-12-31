@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../core/config/app_config.dart';
 import 'AdminDoctorProfilePage.dart';
 
 class AdminDoctorListPage extends StatefulWidget {
@@ -21,7 +22,7 @@ class _AdminDoctorListPageState extends State<AdminDoctorListPage>
   // دالة لتكوين الرابط الكامل إذا كان الرابط نسبي
   String getFullUrl(String cvUrl) {
     if (cvUrl.startsWith("http")) return cvUrl;
-    return "http://10.0.2.2:8000$cvUrl";
+    return "http://192.168.8.31:8000$cvUrl";
   }
 
   @override
@@ -39,7 +40,7 @@ class _AdminDoctorListPageState extends State<AdminDoctorListPage>
 
     try {
       final response = await http.get(
-        Uri.parse("http://10.0.2.2:8000/admin/doctor"),
+        Uri.parse("$baseUrl1/admin/doctor"),
         headers: {"Authorization": "Bearer $token"},
       );
 
@@ -72,7 +73,7 @@ class _AdminDoctorListPageState extends State<AdminDoctorListPage>
     if (isApproved != null) body["is_approved"] = isApproved;
 
     final response = await http.put(
-      Uri.parse("http://10.0.2.2:8000/admin/doctor/update/$id"),
+      Uri.parse("$baseUrl1/admin/doctor/update/$id"),
       headers: {"Authorization": "Bearer $token", "Content-Type": "application/json"},
       body: jsonEncode(body),
     );

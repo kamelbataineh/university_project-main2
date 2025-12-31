@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import '../../../core/config/app_config.dart';
 import 'image_results_page(3).dart';
 
 class UploadImagePage extends StatefulWidget {
@@ -63,7 +64,7 @@ class _UploadImagePageState extends State<UploadImagePage>
   // ================================
   bool isMammogram(File file) {
     final name = file.path.toLowerCase();
-    final allowedExtensions = ['jpg', 'jpeg', 'png', 'dcm'];
+    final allowedExtensions = ['jpg'];
     final ext = name.split('.').last;
     if (!allowedExtensions.contains(ext)) return false;
     if (!(name.contains("mamm") ||
@@ -81,7 +82,7 @@ class _UploadImagePageState extends State<UploadImagePage>
   Future<Map<String, dynamic>> uploadImage(File imageFile) async {
     var request = http.MultipartRequest(
       'POST',
-      Uri.parse('http://10.0.2.2:8000/predict'),
+      Uri.parse('$baseUrl1/predict'),
     );
     request.files.add(await http.MultipartFile.fromPath('file', imageFile.path));
     var response = await request.send();

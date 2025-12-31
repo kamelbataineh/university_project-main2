@@ -1,70 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:university_project/pages/auth/LandingPage.dart';
-import 'package:university_project/pages/doctor/auth/LoginDoctorPage.dart';
-void main() async{
+import 'package:university_project/pages/patient/home_patient.dart';
+import 'package:university_project/pages/doctor/home/home_doctor.dart';
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   InAppWebViewController.setWebContentsDebuggingEnabled(true);
 
-  runApp(const MyApp());
+  final initialPage = await getInitialPage();
+  runApp(MyApp(initialPage: initialPage));
+}
+
+Future<Widget> getInitialPage() async {
+  final prefs = await SharedPreferences.getInstance();
+  final role = prefs.getString("role");
+  final token = prefs.getString("token") ?? prefs.getString("doctor_token");
+
+  if (token != null && token.isNotEmpty && role != null) {
+    if (role == "patient") {
+      return HomePatientPage(token: token);
+    } else if (role == "doctor") {
+      final userId = prefs.getString("doctor_id") ?? "";
+      return HomeDoctorPage(token: token, userId: userId);
+    }
+  }
+
+  return LandingPage(); // إذا ما فيه تسجيل دخول
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-// @override
-//   void initState(){
-//     super.initState();
-//     FirebaseAuth.instance.authStateChanges().listen((User? user) {
-//       if (user == null) {
-//         print('User is currently signed out!');
-//       } else {
-//         print('User is signed in!');
-//       }
-//     });
-//   }
-//
-
+  final Widget initialPage;
+  const MyApp({super.key, required this.initialPage});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      // initialRoute: "Userorrented",
-      // onGenerateRoute: RouteClass.generator,
-      home: LandingPage(),
+      home: initialPage,
     );
-
   }
-
-
-
 }
-// import 'package:flutter/material.dart';
-// import 'core/theme/app_theme.dart';
-// import 'core/config/app_config.dart';
-// import 'pages/auth/login_page.dart';
-// import 'pages/doctor/home_doctor.dart';
-// import 'pages/patient/home_patient.dart';
-//
-// void main() {
-//   runApp(const SmartClinicApp());
-// }
-//
-// class SmartClinicApp extends StatelessWidget {
-//   const SmartClinicApp({super.key});
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       title: 'Smart Clinic',
-//       debugShowCheckedModeBanner: false,
-//       theme: AppTheme.lightTheme,
-//       home: const LoginPage(),
-//       routes: {
-//         '/login': (context) => const LoginPage(),
-//         '/doctorHome': (context) => const HomeDoctorPage(),
-//         '/patientHome': (context) => const HomePatientPage(),
-//       },
-//     );
-//   }
-// }
+
+
+
+
+
+
+//ipconfig لل الامتداد host

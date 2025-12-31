@@ -2,12 +2,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:marquee/marquee.dart';
+import '../../core/config/app_config.dart';
 import '../auth/FullScreenImagePage.dart';
 import '../doctor/records/DoctorPatientFullRecordPage.dart';
 import '../doctor/records/EditRecordPage.dart';
 import '../doctor/records/add_record_page.dart';
 
-const baseUrl = "http://10.0.2.2:8000";
+
 
 class ChatPatientProfile extends StatefulWidget {
   final String patientId;
@@ -43,7 +44,7 @@ class _ChatPatientProfileState extends State<ChatPatientProfile> {
     try {
       final response = await http.get(
         Uri.parse(
-            "$baseUrl/api/v1/doctor/patients/${widget.patientId}/medical_records?page=1&limit=1"),
+            "$baseUrl1/api/v1/doctor/patients/${widget.patientId}/medical_records?page=1&limit=1"),
         headers: {"Authorization": "Bearer ${widget.token}"},
       );
 
@@ -80,7 +81,7 @@ class _ChatPatientProfileState extends State<ChatPatientProfile> {
   Future<void> fetchPatient() async {
     try {
       final response = await http.get(
-        Uri.parse("$baseUrl/doctors/patients/${widget.patientId}"),
+        Uri.parse("$baseUrl1/doctors/patients/${widget.patientId}"),
         headers: {"Authorization": "Bearer ${widget.token}"},
       );
 
@@ -191,7 +192,7 @@ class _ChatPatientProfileState extends State<ChatPatientProfile> {
                           MaterialPageRoute(
                             builder: (_) => FullScreenImagePage(
                               imageUrl:
-                                  "$baseUrl/${patient!['profile_image_url']}",
+                                  "$baseUrl1/${patient!['profile_image_url']}",
                             ),
                           ),
                         );

@@ -2,12 +2,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:university_project/pages/patient/BookAppointmentPage_doctor.dart';
+import '../../core/config/app_config.dart';
 import '../../core/config/app_font.dart';
 import '../../core/config/theme.dart';
 import '../auth/FullScreenImagePage.dart';
 import '../components/chat_page.dart';
 
-const baseUrl = "http://10.0.2.2:8000";
 
 class PatientdoctorprofileOrChatdoctorprofile extends StatefulWidget {
   final String doctorId;
@@ -38,7 +38,7 @@ class _ChatDoctorProfileState extends State<PatientdoctorprofileOrChatdoctorprof
   Future<void> fetchDoctor() async {
     try {
       final response = await http.get(
-        Uri.parse("$baseUrl/patients/doctors/${widget.doctorId}"),
+        Uri.parse("$baseUrl1/patients/doctors/${widget.doctorId}"),
         headers: {"Authorization": "Bearer ${widget.token}"},
       );
 
@@ -133,14 +133,14 @@ class _ChatDoctorProfileState extends State<PatientdoctorprofileOrChatdoctorprof
                     context,
                     MaterialPageRoute(
                       builder: (_) => FullScreenImagePage(
-                        imageUrl: "$baseUrl/${doctor!['profile_image_url']}",
+                        imageUrl: "$baseUrl1/${doctor!['profile_image_url']}",
                       ),
                     ),
                   );
                 },
                 child: ClipOval(
                   child: Image.network(
-                    "$baseUrl/${doctor!['profile_image_url']}",
+                    "$baseUrl1/${doctor!['profile_image_url']}",
                     width: 120,
                     height: 120,
                     fit: BoxFit.cover,

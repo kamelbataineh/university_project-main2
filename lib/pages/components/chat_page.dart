@@ -6,15 +6,15 @@ import 'package:http/http.dart' as http;
 import 'package:file_picker/file_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/config/app_config.dart';
-import '../patient/PatientDoctorProfile_OR_ChatDoctorProfile.dart';
-import 'ChatPatientProfile.dart';
+import '../patient/PatientDoctorProfile_OR_ChatDoctorProfile.dart' hide baseUrl;
+import 'ChatPatientProfile.dart' hide baseUrl;
 
 class ChatPage extends StatefulWidget {
   final String name;
   final String userId;
   final String otherId;
   final String token;
-  final String? profileImageUrl; // موجود أصلاً ✅
+  final String? profileImageUrl;
 
   const ChatPage({
     required this.name,
@@ -34,8 +34,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
   List<Map<String, dynamic>> messages = [];
 
-  final String baseUrl = "http://10.0.2.2:8000";
-  final String baseUrl1 = "http://10.0.2.2:8000/";
+
 
   @override
   void initState() {
@@ -239,7 +238,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                         radius: 25,
                         backgroundColor: Colors.pink.shade300,
                         backgroundImage: imageUrl.isNotEmpty
-                            ? NetworkImage("$baseUrl1$imageUrl")
+                            ? NetworkImage("$baseUrl$imageUrl")
                             : null,
                         child: imageUrl.isEmpty
                             ? Text(

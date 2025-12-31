@@ -186,7 +186,7 @@ class _PatientLoginPageState extends State<PatientLoginPage>
     ]);
   }
 
-  Widget floatingHeartIcon() {
+  Widget floatingPatientIcon() {
     return SizedBox(
       height: 120,
       child: Center(
@@ -197,26 +197,40 @@ class _PatientLoginPageState extends State<PatientLoginPage>
             return Transform.scale(
               scale: scale,
               child: Container(
-                width: 80,
-                height: 80,
+                width: 90,
+                height: 90,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
-                    colors: [Colors.pink.shade200, Colors.pinkAccent.shade200],
+                    colors: [
+                      Colors.pink.shade200,
+                      Colors.pink.shade200
+                    ],
                   ),
                   boxShadow: [
                     BoxShadow(
-                        color: Colors.pink.shade200.withOpacity(0.5),
-                        blurRadius: 20,
-                        offset: Offset(0, 8)),
+                      color: Colors.pink.shade200.withOpacity(0.5),
+                      blurRadius: 20,
+                      offset: Offset(0, 8),
+                    ),
                     BoxShadow(
-                        color: Colors.white.withOpacity(0.5),
-                        blurRadius: 8,
-                        offset: Offset(-4, -4),
-                        spreadRadius: 1),
+                      color: Colors.white.withOpacity(0.6),
+                      blurRadius: 8,
+                      offset: Offset(-4, -4),
+                      spreadRadius: 1,
+                    ),
                   ],
                 ),
-                child: Icon(Icons.favorite, color: Colors.white, size: 40),
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: ClipOval(
+                    child: Image.asset(
+                      'images/logo.jpg',
+
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
               ),
             );
           },
@@ -224,6 +238,7 @@ class _PatientLoginPageState extends State<PatientLoginPage>
       ),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -253,7 +268,7 @@ class _PatientLoginPageState extends State<PatientLoginPage>
           ),
 
             SizedBox(height: 20),
-            floatingHeartIcon(),
+            floatingPatientIcon(),
             SizedBox(height: 16),
             Text(
               'User Login',
@@ -262,7 +277,7 @@ class _PatientLoginPageState extends State<PatientLoginPage>
                 fontWeight: FontWeight.bold,
                 foreground: Paint()
                   ..shader = LinearGradient(
-                    colors: [Colors.pink.shade200, Colors.pink.shade400],
+                    colors: [Colors.pink.shade300, Colors.pink.shade300],
                   ).createShader(Rect.fromLTWH(0, 0, 200, 0)),
               ),
             ),

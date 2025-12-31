@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:university_project/pages/auth/FullScreenImagePage.dart';
 import 'package:university_project/pages/auth/PatientLoginPage.dart';
-import 'package:university_project/pages/patient/EditPatientProfilePage.dart';
+import 'package:university_project/pages/patient/EditPatientProfilePage.dart' hide baseUrl;
 import 'dart:convert';
 import '../../core/config/app_config.dart';
 import '../../core/config/theme.dart';
@@ -14,7 +14,6 @@ class ProfilePatientPage extends StatefulWidget {
   @override
   _ProfilePatientPageState createState() => _ProfilePatientPageState();
 }
-const baseUrl = "http://10.0.2.2:8000/";
 
 class _ProfilePatientPageState extends State<ProfilePatientPage> {
   Map<String, dynamic>? patientData;

@@ -286,7 +286,6 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
   }
 
 
-
   Widget floatingPatientIcon() {
     return SizedBox(
       height: 120,
@@ -298,26 +297,40 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
             return Transform.scale(
               scale: scale,
               child: Container(
-                width: 80,
-                height: 80,
+                width: 90,
+                height: 90,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
-                    colors: [Colors.pink.shade200, Colors.pinkAccent.shade200],
+                    colors: [
+                      Colors.pink.shade200,
+                      Colors.pink.shade200
+                    ],
                   ),
                   boxShadow: [
                     BoxShadow(
-                        color: Colors.pink.shade200.withOpacity(0.5),
-                        blurRadius: 20,
-                        offset: Offset(0, 8)),
+                      color: Colors.pink.shade200.withOpacity(0.5),
+                      blurRadius: 20,
+                      offset: Offset(0, 8),
+                    ),
                     BoxShadow(
-                        color: Colors.white.withOpacity(0.5),
-                        blurRadius: 8,
-                        offset: Offset(-4, -4),
-                        spreadRadius: 1),
+                      color: Colors.white.withOpacity(0.6),
+                      blurRadius: 8,
+                      offset: Offset(-4, -4),
+                      spreadRadius: 1,
+                    ),
                   ],
                 ),
-                child: Icon(Icons.favorite, color: Colors.white, size: 40),
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: ClipOval(
+                    child: Image.asset(
+                      'images/logo.jpg',
+
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
               ),
             );
           },
@@ -325,6 +338,7 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
       ),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -339,7 +353,9 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
               Row(
                 children: [
                   IconButton(
-                    icon: Icon(Icons.arrow_back, color: AppTheme.patientIcon),
+                    icon: Icon(Icons.arrow_back,
+                      color:Colors.pink.shade200,
+                    ),
                     onPressed: () => Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (_) => LandingPage())),
@@ -350,7 +366,7 @@ class _RegisterPatientPageState extends State<RegisterPatientPage>
                     style: AppFont.regular(
                       size: 22,
                       weight: FontWeight.bold,
-                      color: AppTheme.patientAppbar,
+                      color:Colors.pink.shade200,
                     ),
                   ),
                   Spacer(flex: 2),

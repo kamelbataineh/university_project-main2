@@ -21,7 +21,9 @@ class ImageResultsPage extends StatefulWidget {
   @override
   State<ImageResultsPage> createState() => _ImageResultsPageState();
 }
-class _ImageResultsPageState extends State<ImageResultsPage> with TickerProviderStateMixin {
+
+class _ImageResultsPageState extends State<ImageResultsPage>
+    with TickerProviderStateMixin {
   bool _isAnalyzing = true;
   late List<AnimationController> _controllers;
   late List<Animation<double>> _animations;
@@ -37,32 +39,24 @@ class _ImageResultsPageState extends State<ImageResultsPage> with TickerProvider
     _initAnimations();
   }
 
-
-
-
-
-
-
-
   void _startTypingConfidence(String confidence) {
-  _confidenceText = "";
-  int index = 0;
-  Timer.periodic(const Duration(milliseconds: 50), (timer) {
-  if (!mounted) {
-  timer.cancel();
-  return;
+    _confidenceText = "";
+    int index = 0;
+    Timer.periodic(const Duration(milliseconds: 50), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      if (index < confidence.length) {
+        setState(() {
+          _confidenceText += confidence[index];
+        });
+        index++;
+      } else {
+        timer.cancel();
+      }
+    });
   }
-  if (index < confidence.length) {
-  setState(() {
-  _confidenceText += confidence[index];
-  });
-  index++;
-  } else {
-  timer.cancel();
-  }
-  });
-  }
-
 
   void _initAnimations() {
     _controllers = [];
@@ -78,16 +72,16 @@ class _ImageResultsPageState extends State<ImageResultsPage> with TickerProvider
       final animation = Tween<double>(begin: 0, end: prob.toDouble()).animate(
         CurvedAnimation(parent: controller, curve: Curves.easeOut),
       )..addListener(() {
-        setState(() {
-          if (_scrollController.hasClients) {
-            _scrollController.animateTo(
-              _scrollController.position.maxScrollExtent,
-              duration: const Duration(milliseconds: 100),
-              curve: Curves.easeOut,
-            );
-          }
+          setState(() {
+            if (_scrollController.hasClients) {
+              _scrollController.animateTo(
+                _scrollController.position.maxScrollExtent,
+                duration: const Duration(milliseconds: 100),
+                curve: Curves.easeOut,
+              );
+            }
+          });
         });
-      });
 
       _controllers.add(controller);
       _animations.add(animation);
@@ -104,7 +98,6 @@ class _ImageResultsPageState extends State<ImageResultsPage> with TickerProvider
       });
     });
   }
-
 
   @override
   void dispose() {
@@ -154,7 +147,6 @@ class _ImageResultsPageState extends State<ImageResultsPage> with TickerProvider
         ),
         backgroundColor: Colors.indigo.shade400,
       ),
-
       body: SingleChildScrollView(
         controller: _scrollController,
         padding: const EdgeInsets.all(16),
@@ -171,14 +163,14 @@ class _ImageResultsPageState extends State<ImageResultsPage> with TickerProvider
               ),
             ),
             const SizedBox(height: 16),
-
             Text(
               "Prediction: ${widget.prediction}",
               style: const TextStyle(
-                  fontSize: 20, fontWeight: FontWeight.bold, color: Colors.indigo),
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.indigo),
             ),
             const SizedBox(height: 16),
-
             ...List.generate(classNames.length, (index) {
               double value = _animations[index].value;
               return Padding(
@@ -188,7 +180,8 @@ class _ImageResultsPageState extends State<ImageResultsPage> with TickerProvider
                   children: [
                     Text(
                       "${classNames[index]}: ${(value * 100).toStringAsFixed(1)}%",
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                      style: const TextStyle(
+                          fontSize: 14, fontWeight: FontWeight.w500),
                     ),
                     const SizedBox(height: 4),
                     ClipRRect(
@@ -204,11 +197,11 @@ class _ImageResultsPageState extends State<ImageResultsPage> with TickerProvider
                 ),
               );
             }),
-
             const SizedBox(height: 16),
             Row(
               children: [
-                Icon(Icons.warning_amber, color: getGradientColor(maxProb), size: 18),
+                Icon(Icons.warning_amber,
+                    color: getGradientColor(maxProb), size: 18),
                 const SizedBox(width: 8),
                 Text(
                   _showConfidence ? "Confidence: $_confidenceText%" : "",
@@ -220,14 +213,14 @@ class _ImageResultsPageState extends State<ImageResultsPage> with TickerProvider
                 ),
               ],
             ),
-
-
             const SizedBox(height: 16),
             if (!_isAnalyzing) ...[
               const Text(
                 "Findings:",
                 style: TextStyle(
-                    fontSize: 18, fontWeight: FontWeight.bold, color: Colors.indigo),
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.indigo),
               ),
               const SizedBox(height: 8),
               ...results['findings'].map<Widget>((f) {
@@ -235,7 +228,8 @@ class _ImageResultsPageState extends State<ImageResultsPage> with TickerProvider
                   children: [
                     const Icon(Icons.circle, size: 8, color: Colors.indigo),
                     const SizedBox(width: 6),
-                    Expanded(child: Text(f, style: const TextStyle(fontSize: 14))),
+                    Expanded(
+                        child: Text(f, style: const TextStyle(fontSize: 14))),
                   ],
                 );
               }).toList(),
@@ -243,15 +237,19 @@ class _ImageResultsPageState extends State<ImageResultsPage> with TickerProvider
               const Text(
                 "Recommendations:",
                 style: TextStyle(
-                    fontSize: 18, fontWeight: FontWeight.bold, color: Colors.indigo),
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.indigo),
               ),
               const SizedBox(height: 8),
               ...results['recommendations'].map<Widget>((r) {
                 return Row(
                   children: [
-                    const Icon(Icons.check_circle, size: 18, color: Colors.green),
+                    const Icon(Icons.check_circle,
+                        size: 18, color: Colors.green),
                     const SizedBox(width: 6),
-                    Expanded(child: Text(r, style: const TextStyle(fontSize: 14))),
+                    Expanded(
+                        child: Text(r, style: const TextStyle(fontSize: 14))),
                   ],
                 );
               }).toList(),
@@ -263,8 +261,6 @@ class _ImageResultsPageState extends State<ImageResultsPage> with TickerProvider
     );
   }
 }
-
-
 
 // import 'dart:io';
 //

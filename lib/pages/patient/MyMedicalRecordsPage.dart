@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../../core/config/app_config.dart';
 import '../../services/MedicalRecordService.dart';
 
 class MyMedicalRecordsPage extends StatefulWidget {
@@ -25,7 +26,7 @@ class _MyMedicalRecordsPageState extends State<MyMedicalRecordsPage> {
   Future<void> loadRecords() async {
     try {
       final data = await MedicalRecordService(
-          baseUrl: "http://10.0.2.2:8000", token: widget.token)
+          baseUrl: "$baseUrl1", token: widget.token)
           .getMyMedicalRecords(page: 1, limit: 20);
       setState(() {
         records = data['records'];

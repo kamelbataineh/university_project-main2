@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import '../../core/config/app_config.dart';
+
 class AdminPatientProfilePage extends StatefulWidget {
   final Map patient;
   final String adminToken;
@@ -17,7 +19,6 @@ class _AdminPatientProfilePageState extends State<AdminPatientProfilePage> {
   bool loading = false;
   late bool isActive;
 
-  final String baseUrl = "http://10.0.2.2:8000"; // API
 
   @override
   void initState() {
@@ -30,7 +31,7 @@ class _AdminPatientProfilePageState extends State<AdminPatientProfilePage> {
     setState(() => loading = true);
     try {
       final response = await http.put(
-        Uri.parse("$baseUrl/admin/patient/${widget.patient["_id"]}/toggle_active"),
+        Uri.parse("$baseUrl1/admin/patient/${widget.patient["_id"]}/toggle_active"),
         headers: {
           "Authorization": "Bearer ${widget.adminToken}",
           "Content-Type": "application/json",
@@ -147,7 +148,7 @@ class _AdminPatientProfilePageState extends State<AdminPatientProfilePage> {
                     setState(() => loading = true);
                     try {
                       final response = await http.delete(
-                        Uri.parse("http://10.0.2.2:8000/admin/patient/${widget.patient["_id"]}"),
+                        Uri.parse("$baseUrl1/admin/patient/${widget.patient["_id"]}"),
                         headers: {
                           "Authorization": "Bearer ${widget.adminToken}",
                           "Content-Type": "application/json",

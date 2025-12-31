@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/config/app_config.dart';
 import 'PdfViewerPage.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
@@ -41,7 +42,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
 
     try {
       final response = await http.get(
-        Uri.parse("http://10.0.2.2:8000/admin/doctor"),
+        Uri.parse("http://192.168.8.31:8000/admin/doctor"),
         headers: {"Authorization": "Bearer $token"},
       );
 
@@ -74,7 +75,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
     if (isApproved != null) body["is_approved"] = isApproved;
 
     final response = await http.put(
-      Uri.parse("http://10.0.2.2:8000/admin/doctor/update/$id"),
+      Uri.parse("http://192.168.8.31:8000/admin/doctor/update/$id"),
       headers: {
         "Authorization": "Bearer $token",
         "Content-Type": "application/json"
@@ -94,7 +95,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
     final token = prefs.getString("admin_token") ?? "";
 
     final response = await http.delete(
-      Uri.parse("http://10.0.2.2:8000/admin/doctor/$id"),
+      Uri.parse("$baseUrl1/admin/doctor/$id"),
       headers: {"Authorization": "Bearer $token"},
     );
 
