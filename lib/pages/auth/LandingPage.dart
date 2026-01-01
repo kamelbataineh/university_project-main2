@@ -44,18 +44,19 @@ class _LandingPageState extends State<LandingPage>
   }
 
 
-  List<Map<String, dynamic>> introPages = [
-    {
-      "title": "Welcome to Pink Scan",
-      "subtitle":
-          "A platform to empower breast cancer patients with AI-assisted insights under doctor supervision.",
-      "icon": Icons.favorite,
-      "gradient": [
-        Colors.pink.shade400,
-        Colors.pink.shade500,
-        Colors.pink.shade600
-      ],
-    },
+  late List<Map<String, dynamic>> introPages = [
+  {
+  "title": "Welcome to Pink Scan",
+  "subtitle":
+  "A platform to empower breast cancer patients with AI-assisted insights under doctor supervision.",
+  "icon": floatingPatientIcon(), // ✅ هنا Widget بدل IconData
+  "gradient": [
+  Colors.pink.shade400,
+  Colors.pink.shade500,
+  Colors.pink.shade600
+  ],
+},
+
     {
       "title": "Secure & Private", // آمن وخاص
       "subtitle":
@@ -83,13 +84,82 @@ class _LandingPageState extends State<LandingPage>
     },
   ];
 
+
+  Widget floatingPatientIcon() {
+    return SizedBox(
+      height: 120,
+      child: Center(
+        child: AnimatedBuilder(
+          animation: _iconController,
+          builder: (context, child) {
+            double scale = 1 + 0.05 * _iconController.value;
+            return Transform.scale(
+              scale: scale,
+              child: Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.pink.shade200,
+                      Colors.pink.shade200
+                    ],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.pink.shade200.withOpacity(0.5),
+                      blurRadius: 20,
+                      offset: Offset(0, 8),
+                    ),
+                    BoxShadow(
+                      color: Colors.white.withOpacity(0.6),
+                      blurRadius: 8,
+                      offset: Offset(-4, -4),
+                      spreadRadius: 1,
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: ClipOval(
+                    child: Image.asset(
+                      'images/logo.jpg',
+
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+
+
+
+
+
   Widget _buildPage(Map<String, dynamic> page) {
+    Widget iconWidget;
+
+    if (page["icon"] is Widget) {
+      iconWidget = page["icon"];
+    } else if (page["icon"] is IconData) {
+      iconWidget = Icon(page["icon"], color: Colors.white, size: 50);
+    } else {
+      iconWidget = Container();
+    }
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Container(
           width: 90,
-          height: 120,
+          height: 90,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: LinearGradient(colors: page["gradient"]),
@@ -100,7 +170,7 @@ class _LandingPageState extends State<LandingPage>
                   offset: Offset(0, 10))
             ],
           ),
-          child: Icon(page["icon"], color: Colors.white, size: 50),
+          child: Center(child: iconWidget),
         ),
         SizedBox(height: 32),
         Text(
@@ -129,44 +199,7 @@ class _LandingPageState extends State<LandingPage>
     );
   }
 
-  Widget floatingPatientIcon() {
-    return SizedBox(
-      height: 120,
-      child: Center(
-        child: AnimatedBuilder(
-          animation: _iconController,
-          builder: (context, child) {
-            double scale = 1 + 0.05 * _iconController.value;
-            return Transform.scale(
-              scale: scale,
-              child: Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: [Colors.pink.shade100, Colors.pinkAccent.shade100],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.pink.shade200.withOpacity(0.5),
-                        blurRadius: 20,
-                        offset: Offset(0, 8)),
-                    BoxShadow(
-                        color: Colors.white.withOpacity(0.5),
-                        blurRadius: 8,
-                        offset: Offset(-4, -4),
-                        spreadRadius: 1),
-                  ],
-                ),
-                child: Icon(Icons.favorite, color: Colors.white, size: 40),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
+
 
   @override
   Widget build(BuildContext context) {

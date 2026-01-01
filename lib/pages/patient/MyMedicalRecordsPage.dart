@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:university_project/core/config/theme.dart';
 import '../../core/config/app_config.dart';
+import '../../core/config/app_font.dart';
 import '../../services/MedicalRecordService.dart';
 
 class MyMedicalRecordsPage extends StatefulWidget {
@@ -98,7 +100,7 @@ class MedicalRecordDetailPage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
-            CircleAvatar(backgroundColor: Colors.purple.shade100, child: Icon(icon, color: Colors.purple)),
+            CircleAvatar(backgroundColor: Colors.pink.shade100, child: Icon(icon, color: Colors.pink.shade600)),
             const SizedBox(width: 12),
             Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           ]),
@@ -197,7 +199,11 @@ class MedicalRecordDetailPage extends StatelessWidget {
 
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Medical Record Details"), backgroundColor: Colors.purple),
+      appBar: AppBar(title:  Text("Medical Record Details",style: AppFont.regular(
+        size: 20,
+        weight: FontWeight.bold,
+        color: Colors.white,
+      ),), backgroundColor: Colors.pink.shade400),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

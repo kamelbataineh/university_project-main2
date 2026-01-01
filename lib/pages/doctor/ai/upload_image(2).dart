@@ -47,12 +47,13 @@ class _UploadImagePageState extends State<UploadImagePage>
     if (image == null) return;
 
     File file = File(image.path);
-    if (!isMammogram(file)) {
+    if (file.lengthSync() > 10 * 1024 * 1024) { // 10MB
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("❌ Please upload a mammogram image only")),
+        const SnackBar(content: Text("❌ Image too large. Max size is 10MB")),
       );
       return;
     }
+
 
     setState(() {
       selectedImage = file;
@@ -64,17 +65,16 @@ class _UploadImagePageState extends State<UploadImagePage>
   // ================================
   bool isMammogram(File file) {
     final name = file.path.toLowerCase();
-    final allowedExtensions = ['jpg'];
+    final allowedExtensions = ['png']; // السماح بصيغ أكثر
     final ext = name.split('.').last;
     if (!allowedExtensions.contains(ext)) return false;
-    if (!(name.contains("mamm") ||
-        name.contains("mg") ||
-        name.contains("breast") ||
-        name.contains("mammo"))) {
-      return true;
-    }
-    return true;
+
+    // يجب أن يحتوي اسم الملف على كلمة مفتاحية
+    final keywords = ["mamm", "mg", "breast", "mammo"];
+    bool containsKeyword = keywords.any((k) => name.contains(k));
+    return containsKeyword;
   }
+
 
   // ================================
   // 3) رفع الصورة الى FastAPI
@@ -183,11 +183,15 @@ class _UploadImagePageState extends State<UploadImagePage>
             onNavigate: (screen) {
               if (screen == 'upload-image') Navigator.pop(context);
             },
-            prediction: result['prediction'],
-            probabilities: result['probabilities'],
+            prediction: result['prediction'] ?? "Unknown",
+            probabilities: result['probabilities'] ?? [0.0, 0.0, 0.0],
+            findings: result['findings'] ?? [],             // ← ←
+            recommendations: result['recommendations'] ?? [], // ← ←
           ),
         ),
       );
+
+
     } catch (e) {
       setState(() => isUploading = false);
       ScaffoldMessenger.of(context)
@@ -468,7 +472,7 @@ class _UploadImagePageState extends State<UploadImagePage>
                                 SizedBox(height: 4),
                                 Text(
                                   "• Only mammogram images\n"
-                                      "• Supported formats: JPG, PNG\n"
+                                      "• Supported formats: PNG\n"
                                       "• Maximum file size: 10MB\n"
                                       "• Ensure clear image quality\n"
                                       "• AI analysis provided after upload",

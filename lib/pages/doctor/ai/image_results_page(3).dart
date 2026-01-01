@@ -8,6 +8,8 @@ class ImageResultsPage extends StatefulWidget {
   final Function(String) onNavigate;
   final String prediction;
   final List probabilities;
+  final List findings;
+  final List recommendations;
 
   const ImageResultsPage({
     super.key,
@@ -16,6 +18,8 @@ class ImageResultsPage extends StatefulWidget {
     required this.onNavigate,
     required this.prediction,
     required this.probabilities,
+    required this.findings, // ← جديد
+    required this.recommendations, // ← جديد
   });
 
   @override
@@ -120,21 +124,9 @@ class _ImageResultsPageState extends State<ImageResultsPage>
     List<String> classNames = ["benign", "malignant", "normal"];
     double maxProb = widget.probabilities.reduce((a, b) => a > b ? a : b);
 
-    final Map<String, dynamic> results = {
-      'confidence': maxProb * 100,
-      'findings': [
-        'Consolidation detected in right lower lobe',
-        'Increased opacity in affected area',
-        'No signs of pleural effusion',
-        'Cardiac silhouette within normal limits',
-      ],
-      'recommendations': [
-        'Antibiotic therapy recommended',
-        'Follow-up X-ray in 2 weeks',
-        'Monitor oxygen saturation',
-        'Consider sputum culture if symptoms persist',
-      ],
-    };
+    final double confidence = maxProb * 100;
+    final List findings = widget.findings ?? [];
+    final List recommendations = widget.recommendations ?? [];
 
     return Scaffold(
       appBar: AppBar(
@@ -213,48 +205,48 @@ class _ImageResultsPageState extends State<ImageResultsPage>
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            if (!_isAnalyzing) ...[
-              const Text(
-                "Findings:",
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.indigo),
-              ),
-              const SizedBox(height: 8),
-              ...results['findings'].map<Widget>((f) {
-                return Row(
-                  children: [
-                    const Icon(Icons.circle, size: 8, color: Colors.indigo),
-                    const SizedBox(width: 6),
-                    Expanded(
-                        child: Text(f, style: const TextStyle(fontSize: 14))),
-                  ],
-                );
-              }).toList(),
-              const SizedBox(height: 16),
-              const Text(
-                "Recommendations:",
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.indigo),
-              ),
-              const SizedBox(height: 8),
-              ...results['recommendations'].map<Widget>((r) {
-                return Row(
-                  children: [
-                    const Icon(Icons.check_circle,
-                        size: 18, color: Colors.green),
-                    const SizedBox(width: 6),
-                    Expanded(
-                        child: Text(r, style: const TextStyle(fontSize: 14))),
-                  ],
-                );
-              }).toList(),
+            // const SizedBox(height: 16),
+            // if (!_isAnalyzing) ...[
+            //   const Text(
+            //     "Findings:",
+            //     style: TextStyle(
+            //         fontSize: 18,
+            //         fontWeight: FontWeight.bold,
+            //         color: Colors.indigo),
+            //   ),
+            //   const SizedBox(height: 8),
+            //   ...findings.map<Widget>((f) {
+            //     return Row(
+            //       children: [
+            //         const Icon(Icons.circle, size: 8, color: Colors.indigo),
+            //         const SizedBox(width: 6),
+            //         Expanded(
+            //             child: Text(f, style: const TextStyle(fontSize: 14))),
+            //       ],
+            //     );
+            //   }).toList(),
+              // const SizedBox(height: 16),
+              // const Text(
+              //   "Recommendations:",
+              //   style: TextStyle(
+              //       fontSize: 18,
+              //       fontWeight: FontWeight.bold,
+              //       color: Colors.indigo),
+              // ),
+              // const SizedBox(height: 8),
+              // ...recommendations.map<Widget>((r) {
+              //   return Row(
+              //     children: [
+              //       const Icon(Icons.check_circle,
+              //           size: 18, color: Colors.green),
+              //       const SizedBox(width: 6),
+              //       Expanded(
+              //           child: Text(r, style: const TextStyle(fontSize: 14))),
+              //     ],
+              //   );
+              // }).toList(),
               const SizedBox(height: 70),
-            ],
+            // ],
           ],
         ),
       ),

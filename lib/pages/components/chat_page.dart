@@ -37,6 +37,25 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
 
   Timer? _timer;
 
+  // final Color senderColor = Color(0xFFF9A8D4);   // زهري فاتح (sender_id)
+  // final Color receiverColor = Color(0xFFEC4899); // زهري غامق (receiver_id)
+  final LinearGradient senderColor = const LinearGradient(
+    colors: [
+      Color(0xFFF472B6), // زهري ناعم
+      Color(0xFFEF9FC6), // زهري فاتح جداً
+    ],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  final LinearGradient receiverColor =  LinearGradient(
+    colors: [
+      Colors.grey[200]!, // زهري أغمق
+      Colors.grey[300]!, // زهري أغمق
+    ],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
 
   @override
   void initState() {
@@ -79,14 +98,15 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
               senderId = msg["sender_id"].toString();
             }
 
-            bool isMe = senderId.trim() == widget.userId.trim();
+            bool isSender = senderId.trim() == widget.userId.trim();
 
             return {
-              "sender": isMe ? "me" : "other",
+              "isSender": isSender,
               "text": msg["type"] == "image" ? msg["preview"] : msg["message_text"],
               "time": msg["timestamp"],
               "type": msg["type"],
             };
+
           }).toList();
         });
 
@@ -288,7 +308,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     final msg = messages[index];
-                    final bool isMe = msg["sender"] == "me";
+                    final bool isSender = msg["isSender"] == true;
                     final bool isImage = msg["type"] == "image";
 
                     String formattedTime = "";
@@ -300,22 +320,28 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                     }
 
                     return AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-                      margin: const EdgeInsets.symmetric(vertical: 10),
+                      duration:  Duration(milliseconds: 200),
+                      alignment: isSender
+                          ? Alignment.centerRight
+                          : Alignment.centerLeft,
+                      margin:  EdgeInsets.symmetric(vertical: 10),
                       child: Container(
-                        padding: const EdgeInsets.all(8),
-                        constraints: const BoxConstraints(maxWidth: 280),
+                        padding:  EdgeInsets.all(8),
+                        constraints:  BoxConstraints(  maxWidth: 280,
+                          minWidth: 180,),
                         decoration: BoxDecoration(
-                          gradient: isMe
-                              ? const LinearGradient(
-                            colors: [Color(0xFFF472B6), Color(0xFFE11D48)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          )
-                              : null,
-                          color: isMe ? null : Colors.white.withOpacity(0.6),
+
+                          gradient: isSender ? senderColor : receiverColor,
                           borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: isSender
+                                  ? const Color(0xFFF472B6).withOpacity(0.35)
+                                  : Colors.black.withOpacity(0.08),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
 
                         child: isImage
@@ -332,7 +358,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                             Text(
                               msg["text"],
                               style: TextStyle(
-                                color: isMe ? Colors.white : Colors.black87,
+                                color: Colors.black45,
                                 fontSize: 15,
                               ),
                             ),
@@ -344,7 +370,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                                 Text(
                                   formattedTime,
                                   style: TextStyle(
-                                    color: isMe ? Colors.pink.shade100 : Colors.grey,
+                                    color: Colors.black45,
                                     fontSize: 10,
                                   ),
                                 ),
