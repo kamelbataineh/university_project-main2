@@ -1,23 +1,31 @@
+// flutter pub run flutter_launcher_icons:main
+// ipconfig
 
-bool isEmulator = true; // ❗ غيّرها فقط
 
-final String emulatorUrl = "http://10.0.2.2:8000/";
-final String emulatorUrlNoSlash = "http://10.0.2.2:8000";
 
-final String phoneUrl = "http://192.168.8.31:8000/";
-final String phoneUrlNoSlash = "http://192.168.8.31:8000";
 
-final String baseUrl = isEmulator ? emulatorUrl : phoneUrl;
-final String baseUrl1 = isEmulator ? emulatorUrlNoSlash : phoneUrlNoSlash;
-// //  localhost
-// const baseUrl                     = "http://10.0.2.2:8000/";
-// const baseUrl1                     = "http://10.0.2.2:8000";
+
+///////////////////
+
+// bool isEmulator = true; // ❗ غيّرها فقط
 //
-// // const baseUrl                     = "http://192.168.8.31:8000/";
-// // const baseUrl1                     = "http://192.168.8.31:8000";
-// //
+// final String emulatorUrl = "http://10.0.2.2:8000/";
+// final String emulatorUrlNoSlash = "http://10.0.2.2:8000";
+//
+// final String phoneUrl = "http://192.168.8.31:8000/";
+// final String phoneUrlNoSlash = "http://192.168.8.31:8000";
+//
+// final String baseUrl = isEmulator ? emulatorUrl : phoneUrl;
+// final String baseUrl1 = isEmulator ? emulatorUrlNoSlash : phoneUrlNoSlash;
+// //  localhost
+// final baseUrl                     = "http://10.0.2.2:8000/";
+// final baseUrl1                     = "http://10.0.2.2:8000";
+//
+final baseUrl                     = "http://192.168.8.31:8000/";
+final baseUrl1                     = "http://192.168.8.31:8000";
 
 
+final String chatMarkDelivered = "$baseUrl1/api/chat/delivered";
 
 final String chatMessages = "$baseUrl1/chat/messages/";
 final String chatSend = "$baseUrl1/chat/send";

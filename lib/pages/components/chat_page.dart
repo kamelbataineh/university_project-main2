@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -34,12 +35,24 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
   List<Map<String, dynamic>> messages = [];
 
+  Timer? _timer;
 
 
   @override
   void initState() {
     super.initState();
     fetchMessages();
+
+    _timer = Timer.periodic(const Duration(milliseconds: 800), (timer) {
+      fetchMessages();
+    });
+  }
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _controller.dispose();
+    _scrollController.dispose();
+    super.dispose();
   }
 
   Future<void> fetchMessages() async {
@@ -52,9 +65,13 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as List;
 
+        // حفظ موقع التمرير الحالي
+        final scrollPosition = _scrollController.hasClients
+            ? _scrollController.position.pixels
+            : 0.0;
+
         setState(() {
           messages = data.map((msg) {
-            // تحويل أي ObjectId من MongoDB إلى String بطريقة آمنة
             String senderId = "";
             if (msg["sender_id"] is Map && msg["sender_id"]["\$oid"] != null) {
               senderId = msg["sender_id"]["\$oid"];
@@ -65,27 +82,35 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
             bool isMe = senderId.trim() == widget.userId.trim();
 
             return {
-              "sender": isMe ? "me" : "other",   // ← هذا يحدد اليمين أو اليسار
+              "sender": isMe ? "me" : "other",
               "text": msg["type"] == "image" ? msg["preview"] : msg["message_text"],
               "time": msg["timestamp"],
               "type": msg["type"],
             };
           }).toList();
-
         });
 
-
-        Future.delayed(const Duration(milliseconds: 200), () {
-          if (_scrollController.hasClients) {
-            _scrollController
-                .jumpTo(_scrollController.position.maxScrollExtent);
-          }
-        });
+        // نعيد التمرير فقط إذا كان عند الأسفل تقريبًا
+        if (_scrollController.hasClients &&
+            (_scrollController.position.maxScrollExtent - scrollPosition) < 50) {
+          scrollToBottom();
+        }
       }
     } catch (e) {
       print("❌ Error: $e");
     }
   }
+
+  void scrollToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
+  }
+
 
   Future<void> sendMessage() async {
     final text = _controller.text.trim();
@@ -161,17 +186,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
     }
   }
 
-  void scrollToBottom() {
-    Future.delayed(const Duration(milliseconds: 200), () {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent + 100,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      }
-    });
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -286,62 +301,71 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
 
                     return AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
-                      alignment:
-                          isMe ? Alignment.centerRight : Alignment.centerLeft,
-                      margin: const EdgeInsets.symmetric(vertical: 5),
+                      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                      margin: const EdgeInsets.symmetric(vertical: 10),
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         constraints: const BoxConstraints(maxWidth: 280),
                         decoration: BoxDecoration(
                           gradient: isMe
                               ? const LinearGradient(
-                                  colors: [
-                                    Color(0xFFF472B6),
-                                    Color(0xFFE11D48)
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                )
+                            colors: [Color(0xFFF472B6), Color(0xFFE11D48)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          )
                               : null,
                           color: isMe ? null : Colors.white.withOpacity(0.6),
                           borderRadius: BorderRadius.circular(20),
                         ),
+
                         child: isImage
                             ? ClipRRect(
-                                borderRadius: BorderRadius.circular(16),
-                                child: Image.network(
-                                  baseUrl + msg["text"],
-                                  width: 200,
-                                ),
-                              )
+                          borderRadius: BorderRadius.circular(16),
+                          child: Image.network(
+                            baseUrl + msg["text"],
+                            width: 200,
+                          ),
+                        )
                             : Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    msg["text"],
-                                    style: TextStyle(
-                                      color:
-                                          isMe ? Colors.white : Colors.black87,
-                                      fontSize: 15,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Align(
-                                    alignment: Alignment.bottomRight,
-                                    child: Text(
-                                      formattedTime,
-                                      style: TextStyle(
-                                        color: isMe
-                                            ? Colors.pink.shade100
-                                            : Colors.grey,
-                                        fontSize: 10,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              msg["text"],
+                              style: TextStyle(
+                                color: isMe ? Colors.white : Colors.black87,
+                                fontSize: 15,
                               ),
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Text(
+                                  formattedTime,
+                                  style: TextStyle(
+                                    color: isMe ? Colors.pink.shade100 : Colors.grey,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                // if (isMe)
+                                //   Icon(
+                                //     msg["delivered"] == true
+                                //         ? Icons.check_circle
+                                //         : Icons.check_circle_outline,
+                                //     size: 14,
+                                //     color: msg["delivered"] == true
+                                //         ? Colors.green
+                                //         : Colors.grey,
+                                //   ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     );
+
                   },
                 ),
               ),
