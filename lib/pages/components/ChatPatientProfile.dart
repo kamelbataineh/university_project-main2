@@ -199,7 +199,7 @@ class _ChatPatientProfileState extends State<ChatPatientProfile> {
                       },
                       child: ClipOval(
                         child: Image.network(
-                          "$baseUrl/${patient!['profile_image_url']}",
+                          "$baseUrl1/${patient!['profile_image_url']}",
                           width: 120,
                           height: 120,
                           fit: BoxFit.cover,

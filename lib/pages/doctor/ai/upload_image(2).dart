@@ -3,9 +3,11 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'dart:io';
+import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import '../../../core/config/app_config.dart';
 import 'image_results_page(3).dart';
+
 
 class UploadImagePage extends StatefulWidget {
   const UploadImagePage({super.key});
@@ -23,6 +25,37 @@ class _UploadImagePageState extends State<UploadImagePage>
   double uploadProgress = 0;
 
   late AnimationController _controller;
+
+  Future<bool> isGrayscale(File file) async {
+    final bytes = await file.readAsBytes();
+    final image = img.decodeImage(bytes);
+
+    if (image == null) return false;
+
+    const threshold = 210; // فرق أكبر بين R,G,B ليعتبر رمادي (قبل: 15)
+
+    for (int y = 0; y < image.height; y += 10) { // عين كل 10 بيكسل بدل 50 للتأكد
+      for (int x = 0; x < image.width; x += 10) {
+        final pixel = image.getPixel(x, y);
+
+        // جلب قيم R,G,B
+        final r = pixel.r;
+        final g = pixel.g;
+        final b = pixel.b;
+
+        // نقبل الفرق حتى threshold أكبر للرمادي
+        if ((r - g).abs() > threshold ||
+            (g - b).abs() > threshold ||
+            (r - b).abs() > threshold) {
+          return false; // صورة ملونة جداً
+        }
+      }
+    }
+
+    return true; // أبيض وأسود / رمادي مسموح
+  }
+
+
 
   @override
   void initState() {
@@ -47,33 +80,30 @@ class _UploadImagePageState extends State<UploadImagePage>
     if (image == null) return;
 
     File file = File(image.path);
-    if (file.lengthSync() > 10 * 1024 * 1024) { // 10MB
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("❌ Image too large. Max size is 10MB")),
-      );
+
+    // ===== فحص صيغة الملف =====
+    if (!file.path.toLowerCase().endsWith('.png')) {
+      showTopSnackBar(context, "❌ Only PNG images are supported");
+
       return;
     }
 
+    // ===== فحص الحجم =====
+    if (file.lengthSync() > 10 * 1024 * 1024) { // 10MB
+      showTopSnackBar(context, "❌ Image too large. Max size is 10MB");
+
+      return;
+    }
 
     setState(() {
       selectedImage = file;
     });
   }
 
+
   // ================================
   // 2) فلتر للتحقق من صورة الميموجرام
-  // ================================
-  bool isMammogram(File file) {
-    final name = file.path.toLowerCase();
-    final allowedExtensions = ['png']; // السماح بصيغ أكثر
-    final ext = name.split('.').last;
-    if (!allowedExtensions.contains(ext)) return false;
 
-    // يجب أن يحتوي اسم الملف على كلمة مفتاحية
-    final keywords = ["mamm", "mg", "breast", "mammo"];
-    bool containsKeyword = keywords.any((k) => name.contains(k));
-    return containsKeyword;
-  }
 
 
   // ================================
@@ -131,9 +161,9 @@ class _UploadImagePageState extends State<UploadImagePage>
   // }
   void goToResultsPage() async {
     if (selectedImage == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("📌 Please select an image first")),
-      );
+
+      showTopSnackBar(context, "Please select an image first");
+
       return;
     }
 
@@ -225,6 +255,32 @@ class _UploadImagePageState extends State<UploadImagePage>
     });
   }
 
+  void showTopSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.info_outline, color: Colors.white),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(fontSize: 14),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.indigo.shade400,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.fromLTRB(16, 100, 16, 50), // ← زودت المسافة من الأعلى
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
 
 
 
@@ -258,7 +314,7 @@ class _UploadImagePageState extends State<UploadImagePage>
         children: [
           // Background gradient
           Container(
-            decoration: const BoxDecoration(
+            decoration:  BoxDecoration(
               gradient: LinearGradient(
                 colors: [Color(0xFFE3F2FD), Color(0xFFC5CAE9), Color(0xFF9FA8DA)],
                 begin: Alignment.topLeft,
@@ -388,14 +444,52 @@ class _UploadImagePageState extends State<UploadImagePage>
                           width: double.infinity,
                           child: ElevatedButton.icon(
                             onPressed: (selectedImage == null || isUploading)
-                                ? null // معطل إذا ما في صورة أو أثناء التحميل
-                                : () {
+                                ? null
+                                : () async {
+                              // فحص صيغة الملف
+                              if (!selectedImage!.path.toLowerCase().endsWith('.png')) {
+                                showTopSnackBar(context, "❌ Only PNG images are supported");
+
+                                return;
+                              }
+
+                              // فحص الأبيض والأسود
+                              bool grayscale = await isGrayscale(selectedImage!);
+                              if (!grayscale) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Row(
+                                      children: const [
+                                        Icon(Icons.info_outline, color: Colors.white),
+                                        SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            "Please upload a grayscale mammogram",
+                                            style: TextStyle(fontSize: 14),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    backgroundColor: Colors.indigo.shade400,
+                                    behavior: SnackBarBehavior.floating,
+                                    margin: EdgeInsets.fromLTRB(16, 50, 16, 50), // أعلى الشاشة
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+                                return;
+                              }
+
+                              // كل شيء تمام → رفع الصورة
                               setState(() {
                                 isUploading = true;
                                 uploadProgress = 0;
                               });
                               goToResultsPage();
                             },
+
                             icon: const Icon(Icons.upload, color: Colors.white),
                             label: Text(
                               isUploading
