@@ -219,7 +219,7 @@ class _ProfilePatientPageState extends State<ProfilePatientPage> {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red.shade400,
+                      backgroundColor: Colors.pinkAccent.shade200,
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),

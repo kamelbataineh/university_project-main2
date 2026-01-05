@@ -184,7 +184,7 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
                     if (isExpired)
                       IconButton(
                         onPressed: () => deleteAppointment(app['appointment_id']),
-                        icon: const Icon(Icons.delete, color: Colors.red, size: 20),
+                        icon:  Icon(Icons.delete, color: Colors.red.shade300, size: 20),
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
                       ),
@@ -192,7 +192,7 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
                     if (app['status'] == 'Completed')
                       IconButton(
                         onPressed: () => deleteAppointment(app['appointment_id']),
-                        icon: const Icon(Icons.delete, color: Colors.red, size: 20),
+                        icon:  Icon(Icons.delete, color: Colors.red.shade300, size: 20),
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
                         tooltip: "Delete appointment",
@@ -202,17 +202,17 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
                       ElevatedButton(
                         onPressed: () => handleApproval(app, approve: true),
                         style: smallButtonStyle.copyWith(
-                          backgroundColor: MaterialStateProperty.all(Colors.green),
+                          backgroundColor: MaterialStateProperty.all(Colors.green.shade300),
                         ),
-                        child: const Text("Approve"),
+                        child:  Text("Approve",style: TextStyle(color: Colors.black ,),),
                       ),
                       const SizedBox(width: 6),
                       ElevatedButton(
                         onPressed: () => handleApproval(app, approve: false),
                         style: smallButtonStyle.copyWith(
-                          backgroundColor: MaterialStateProperty.all(Colors.red),
+                          backgroundColor: MaterialStateProperty.all(Colors.red.shade300),
                         ),
-                        child: const Text("Reject"),
+                        child: const Text("Reject",style: TextStyle(color: Colors.black ,)),
                       ),
                     ]
 
@@ -220,17 +220,17 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
                       ElevatedButton(
                         onPressed: () => markCompleted(app, index),
                         style: smallButtonStyle.copyWith(
-                          backgroundColor: MaterialStateProperty.all(Colors.blue),
+                          backgroundColor: MaterialStateProperty.all(Colors.blue.shade300),
                         ),
-                        child: const Text("Completed"),
+                        child:  Text("Completed",style: TextStyle(color: Colors.black ,)),
                       ),
                       const SizedBox(width: 6),
                       ElevatedButton(
                         onPressed: () => handleApproval(app, revert: true),
                         style: smallButtonStyle.copyWith(
-                          backgroundColor: MaterialStateProperty.all(Colors.orange),
+                          backgroundColor: MaterialStateProperty.all(Colors.orange.shade300),
                         ),
-                        child: const Text("Revert"),
+                        child:  Text("Revert",style: TextStyle(color: Colors.black ,)),
                       ),
                     ]
 
@@ -238,9 +238,9 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> with Si
                         ElevatedButton(
                           onPressed: () => handleApproval(app, revert: true),
                           style: smallButtonStyle.copyWith(
-                            backgroundColor: MaterialStateProperty.all(Colors.orange),
+                            backgroundColor: MaterialStateProperty.all(Colors.orange.shade300),
                           ),
-                          child: const Text("Revert"),
+                          child:  Text("Revert",style: TextStyle(color: Colors.black ,)),
                         ),
                       ],
 

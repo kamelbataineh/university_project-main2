@@ -215,8 +215,10 @@ class _UploadImagePageState extends State<UploadImagePage>
             },
             prediction: result['prediction'] ?? "Unknown",
             probabilities: result['probabilities'] ?? [0.0, 0.0, 0.0],
-            findings: result['findings'] ?? [],             // ← ←
-            recommendations: result['recommendations'] ?? [], // ← ←
+            findings: result['findings'] ?? [],
+            recommendations: result['recommendations'] ?? [],
+            overlayB64: result['overlayB64'] ?? "",   // ← الاسم مطابق backend
+            heatmapB64: result['heatmapB64'] ?? "",
           ),
         ),
       );

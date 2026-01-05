@@ -234,7 +234,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.4),
                   border:
-                      const Border(bottom: BorderSide(color: Colors.white38)),
+                       Border(bottom: BorderSide(color: Colors.white38)),
                 ),
                 child: GestureDetector(
                   onTap: () async {
