@@ -12,8 +12,6 @@ class ImageResultsPage extends StatefulWidget {
   final List probabilities;
   final List findings;
   final List recommendations;
-  final String overlayB64;  // ← جديد
-  final String heatmapB64;
 
   const ImageResultsPage({
     super.key,
@@ -24,8 +22,7 @@ class ImageResultsPage extends StatefulWidget {
     required this.probabilities,
     required this.findings, // ← جديد
     required this.recommendations, // ← جديد
-    required this.overlayB64, // ← جديد
-    required this.heatmapB64,
+
   });
 
   @override
@@ -211,6 +208,41 @@ class _ImageResultsPageState extends State<ImageResultsPage>
                 ),
               ],
             ),
+
+// 👇 الزر خارج الـ Row
+            if (_showConfidence)
+              Padding(
+                padding: const EdgeInsets.only(top: 20),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.show_chart),
+                    label: const Text("View Heatmap"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.indigo.shade400,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => HeatmapPage(
+                            imagePath: widget.imageUrl,           // مسار الصورة
+                            prediction: widget.prediction,        // النتيجة الأصلية
+                            probabilities: widget.probabilities.map<double>((e) => e.toDouble()).toList(), // الاحتمالات
+
+                          ),
+                        ),
+                      );
+                    },
+
+                  ),
+                ),
+              ),
+
             // const SizedBox(height: 16),
             // if (!_isAnalyzing) ...[
             //   const Text(
@@ -253,32 +285,30 @@ class _ImageResultsPageState extends State<ImageResultsPage>
               // }).toList(),
               const SizedBox(height: 70),
 
-
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: (widget.overlayB64.isEmpty || widget.heatmapB64.isEmpty)
-                  ? null // معطل إذا البيانات غير موجودة
-                  : () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => HeatmapPage(
-                      overlayB64: widget.overlayB64,
-                      heatmapB64: widget.heatmapB64,
-                      imageName: widget.imageName,
-                    ),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.show_chart),
-              label: const Text("View Heatmap"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.indigo.shade400,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
+            //
+            // const SizedBox(height: 16),
+            // ElevatedButton.icon(
+            //   onPressed: (widget.overlayB64.isEmpty || widget.heatmapB64.isEmpty)
+            //       ? null // معطل إذا البيانات غير موجودة
+            //       : () {
+            //     Navigator.push(
+            //       context,
+            //       MaterialPageRoute(
+            //         builder: (_) => HeatmapPage(
+            //
+            //         ),
+            //       ),
+            //     );
+            //   },
+            //   icon: const Icon(Icons.show_chart),
+            //   label: const Text("View Heatmap"),
+            //   style: ElevatedButton.styleFrom(
+            //     backgroundColor: Colors.indigo.shade400,
+            //     shape: RoundedRectangleBorder(
+            //       borderRadius: BorderRadius.circular(12),
+            //     ),
+            //   ),
+            // ),
 
             // ],
           ],

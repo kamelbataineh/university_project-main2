@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import '../../../core/config/app_config.dart';
+import 'HeatmapPage(4).dart';
 import 'image_results_page(3).dart';
 
 
@@ -112,7 +113,7 @@ class _UploadImagePageState extends State<UploadImagePage>
   Future<Map<String, dynamic>> uploadImage(File imageFile) async {
     var request = http.MultipartRequest(
       'POST',
-      Uri.parse('$baseUrl1/predict'),
+      Uri.parse('$baseUrl1/ai/momo'),
     );
     request.files.add(await http.MultipartFile.fromPath('file', imageFile.path));
     var response = await request.send();
@@ -208,8 +209,8 @@ class _UploadImagePageState extends State<UploadImagePage>
         context,
         MaterialPageRoute(
           builder: (context) => ImageResultsPage(
-            imageUrl: selectedImage!.path,
-            imageName: selectedImage!.path.split('/').last,
+            imageUrl: result['image_url'] ?? selectedImage!.path,
+            imageName: (result['image_url'] ?? selectedImage!.path).split('/').last,
             onNavigate: (screen) {
               if (screen == 'upload-image') Navigator.pop(context);
             },
@@ -217,11 +218,11 @@ class _UploadImagePageState extends State<UploadImagePage>
             probabilities: result['probabilities'] ?? [0.0, 0.0, 0.0],
             findings: result['findings'] ?? [],
             recommendations: result['recommendations'] ?? [],
-            overlayB64: result['overlayB64'] ?? "",   // ← الاسم مطابق backend
-            heatmapB64: result['heatmapB64'] ?? "",
+
           ),
         ),
       );
+
 
 
     } catch (e) {
@@ -582,6 +583,34 @@ class _UploadImagePageState extends State<UploadImagePage>
                       ),
                     ),
                   ),
+                  // Padding(
+                  //   padding: const EdgeInsets.symmetric(horizontal: 16),
+                  //   child: SizedBox(
+                  //     width: double.infinity, // يمتد على كامل العرض
+                  //     child: ElevatedButton.icon(
+                  //       onPressed: (){  Navigator.push(
+                  //         context,
+                  //         MaterialPageRoute(
+                  //           builder: (_) => HeatmapPage(
+                  //
+                  //           ),
+                  //         ),
+                  //       );},
+                  //       icon: const Icon(Icons.image, color: Colors.white), // أيقونة باللون الأبيض
+                  //       label: const Text(
+                  //         "Choose Image",
+                  //         style: TextStyle(color: Colors.white), // نص أبيض
+                  //       ),
+                  //       style: ElevatedButton.styleFrom(
+                  //         padding: const EdgeInsets.symmetric(vertical: 13),
+                  //         backgroundColor: Colors.indigo.shade400,
+                  //         shape: RoundedRectangleBorder(
+                  //           borderRadius: BorderRadius.circular(16),
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
 
                   const SizedBox(height: 32),
                 ],

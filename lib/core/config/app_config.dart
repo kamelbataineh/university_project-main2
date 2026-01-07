@@ -7,7 +7,6 @@
 
 ///////////////////
 
-// bool isEmulator = true; // ❗ غيّرها فقط
 //
 // final String emulatorUrl = "http://10.0.2.2:8000/";
 // final String emulatorUrlNoSlash = "http://10.0.2.2:8000";
