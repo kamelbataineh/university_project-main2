@@ -17,28 +17,29 @@
 // final String baseUrl = isEmulator ? emulatorUrl : phoneUrl;
 // final String baseUrl1 = isEmulator ? emulatorUrlNoSlash : phoneUrlNoSlash;
 // //  localhost
-// final baseUrl                     = "http://10.0.2.2:8000/";
-// final baseUrl1                     = "http://10.0.2.2:8000";
+final baseUrl                     = "http://10.0.2.2:8000/";
+final baseUrl1                     = "http://10.0.2.2:8000";
 //
-final baseUrl                     = "http://192.168.8.31:8000/";
-final baseUrl1                     = "http://192.168.8.31:8000";
+
+// final baseUrl                     = "http://192.168.8.45:8000/";
+// final baseUrl1                     = "http://192.168.8.45:8000";
 
 
 final String chatMarkDelivered = "$baseUrl1/api/chat/delivered";
 
-final String chatMessages = "$baseUrl1/chat/messages/";
-final String chatSend = "$baseUrl1/chat/send";
-final String chatUploadFile = "$baseUrl1/chat/upload_file/";
-final String chatList = "$baseUrl1/chat/list";
+final String chatMessages      = "$baseUrl1/chat/messages/";
+final String chatSend          = "$baseUrl1/chat/send";
+final String chatUploadFile    = "$baseUrl1/chat/upload_file/";
+final String chatList          = "$baseUrl1/chat/list";
 
 
 // ---------- Admin ----------
-final adminLogin  = baseUrl + "admin/login";
-final adminCheck  = baseUrl + "admin/check";
+final adminLogin               = baseUrl + "admin/login";
+final adminCheck               = baseUrl + "admin/check";
 
 
 //  (Doctor)
-final doctorRegister              = baseUrl + "doctors/register-temp";
+final doctorRegister           = baseUrl + "doctors/register-temp";
 final doctorLogin                 = baseUrl + "doctors/login";
 final doctorLogout                = baseUrl + "doctors/logout";
 final doctorUpdate                = baseUrl + "doctors/update";

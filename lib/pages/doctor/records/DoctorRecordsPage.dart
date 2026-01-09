@@ -12,10 +12,11 @@ class DoctorRecordsPage extends StatefulWidget {
   @override
   State<DoctorRecordsPage> createState() => _DoctorRecordsPageState();
 }
-
 class _DoctorRecordsPageState extends State<DoctorRecordsPage> {
   List<dynamic> records = [];
+  List<dynamic> filteredRecords = [];
   bool loading = true;
+  String searchQuery = '';
 
   @override
   void initState() {
@@ -78,6 +79,7 @@ class _DoctorRecordsPageState extends State<DoctorRecordsPage> {
       setState(() {
         loading = false;
         records = [];
+        filteredRecords = [];
       });
       return;
     }
@@ -107,7 +109,20 @@ class _DoctorRecordsPageState extends State<DoctorRecordsPage> {
 
     setState(() {
       records = updatedRecords;
+      filteredRecords = updatedRecords;
       loading = false;
+    });
+  }
+
+  // ================== تحديث الفلترة حسب البحث ==================
+  void _filterRecords(String query) {
+    setState(() {
+      searchQuery = query;
+      filteredRecords = records
+          .where((record) => (record['patient_name'] ?? '')
+          .toLowerCase()
+          .contains(query.toLowerCase()))
+          .toList();
     });
   }
 
@@ -125,112 +140,141 @@ class _DoctorRecordsPageState extends State<DoctorRecordsPage> {
       ),
       body: loading
           ? const Center(child: CircularProgressIndicator())
-          : records.isEmpty
-          ? const Center(child: Text("No records found"))
-          : ListView.builder(
-        itemCount: records.length,
-        itemBuilder: (context, index) {
-          final record = records[index];
-
-          String patientId = '';
-          final patientIdRaw = record['patient_id'];
-          if (patientIdRaw is Map && patientIdRaw.containsKey('\$oid')) {
-            patientId = patientIdRaw['\$oid'];
-          } else if (patientIdRaw is String) {
-            patientId = patientIdRaw;
-          }
-
-          return Dismissible(
-            key: Key(record['_id']),
-            direction: DismissDirection.endToStart,
-
-            background: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Container(
-                alignment: Alignment.centerRight,
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                color: Colors.red,
-                child: const Icon(Icons.delete, color: Colors.white),
+          : Column(
+        children: [
+          // ======= شريط البحث =======
+          Padding(
+            padding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: TextField(
+              decoration: const InputDecoration(
+                labelText: 'Search by patient name',
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(),
               ),
+              onChanged: _filterRecords,
             ),
-            confirmDismiss: (direction) async {
-              final result = await showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text("Confirm deletion"),
-                  content: const Text(
-                      "Are you sure you want to delete this record? "),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(false),
-                      child: const Text("No"),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(true),
-                      child: const Text("Yes"),
-                    ),
-                  ],
-                ),
-              );
-              return result ?? false;
-            },
-            onDismissed: (direction) async {
-              final recordId = record['_id'];
-              final url = Uri.parse("$baseUrl1/api/v1/medical_records/$recordId");
+          ),
+          // ======= قائمة السجلات =======
+          Expanded(
+            child: filteredRecords.isEmpty
+                ? const Center(child: Text("No records found"))
+                : ListView.builder(
+              itemCount: filteredRecords.length,
+              itemBuilder: (context, index) {
+                final record = filteredRecords[index];
 
-              final response = await http.delete(
-                url,
-                headers: {
-                  "Content-Type": "application/json",
-                  "Authorization": "Bearer ${widget.token}",
-                },
-              );
+                String patientId = '';
+                final patientIdRaw = record['patient_id'];
+                if (patientIdRaw is Map &&
+                    patientIdRaw.containsKey('\$oid')) {
+                  patientId = patientIdRaw['\$oid'];
+                } else if (patientIdRaw is String) {
+                  patientId = patientIdRaw;
+                }
 
-              if (response.statusCode == 200) {
-                setState(() {
-                  records.removeAt(index);
-                });
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text("The history was successfully deleted")),
-                );
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Deletion failed")),
-                );
-              }
-            },
-            child: Card(
-              margin: const EdgeInsets.symmetric(
-                  horizontal: 16, vertical: 8),
-              child: ListTile(
-                leading: const Icon(Icons.folder_shared),
-                title: Text(
-                  "Patient: ${record['patient_name'] ?? 'Unknown'}",
-                  style:
-                  const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                subtitle: Text(
-                  "Created at: ${formatDate(record['created_at'])}",
-                ),
-                trailing:
-                const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => DoctorPatientFullRecordPage(
-                        token: widget.token,
-                        patientId: patientId,
-                        patientName: record['patient_name'],
+                return Dismissible(
+                  key: Key(record['_id']),
+                  direction: DismissDirection.endToStart,
+                  background: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Container(
+                      alignment: Alignment.centerRight,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20),
+                      color: Colors.red,
+                      child: const Icon(Icons.delete,
+                          color: Colors.white),
+                    ),
+                  ),
+                  confirmDismiss: (direction) async {
+                    final result = await showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text("Confirm deletion"),
+                        content: const Text(
+                            "Are you sure you want to delete this record? "),
+                        actions: [
+                          TextButton(
+                            onPressed: () =>
+                                Navigator.of(context).pop(false),
+                            child: const Text("No"),
+                          ),
+                          TextButton(
+                            onPressed: () =>
+                                Navigator.of(context).pop(true),
+                            child: const Text("Yes"),
+                          ),
+                        ],
                       ),
+                    );
+                    return result ?? false;
+                  },
+                  onDismissed: (direction) async {
+                    final recordId = record['_id'];
+                    final url = Uri.parse(
+                        "$baseUrl1/api/v1/medical_records/$recordId");
+
+                    final response = await http.delete(
+                      url,
+                      headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer ${widget.token}",
+                      },
+                    );
+
+                    if (response.statusCode == 200) {
+                      setState(() {
+                        records.remove(record);
+                        filteredRecords.remove(record);
+                      });
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text(
+                                "The history was successfully deleted")),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text("Deletion failed")),
+                      );
+                    }
+                  },
+                  child: Card(
+                    margin: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 8),
+                    child: ListTile(
+                      leading: const Icon(Icons.folder_shared),
+                      title: Text(
+                        "Patient: ${record['patient_name'] ?? 'Unknown'}",
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Text(
+                        "Created at: ${formatDate(record['created_at'])}",
+                      ),
+                      trailing: const Icon(Icons.arrow_forward_ios,
+                          size: 16),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                DoctorPatientFullRecordPage(
+                                  token: widget.token,
+                                  patientId: patientId,
+                                  patientName: record['patient_name'],
+                                ),
+                          ),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }

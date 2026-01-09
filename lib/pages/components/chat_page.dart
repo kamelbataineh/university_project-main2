@@ -229,15 +229,15 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
             children: [
               // ===== AppBar =====
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.4),
-                  border:
-                       Border(bottom: BorderSide(color: Colors.white38)),
-                ),
-                child: GestureDetector(
-                  onTap: () async {
+                  padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.4),
+                    border:
+                    Border(bottom: BorderSide(color: Colors.white38)),
+                  ),
+                  child: GestureDetector(
+                    onTap: () async {
 
                       final prefs = await SharedPreferences.getInstance();
                       final role = prefs.getString("role") ?? "";
@@ -266,40 +266,40 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                         );
                       }},
                     child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new,
-                            color: Colors.pinkAccent),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      CircleAvatar(
-                        radius: 25,
-                        backgroundColor: Colors.pink.shade300,
-                        backgroundImage: imageUrl.isNotEmpty
-                            ? NetworkImage("$baseUrl$imageUrl")
-                            : null,
-                        child: imageUrl.isEmpty
-                            ? Text(
-                          widget.name[0],
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18),
-                        )
-                            : null,
-                      ),
-                      const SizedBox(width: 10),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(widget.name,
-                              style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold)),
-                        ],
-                      ),
-                    ],
-                  ),
-                )
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.arrow_back_ios_new,
+                              color: Colors.pinkAccent),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        CircleAvatar(
+                          radius: 25,
+                          backgroundColor: Colors.pink.shade300,
+                          backgroundImage: imageUrl.isNotEmpty
+                              ? NetworkImage("$baseUrl$imageUrl")
+                              : null,
+                          child: imageUrl.isEmpty
+                              ? Text(
+                            widget.name[0],
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18),
+                          )
+                              : null,
+                        ),
+                        const SizedBox(width: 10),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(widget.name,
+                                style: const TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                      ],
+                    ),
+                  )
 
               ),
 
@@ -402,7 +402,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
               // ===== Input Field =====
               Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.4),
                   border: const Border(top: BorderSide(color: Colors.white38)),
@@ -410,8 +410,8 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                 child: Row(
                   children: [
                     Icon(Icons.person_sharp,
-                          color: Colors.purpleAccent),
-                     SizedBox(width: 4),
+                        color: Colors.purpleAccent),
+                    SizedBox(width: 4),
 
                     Expanded(
                       child: TextField(
