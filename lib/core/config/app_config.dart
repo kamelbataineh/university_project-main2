@@ -11,18 +11,23 @@
 // final String emulatorUrl = "http://10.0.2.2:8000/";
 // final String emulatorUrlNoSlash = "http://10.0.2.2:8000";
 //
-// final String phoneUrl = "http://192.168.8.31:8000/";
-// final String phoneUrlNoSlash = "http://192.168.8.31:8000";
+// final String phoneUrl = "http://172.20.10.6:8000/";
+// final String phoneUrlNoSlash = "http://172.20.10.6:8000";
 //
 // final String baseUrl = isEmulator ? emulatorUrl : phoneUrl;
 // final String baseUrl1 = isEmulator ? emulatorUrlNoSlash : phoneUrlNoSlash;
 // //  localhost
-final baseUrl                     = "http://10.0.2.2:8000/";
-final baseUrl1                     = "http://10.0.2.2:8000";
+// final baseUrl                     = "http://10.0.2.2:8000/";
+// final baseUrl1                     = "http://10.0.2.2:8000";
 //
+// 10.0.2.2 هو عنوان خاص يُستخدم داخل Android Emulator للوصول إلى localhost الخاص بالجهاز الحقيقي.
 
-// final baseUrl                     = "http://192.168.8.45:8000/";
-// final baseUrl1                     = "http://192.168.8.45:8000";
+
+
+
+
+final  String baseUrl                     = "http://172.20.10.2:8000/";
+final String baseUrl1                     = "http://172.20.10.2:8000";
 
 
 final String chatMarkDelivered = "$baseUrl1/api/chat/delivered";

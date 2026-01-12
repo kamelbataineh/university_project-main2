@@ -61,9 +61,16 @@ class _DoctorsListPageState extends State<DoctorsListPage> {
       );
 
       if (response.statusCode == 200) {
+        final allDoctors = jsonDecode(response.body);
+
+        // فلترة الأطباء فقط إذا is_approved = true
+        final approvedDoctors = allDoctors.where((doctor) {
+          return doctor['is_approved'] == true;
+        }).toList();
+
         setState(() {
-          doctors = jsonDecode(response.body);
-          filteredDoctors = doctors; // عرض كل الأطباء افتراضياً
+          doctors = approvedDoctors;
+          filteredDoctors = approvedDoctors; // عرض كل الأطباء افتراضياً
           isLoading = false;
         });
       } else {
@@ -76,6 +83,7 @@ class _DoctorsListPageState extends State<DoctorsListPage> {
       );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
