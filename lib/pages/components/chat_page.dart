@@ -6,10 +6,10 @@ import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:file_picker/file_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:web_socket_channel/web_socket_channel.dart' show WebSocketChannel;
 import '../../core/config/app_config.dart';
 import '../patient/PatientDoctorProfile_OR_ChatDoctorProfile.dart' hide baseUrl;
 import 'ChatPatientProfile.dart' hide baseUrl;
-
 class ChatPage extends StatefulWidget {
   final String name;
   final String userId;
@@ -34,8 +34,8 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   List<Map<String, dynamic>> messages = [];
+  late WebSocketChannel channel;
 
-  Timer? _timer;
 
   // final Color senderColor = Color(0xFFF9A8D4);   // زهري فاتح (sender_id)
   // final Color receiverColor = Color(0xFFEC4899); // زهري غامق (receiver_id)
@@ -60,66 +60,51 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    fetchMessages();
 
-    _timer = Timer.periodic(const Duration(milliseconds: 800), (timer) {
-      fetchMessages();
+    fetchOldMessages();
+
+    channel = WebSocketChannel.connect(
+      Uri.parse("$wsUrl?token=${widget.token}"),
+    );
+
+    channel.stream.listen((event) {
+      final data = json.decode(event);
+      setState(() {
+        messages.add({
+          "isSender": data["sender_id"] == widget.userId,
+          "text": data["message_text"],
+          "time": data["timestamp"],
+          "type": data["type"],
+        });
+      });
+      scrollToBottom();
     });
   }
+
   @override
   void dispose() {
-    _timer?.cancel();
+    channel.sink.close();
     _controller.dispose();
     _scrollController.dispose();
     super.dispose();
   }
 
-  Future<void> fetchMessages() async {
-    try {
-      final response = await http.get(
-        Uri.parse(chatMessages + "${widget.otherId}"),
-        headers: {"Authorization": "Bearer ${widget.token}"},
-      );
+  void sendMessageWS() {
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body) as List;
+    final payload = {
+      "receiver_id": widget.otherId,
+      "message": text,
+      "type": "text",
+    };
 
-        // حفظ موقع التمرير الحالي
-        final scrollPosition = _scrollController.hasClients
-            ? _scrollController.position.pixels
-            : 0.0;
-
-        setState(() {
-          messages = data.map((msg) {
-            String senderId = "";
-            if (msg["sender_id"] is Map && msg["sender_id"]["\$oid"] != null) {
-              senderId = msg["sender_id"]["\$oid"];
-            } else {
-              senderId = msg["sender_id"].toString();
-            }
-
-            bool isSender = senderId.trim() == widget.userId.trim();
-
-            return {
-              "isSender": isSender,
-              "text": msg["type"] == "image" ? msg["preview"] : msg["message_text"],
-              "time": msg["timestamp"],
-              "type": msg["type"],
-            };
-
-          }).toList();
-        });
-
-        // نعيد التمرير فقط إذا كان عند الأسفل تقريبًا
-        if (_scrollController.hasClients &&
-            (_scrollController.position.maxScrollExtent - scrollPosition) < 50) {
-          scrollToBottom();
-        }
-      }
-    } catch (e) {
-      print("❌ Error: $e");
-    }
+    channel.sink.add(json.encode(payload));
+    _controller.clear();
+    scrollToBottom();
   }
+
+
 
   void scrollToBottom() {
     if (_scrollController.hasClients) {
@@ -132,46 +117,43 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
       });
     }
   }
-
-
-
-  Future<void> sendMessage() async {
-    final text = _controller.text.trim();
-    if (text.isEmpty) return;
-
-    final payload = {
-      "receiver_id": widget.otherId,
-      "message": text,
-      "type": "text"
-    };
-
+  Future<void> fetchOldMessages() async {
     try {
-      final response = await http.post(
-        Uri.parse(chatSend),
-        headers: {
-          "Authorization": "Bearer ${widget.token}",
-          "Content-Type": "application/json",
-        },
-        body: json.encode(payload),
+      final url = chatMessages + widget.otherId;
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {"Authorization": "Bearer ${widget.token}"},
       );
 
       if (response.statusCode == 200) {
+        final data = json.decode(response.body) as List;
+
         setState(() {
-          messages.add({
-            "sender": "me",
-            "text": text,
-            "time": DateTime.now().toIso8601String(),
-            "type": "text",
-          });
-          _controller.clear();
+          messages = data.map((msg) {
+            final senderId = msg["sender_id"].toString().trim();
+            final isSender = senderId == widget.userId.trim();
+
+            return {
+              "isSender": isSender,
+              "text": msg["message_text"] ?? "",
+              "time": msg["timestamp"] ?? DateTime.now().toIso8601String(),
+              "type": msg["type"] ?? "text",
+            };
+          }).toList();
         });
 
         scrollToBottom();
+      } else {
+        print("Failed to fetch messages: ${response.statusCode}");
+        print("Body: ${response.body}");
       }
     } catch (e) {
-      print("❌ Send error: $e");
+      print("❌ Fetch old messages error: $e");
     }
   }
+
+
+
 
   Future<void> pickAndSendFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
@@ -424,11 +406,13 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                         maxLines: 5,
                       ),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.send_rounded,
-                          color: Colors.pinkAccent),
-                      onPressed: sendMessage,
-                    ),
+
+                        IconButton(
+                          icon: const Icon(Icons.send_rounded, color: Colors.pinkAccent),
+                          onPressed: sendMessageWS,
+                        )
+
+
                   ],
                 ),
               ),

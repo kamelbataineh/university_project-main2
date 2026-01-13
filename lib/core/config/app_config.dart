@@ -28,11 +28,13 @@
 
 final  String baseUrl                     = "http://172.21.208.1:8000/";
 final String baseUrl1                     = "http://172.21.208.1:8000";
+final String wsUrl                        = "ws://172.21.208.1:8000/chat/ws";
 
 
 final String chatMarkDelivered = "$baseUrl1/api/chat/delivered";
 
-final String chatMessages      = "$baseUrl1/chat/messages/";
+final String chatMessages      =  "$baseUrl1/chat/messages/";
+
 final String chatSend          = "$baseUrl1/chat/send";
 final String chatUploadFile    = "$baseUrl1/chat/upload_file/";
 final String chatList          = "$baseUrl1/chat/list";
