@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 
+import '../../../core/config/app_font.dart';
 import 'HeatmapPage(4).dart';
 
 class ImageResultsPage extends StatefulWidget {
@@ -22,7 +23,6 @@ class ImageResultsPage extends StatefulWidget {
     required this.probabilities,
     required this.findings, // ← جديد
     required this.recommendations, // ← جديد
-
   });
 
   @override
@@ -134,10 +134,12 @@ class _ImageResultsPageState extends State<ImageResultsPage>
     return Scaffold(
       appBar: AppBar(
         centerTitle: true, // 🟢 لتوسيط العنوان
-        title: const Text(
+        title:  Text(
           "Image Analysis",
-          style: TextStyle(
-            color: Colors.white, // 🟢 لون العنوان أبيض
+          style: AppFont.regular(
+            size: 18,
+            weight: FontWeight.bold,
+            color: Colors.white,
           ),
         ),
         backgroundColor: Colors.indigo.shade400,
@@ -148,23 +150,30 @@ class _ImageResultsPageState extends State<ImageResultsPage>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Image.file(
-                File(widget.imageUrl),
-                width: double.infinity,
-                height: 250,
-                fit: BoxFit.cover,
+            Container(
+              width: double.infinity,
+              height: 300, // يمكنك تعديل الارتفاع
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: Colors.grey[200], // خلفية للحفاظ على المساحة الفارغة
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.file(
+                  File(widget.imageUrl),
+                  fit: BoxFit.contain, // كامل الصورة
+                ),
               ),
             ),
+
             const SizedBox(height: 16),
             Text(
               "Prediction: ${widget.prediction}",
-              style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.indigo),
-            ),
+              style: AppFont.regular(
+                size: 20,
+                weight: FontWeight.bold,
+                color: Colors.indigo,
+              ),),
             const SizedBox(height: 16),
             ...List.generate(classNames.length, (index) {
               double value = _animations[index].value;
@@ -175,9 +184,11 @@ class _ImageResultsPageState extends State<ImageResultsPage>
                   children: [
                     Text(
                       "${classNames[index]}: ${(value * 100).toStringAsFixed(1)}%",
-                      style: const TextStyle(
-                          fontSize: 14, fontWeight: FontWeight.w500),
-                    ),
+                      style: AppFont.regular(
+                        size: 14,
+                        weight: FontWeight.bold,
+                        color: Colors.black,
+                      ),),
                     const SizedBox(height: 4),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(12),
@@ -200,48 +211,61 @@ class _ImageResultsPageState extends State<ImageResultsPage>
                 const SizedBox(width: 8),
                 Text(
                   _showConfidence ? "Confidence: $_confidenceText%" : "",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: getGradientColor(maxProb),
-                  ),
+    style: AppFont.regular(
+    size: 16,
+    weight: FontWeight.bold,
+        color: getGradientColor(maxProb)  )
                 ),
               ],
             ),
+            SizedBox(height: 20),
 
-// 👇 الزر خارج الـ Row
             if (_showConfidence)
               Padding(
                 padding: const EdgeInsets.only(top: 20),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.show_chart),
-                    label: const Text("View Heatmap"),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.indigo.shade400,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                    ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => HeatmapPage(
-                            imagePath: widget.imageUrl,           // مسار الصورة
-                            prediction: widget.prediction,        // النتيجة الأصلية
-                            probabilities: widget.probabilities.map<double>((e) => e.toDouble()).toList(), // الاحتمالات
-
-                          ),
+                child: Center(
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width / 2,
+                    height: 38, // رفع الارتفاع قليلًا لتوفير مساحة للنص
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.show_chart, color: Colors.white),
+                      label: Text(
+                        'View Heatmap',
+                        style: AppFont.regular(
+                          size: 16,
+                          weight: FontWeight.bold,
+                          color: Colors.white,
                         ),
-                      );
-                    },
-
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.indigo.shade400,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 16), // قللنا vertical وخلي horizontal
+                        elevation: 8,
+                        shadowColor: Colors.black54,
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => HeatmapPage(
+                              imagePath: widget.imageUrl,
+                              prediction: widget.prediction,
+                              probabilities: widget.probabilities
+                                  .map<double>((e) => e.toDouble())
+                                  .toList(),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
+
+
 
             // const SizedBox(height: 16),
             // if (!_isAnalyzing) ...[
@@ -263,27 +287,27 @@ class _ImageResultsPageState extends State<ImageResultsPage>
             //       ],
             //     );
             //   }).toList(),
-              // const SizedBox(height: 16),
-              // const Text(
-              //   "Recommendations:",
-              //   style: TextStyle(
-              //       fontSize: 18,
-              //       fontWeight: FontWeight.bold,
-              //       color: Colors.indigo),
-              // ),
-              // const SizedBox(height: 8),
-              // ...recommendations.map<Widget>((r) {
-              //   return Row(
-              //     children: [
-              //       const Icon(Icons.check_circle,
-              //           size: 18, color: Colors.green),
-              //       const SizedBox(width: 6),
-              //       Expanded(
-              //           child: Text(r, style: const TextStyle(fontSize: 14))),
-              //     ],
-              //   );
-              // }).toList(),
-              const SizedBox(height: 70),
+            // const SizedBox(height: 16),
+            // const Text(
+            //   "Recommendations:",
+            //   style: TextStyle(
+            //       fontSize: 18,
+            //       fontWeight: FontWeight.bold,
+            //       color: Colors.indigo),
+            // ),
+            // const SizedBox(height: 8),
+            // ...recommendations.map<Widget>((r) {
+            //   return Row(
+            //     children: [
+            //       const Icon(Icons.check_circle,
+            //           size: 18, color: Colors.green),
+            //       const SizedBox(width: 6),
+            //       Expanded(
+            //           child: Text(r, style: const TextStyle(fontSize: 14))),
+            //     ],
+            //   );
+            // }).toList(),
+            SizedBox(height: 70),
 
             //
             // const SizedBox(height: 16),
@@ -317,4 +341,3 @@ class _ImageResultsPageState extends State<ImageResultsPage>
     );
   }
 }
-

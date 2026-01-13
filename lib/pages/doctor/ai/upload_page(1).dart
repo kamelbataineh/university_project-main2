@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:university_project/pages/doctor/ai/upload_image(2).dart';
 
+import '../../../core/config/app_font.dart';
+
 class UploadPage extends StatelessWidget {
   const UploadPage({super.key});
 
@@ -50,17 +52,19 @@ class UploadPage extends StatelessWidget {
                  SizedBox(height: 12),
                  Text(
                   "Upload Mammogram",
-                  style: TextStyle(
-                    color: Colors.indigo.shade400,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                   style: AppFont.regular(
+                     size: 18,
+                     weight: FontWeight.bold,
+                     color: Colors.indigo.shade400,
+                   ),),
                 const SizedBox(height: 6),
-                const Text(
+                 Text(
                   "Upload a mammogram for AI-powered analysis",                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.black54, fontSize: 12),
-                ),
+                   style: AppFont.regular(
+                     size: 12,
+                     weight: FontWeight.bold,
+                     color: Colors.black54,
+                   ),),
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () {
@@ -81,8 +85,11 @@ class UploadPage extends StatelessWidget {
                   ),
                   child:  Text(
                     "Start Upload",
-                    style: TextStyle(fontSize: 14,color: Colors.white),
-                  ),
+                    style: AppFont.regular(
+                      size: 14,
+                      weight: FontWeight.bold,
+                      color: Colors.white,
+                    ),),
                 ),
               ],
             ),

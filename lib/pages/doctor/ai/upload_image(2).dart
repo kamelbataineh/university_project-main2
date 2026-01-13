@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import '../../../core/config/app_config.dart';
+import '../../../core/config/app_font.dart';
 import 'HeatmapPage(4).dart';
 import 'image_results_page(3).dart';
 
@@ -21,6 +22,7 @@ class _UploadImagePageState extends State<UploadImagePage>
     with SingleTickerProviderStateMixin {
   File? selectedImage;
   final ImagePicker _picker = ImagePicker();
+  bool acceptedTerms = false;
 
   bool isUploading = false;
   double uploadProgress = 0;
@@ -115,15 +117,24 @@ class _UploadImagePageState extends State<UploadImagePage>
       'POST',
       Uri.parse('$baseUrl1/ai/momo'),
     );
+
+    // إضافة الملف
     request.files.add(await http.MultipartFile.fromPath('file', imageFile.path));
+
+    // إضافة accepted_terms كـ form field
+    request.fields['accepted_terms'] = 'true'; // أو 'false' حسب checkbox
+
     var response = await request.send();
     if (response.statusCode == 200) {
       var respStr = await response.stream.bytesToString();
       return json.decode(respStr);
     } else {
+      var respStr = await response.stream.bytesToString();
+      print(respStr); // لعرض رسالة الخطأ من FastAPI
       throw Exception("Upload failed - status code: ${response.statusCode}");
     }
   }
+
 
   // ================================
   // 4) الانتقال لصفحة النتائج
@@ -440,48 +451,56 @@ class _UploadImagePageState extends State<UploadImagePage>
 
                   // Upload button + progress
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
                     child: Column(
                       children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Checkbox(
+                                value: acceptedTerms,
+                                onChanged: (value) {
+                                  setState(() {
+                                    acceptedTerms = value ?? false;
+                                  });
+                                },
+                              ),
+                              Expanded(
+                                child: Text(
+                                  "This AI system provides clinical decision support only and does not replace professional medical judgment.\nI acknowledge and understand this.",
+    style: AppFont.regular(
+    size: 14,
+    weight: FontWeight.bold,
+    color: Colors.black,
+    ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton.icon(
-                            onPressed: (selectedImage == null || isUploading)
-                                ? null
-                                : () async {
-                              // فحص صيغة الملف
-                              if (!selectedImage!.path.toLowerCase().endsWith('.png')) {
-                                showTopSnackBar(context, "❌ Only PNG images are supported");
-
+                            onPressed: (selectedImage == null || isUploading) ? null : () async {
+                              if (!acceptedTerms) {
+                                showTopSnackBar(context, "❌ You must acknowledge the disclaimer first");
                                 return;
                               }
 
-                              // فحص الأبيض والأسود
+                              // فحص PNG
+                              if (!selectedImage!.path.toLowerCase().endsWith('.png')) {
+                                showTopSnackBar(context, "❌ Only PNG images are supported");
+                                return;
+                              }
+
+                              // فحص أبيض وأسود
                               bool grayscale = await isGrayscale(selectedImage!);
                               if (!grayscale) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Row(
-                                      children: const [
-                                        Icon(Icons.info_outline, color: Colors.white),
-                                        SizedBox(width: 8),
-                                        Expanded(
-                                          child: Text(
-                                            "Please upload a grayscale mammogram",
-                                            style: TextStyle(fontSize: 14),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    backgroundColor: Colors.indigo.shade400,
-                                    behavior: SnackBarBehavior.floating,
-                                    margin: EdgeInsets.fromLTRB(16, 50, 16, 50), // أعلى الشاشة
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    duration: Duration(seconds: 2),
-                                  ),
-                                );
+                                showTopSnackBar(context, "❌ Please upload a grayscale mammogram");
                                 return;
                               }
 
@@ -492,6 +511,7 @@ class _UploadImagePageState extends State<UploadImagePage>
                               });
                               goToResultsPage();
                             },
+
 
                             icon: const Icon(Icons.upload, color: Colors.white),
                             label: Text(
@@ -558,14 +578,14 @@ class _UploadImagePageState extends State<UploadImagePage>
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              children: const [
+                              children:  [
                                 Text(
                                   "Upload Guidelines",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16
-                                  ),
-                                ),
+                                  style: AppFont.regular(
+                                    size: 16,
+                                    weight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),),
                                 SizedBox(height: 4),
                                 Text(
                                   "• Only mammogram images\n"
@@ -573,7 +593,11 @@ class _UploadImagePageState extends State<UploadImagePage>
                                       "• Maximum file size: 10MB\n"
                                       "• Ensure clear image quality\n"
                                       "• AI analysis provided after upload",
-                                  style: TextStyle(fontSize: 14),
+                                  style: AppFont.regular(
+                                    size: 14,
+                                    weight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
                                 ),
                               ],
                             ),
