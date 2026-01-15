@@ -29,7 +29,6 @@ Future<Widget> getInitialPage() async {
 
   return LandingPage(); // إذا ما فيه تسجيل دخول
 }
-
 class MyApp extends StatelessWidget {
   final Widget initialPage;
   const MyApp({super.key, required this.initialPage});
@@ -38,10 +37,31 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+
+      // 🌟 Theme عام لكل التطبيق
+      theme: ThemeData(
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.indigo.shade400, // خلفية AppBar افتراضية
+          iconTheme: IconThemeData(
+            color: Colors.white, // كل الأسهم والأيقونات في AppBar بيضاء
+          ),
+          titleTextStyle: TextStyle(
+            color: Colors.white, // العنوان أبيض
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+          centerTitle: true, // توسيط العنوان افتراضياً
+        ),
+        iconTheme: IconThemeData(
+          color: Colors.white, // أي أيقونة عامة في التطبيق أبيض
+        ),
+      ),
+
       home: initialPage,
     );
   }
 }
+
 
 
 

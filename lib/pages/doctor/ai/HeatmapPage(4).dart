@@ -84,8 +84,8 @@ class _HeatmapPageState extends State<HeatmapPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:  Text("Breast Cancer Heatmap", style: AppFont.regular(
-          size: 18,
+        title:  Text("AI-Highlighted Suspicious Region", style: AppFont.regular(
+          size: 16,
           weight: FontWeight.bold,
           color: Colors.white,
         ),),
@@ -131,29 +131,29 @@ class _HeatmapPageState extends State<HeatmapPage> {
               children: [
                 if (_probs != null) ...[
                   Text(
-                    "Malignant: ${( _probs![1]*100).toStringAsFixed(1)}%",
+                    "Malignant: ${(_probs![1] * 100).toStringAsFixed(1)}%",
                     style: AppFont.regular(
                       size: 16,
                       weight: FontWeight.bold,
-                      color: getProbabilityColor(_probs![1]), // اللون حسب النسبة
+                      color: Colors.black, // 🟢 جميع النصوص باللون الأسود
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    "Benign: ${( _probs![0]*100).toStringAsFixed(1)}%",
+                    "Benign: ${(_probs![0] * 100).toStringAsFixed(1)}%",
                     style: AppFont.regular(
                       size: 16,
                       weight: FontWeight.bold,
-                      color: getProbabilityColor(_probs![0]), // اللون حسب النسبة
+                      color: Colors.black, // 🟢 أسود
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    "Normal: ${( _probs![2]*100).toStringAsFixed(1)}%",
+                    "Normal: ${(_probs![2] * 100).toStringAsFixed(1)}%",
                     style: AppFont.regular(
                       size: 16,
                       weight: FontWeight.bold,
-                      color: getProbabilityColor(_probs![2]), // اللون حسب النسبة
+                      color: Colors.black, // 🟢 أسود
                     ),
                   ),
                 ] else
@@ -162,11 +162,12 @@ class _HeatmapPageState extends State<HeatmapPage> {
                     style: AppFont.regular(
                       size: 16,
                       weight: FontWeight.bold,
-                      color: Colors.black, // لون افتراضي
+                      color: Colors.black, // 🟢 أسود
                     ),
                   ),
               ],
             ),
+
             const SizedBox(height: 20),
 
             const SizedBox(height: 20),
@@ -176,7 +177,7 @@ class _HeatmapPageState extends State<HeatmapPage> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                   Text("Overlay:", style: AppFont.regular(
+                   Text("AI-Highlighted Area (Overlay View)", style: AppFont.regular(
                     size: 16,
                     weight: FontWeight.bold,
                     color: Colors.black,
@@ -202,7 +203,7 @@ class _HeatmapPageState extends State<HeatmapPage> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                   Text("Heatmap Only:",
+                   Text("Model Attention Map",
                     style: AppFont.regular(
                       size: 16,
                       weight: FontWeight.bold,

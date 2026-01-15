@@ -26,9 +26,9 @@
 
 
 
-final  String baseUrl                     = "http://172.21.208.1:8000/";
-final String baseUrl1                     = "http://172.21.208.1:8000";
-final String wsUrl                        = "ws://172.21.208.1:8000/chat/ws";
+final  String baseUrl                     = "http://10.0.2.2:8000/";
+final String baseUrl1                     = "http://10.0.2.2:8000";
+final String wsUrl                        = "ws://10.0.2.2:8000/chat/ws";
 
 
 final String chatMarkDelivered = "$baseUrl1/api/chat/delivered";

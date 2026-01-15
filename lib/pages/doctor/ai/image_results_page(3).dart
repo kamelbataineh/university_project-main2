@@ -143,6 +143,9 @@ class _ImageResultsPageState extends State<ImageResultsPage>
           ),
         ),
         backgroundColor: Colors.indigo.shade400,
+        iconTheme: IconThemeData(
+          color: Colors.white, // 🟢 السهم أبيض
+        ),
       ),
       body: SingleChildScrollView(
         controller: _scrollController,
@@ -206,13 +209,12 @@ class _ImageResultsPageState extends State<ImageResultsPage>
             const SizedBox(height: 16),
             Row(
               children: [
-                Icon(Icons.warning_amber,
-                    color: getGradientColor(maxProb), size: 18),
-                const SizedBox(width: 8),
+
+                 SizedBox(width: 2),
                 Text(
-                  _showConfidence ? "Confidence: $_confidenceText%" : "",
+                  _showConfidence ?"Confidence: $_confidenceText%" : "",
     style: AppFont.regular(
-    size: 16,
+    size: 15,
     weight: FontWeight.bold,
         color: getGradientColor(maxProb)  )
                 ),
@@ -225,12 +227,12 @@ class _ImageResultsPageState extends State<ImageResultsPage>
                 padding: const EdgeInsets.only(top: 20),
                 child: Center(
                   child: SizedBox(
-                    width: MediaQuery.of(context).size.width / 2,
+                    width: MediaQuery.of(context).size.width ,
                     height: 38, // رفع الارتفاع قليلًا لتوفير مساحة للنص
                     child: ElevatedButton.icon(
-                      icon: const Icon(Icons.show_chart, color: Colors.white),
+                      icon:  Icon(Icons.show_chart, color: Colors.white),
                       label: Text(
-                        'View Heatmap',
+                        'View AI Highlighted Area',
                         style: AppFont.regular(
                           size: 16,
                           weight: FontWeight.bold,

@@ -433,7 +433,7 @@ class _UploadImagePageState extends State<UploadImagePage>
                         onPressed: pickFromGallery,
                         icon: const Icon(Icons.image, color: Colors.white), // أيقونة باللون الأبيض
                         label: const Text(
-                          "Choose Image",
+                          "Select Mammogram",
                           style: TextStyle(color: Colors.white), // نص أبيض
                         ),
                         style: ElevatedButton.styleFrom(
@@ -469,7 +469,7 @@ class _UploadImagePageState extends State<UploadImagePage>
                               ),
                               Expanded(
                                 child: Text(
-                                  "This AI system provides clinical decision support only and does not replace professional medical judgment.\nI acknowledge and understand this.",
+                                  "This AI system provides clinical decision support only. Final medical judgment remains the responsibility of the physician.",
     style: AppFont.regular(
     size: 14,
     weight: FontWeight.bold,
