@@ -39,7 +39,11 @@ class AdminHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Home"),
+        iconTheme: IconThemeData(
+          color: Colors.black,
+        ),
+        backgroundColor: Colors.white,
+        title: const Text("Home",style: TextStyle(color: Colors.black),),
         centerTitle: true,
         actions: [
           IconButton(

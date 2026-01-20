@@ -224,7 +224,12 @@ class _EditPatientProfilePageState extends State<EditPatientProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Edit Profile"), centerTitle: true),
+      appBar: AppBar(
+          iconTheme: IconThemeData(
+            color: Colors.black,
+          ),
+          backgroundColor: Colors.white,
+          title:  Text("Edit Profile",style: TextStyle(color: Colors.black),), centerTitle: true),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
-import '../../../core/config/app_font.dart';
+import '../../core/config/app_font.dart';
 
 class YoutubeVideoPage extends StatefulWidget {
   const YoutubeVideoPage({super.key});

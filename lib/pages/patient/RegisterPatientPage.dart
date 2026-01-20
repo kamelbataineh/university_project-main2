@@ -5,10 +5,10 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:university_project/core/config/theme.dart';
 import 'package:university_project/pages/auth/LandingPage.dart';
-import 'package:university_project/pages/auth/PatientLoginPage.dart';
+import 'package:university_project/pages/patient/PatientLoginPage.dart';
 import 'package:university_project/pages/doctor/auth/RegisterDoctorPage.dart';
 import '../../core/config/app_font.dart';
-import '../patient/patient_verify_otp_page.dart';
+import 'patient_verify_otp_page.dart';
 
 import 'package:http/http.dart' as http;
 import '../../core/config/app_config.dart';

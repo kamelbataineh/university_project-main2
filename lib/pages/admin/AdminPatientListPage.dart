@@ -153,7 +153,11 @@ class _AdminPatientListPageState extends State<AdminPatientListPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("List of patients"),
+        iconTheme: IconThemeData(
+          color: Colors.black,
+        ),
+        backgroundColor: Colors.white,
+        title: const Text("List of patients",style: TextStyle(color: Colors.black)),
         centerTitle: true,
         bottom: TabBar(
           controller: _tabController,

@@ -58,7 +58,12 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("عرض الملف")),
+      appBar: AppBar(
+          iconTheme: IconThemeData(
+            color: Colors.black,
+          ),
+          backgroundColor: Colors.white,
+          title: const Text("عرض الملف",style: TextStyle(color: Colors.black),)),
       body: loading
           ? const Center(child: CircularProgressIndicator())
           : isPdf

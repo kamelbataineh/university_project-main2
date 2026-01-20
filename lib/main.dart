@@ -41,19 +41,19 @@ class MyApp extends StatelessWidget {
       // 🌟 Theme عام لكل التطبيق
       theme: ThemeData(
         appBarTheme: AppBarTheme(
-          backgroundColor: Colors.indigo.shade400, // خلفية AppBar افتراضية
+          backgroundColor: Colors.black,
           iconTheme: IconThemeData(
-            color: Colors.white, // كل الأسهم والأيقونات في AppBar بيضاء
+            color: Colors.white,
           ),
           titleTextStyle: TextStyle(
-            color: Colors.white, // العنوان أبيض
+            color: Colors.white,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
-          centerTitle: true, // توسيط العنوان افتراضياً
+          centerTitle: true,
         ),
         iconTheme: IconThemeData(
-          color: Colors.white, // أي أيقونة عامة في التطبيق أبيض
+          color: Colors.white,
         ),
       ),
 

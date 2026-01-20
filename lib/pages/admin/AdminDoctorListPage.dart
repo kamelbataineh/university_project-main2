@@ -150,14 +150,19 @@ class _AdminDoctorListPageState extends State<AdminDoctorListPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: const Text("List of doctor"),
+        iconTheme: IconThemeData(
+          color: Colors.black,
+        ),
+        backgroundColor: Colors.white,
+          title:  Text("List of doctor",style: TextStyle(color: Colors.black),),
           centerTitle: true,        bottom: TabBar(
           controller: tabController,
           tabs: const [
-            Tab(text: "Approval requests"),
+            Tab(text: "Approval requests", ),
             Tab(text: "Doctors"),
           ],
-        ),
+
+      ),
       ),
       body: loading
           ? const Center(child: CircularProgressIndicator())

@@ -117,7 +117,13 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
 
     return Scaffold(
       appBar:
-          AppBar(title: Text("${doctor['first_name']} ${doctor['last_name']}")),
+          AppBar(
+              iconTheme: IconThemeData(
+                color: Colors.black,
+              ),
+              backgroundColor: Colors.white,
+              title: Text("${doctor['first_name']} ${doctor['last_name']}"
+                ,style: TextStyle(color: Colors.black),),),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16),

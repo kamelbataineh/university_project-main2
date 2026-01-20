@@ -35,31 +35,36 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
   List<Map<String, dynamic>> messages = [];
   late WebSocketChannel channel;
+  String _role = ""; // doctor أو patient
 
 
   // final Color senderColor = Color(0xFFF9A8D4);   // زهري فاتح (sender_id)
   // final Color receiverColor = Color(0xFFEC4899); // زهري غامق (receiver_id)
+  // لون الرسائل المرسلة (أنا) → زهري
   final LinearGradient senderColor = const LinearGradient(
     colors: [
-      Color(0xFFF472B6), // زهري ناعم
-      Color(0xFFEF9FC6), // زهري فاتح جداً
+      Color(0xFFF472B6), // زهري واضح
+      Color(0xFFFBCFE8), // زهري فاتح
     ],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  final LinearGradient receiverColor =  LinearGradient(
+// لون الرسائل المستقبَلة → أبيض
+  final LinearGradient receiverColor = const LinearGradient(
     colors: [
-      Colors.grey[200]!, // زهري أغمق
-      Colors.grey[300]!, // زهري أغمق
+      Colors.white,
+      Colors.white,
     ],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
+
 
   @override
   void initState() {
     super.initState();
+    _loadRole();
 
     fetchOldMessages();
 
@@ -78,6 +83,12 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
         });
       });
       scrollToBottom();
+    });
+  }
+  Future<void> _loadRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _role = prefs.getString("role") ?? "";
     });
   }
 
@@ -294,6 +305,16 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                   itemBuilder: (context, index) {
                     final msg = messages[index];
                     final bool isSender = msg["isSender"] == true;
+                    bool usePinkColor;
+
+                    if (_role == "patient") {
+                      // عند المريض: رسالته زهري
+                      usePinkColor = isSender;
+                    } else {
+                      // عند الدكتور: رسالة المريض زهري
+                      usePinkColor = !isSender;
+                    }
+
                     final bool isImage = msg["type"] == "image";
 
                     String formattedTime = "";
@@ -316,13 +337,14 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                           minWidth: 180,),
                         decoration: BoxDecoration(
 
-                          gradient: isSender ? senderColor : receiverColor,
+                          gradient: usePinkColor ? senderColor : receiverColor,
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: isSender
+                              color: usePinkColor
                                   ? const Color(0xFFF472B6).withOpacity(0.35)
                                   : Colors.black.withOpacity(0.08),
+
                               blurRadius: 10,
                               offset: const Offset(0, 4),
                             ),
@@ -343,10 +365,11 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                             Text(
                               msg["text"],
                               style: TextStyle(
-                                color: Colors.black45,
+                                color: usePinkColor ? Colors.white : Colors.black87,
                                 fontSize: 15,
                               ),
                             ),
+
                             const SizedBox(height: 4),
                             Row(
                               mainAxisSize: MainAxisSize.min,

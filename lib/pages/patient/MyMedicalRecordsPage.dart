@@ -42,7 +42,13 @@ class _MyMedicalRecordsPageState extends State<MyMedicalRecordsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("My Medical Records")),
+      appBar: AppBar(
+          backgroundColor:Colors.pink.shade400 ,
+          title:  Text("My Medical Records",style: AppFont.regular(
+          size: 18,
+            weight: FontWeight.bold,
+            color: Colors.white,
+          ),),),
       body: loading
           ? const Center(child: CircularProgressIndicator())
           : records.isEmpty
@@ -200,7 +206,7 @@ class MedicalRecordDetailPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title:  Text("Medical Record Details",style: AppFont.regular(
-        size: 20,
+        size: 18,
         weight: FontWeight.bold,
         color: Colors.white,
       ),), backgroundColor: Colors.pink.shade400),

@@ -9,7 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:open_file/open_file.dart';
 import 'package:university_project/core/config/theme.dart';
 import 'package:university_project/pages/doctor/auth/LoginDoctorPage.dart';
-import 'package:university_project/pages/auth/RegisterPatientPage.dart';
+import 'package:university_project/pages/patient/RegisterPatientPage.dart';
 import 'package:university_project/pages/doctor/home/doctor_choice_page.dart';
 import '../../../core/config/app_config.dart';
 import '../../../core/config/app_font.dart';

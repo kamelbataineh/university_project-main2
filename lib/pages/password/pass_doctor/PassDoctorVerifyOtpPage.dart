@@ -131,7 +131,13 @@ class _PassdoctorverifyotppageState extends State<Passdoctorverifyotppage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Verify OTP')),
+      appBar: AppBar(
+          iconTheme: IconThemeData(
+            color: Colors.black,
+          ),
+          backgroundColor: Colors.white,
+          title:  Text("Verify OTP",style: TextStyle(color: Colors.black),),),
+
       body: Padding(
         padding: EdgeInsets.all(16),
         child: Column(

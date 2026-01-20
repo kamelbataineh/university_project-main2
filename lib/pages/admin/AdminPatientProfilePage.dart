@@ -67,7 +67,11 @@ class _AdminPatientProfilePageState extends State<AdminPatientProfilePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("${patient["first_name"]} ${patient["last_name"]}"),
+        iconTheme: IconThemeData(
+          color: Colors.black,
+        ),
+        backgroundColor: Colors.white,
+        title: Text("${patient["first_name"]} ${patient["last_name"]}",style: TextStyle(color: Colors.black),),
       ),
       body: loading
           ? const Center(child: CircularProgressIndicator())

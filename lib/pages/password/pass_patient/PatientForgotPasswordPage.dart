@@ -67,7 +67,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Forgot Password')),
+      appBar: AppBar(
+        iconTheme: IconThemeData(
+          color: Colors.black,
+        ),
+        backgroundColor: Colors.white,
+        title:  Text("Forgot Password",style: TextStyle(color: Colors.black),),),
+
       body: Padding(
         padding: EdgeInsets.all(16),
         child: Column(

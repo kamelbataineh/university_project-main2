@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:university_project/pages/auth/FullScreenImagePage.dart';
-import 'package:university_project/pages/auth/PatientLoginPage.dart';
+import 'package:university_project/pages/patient/PatientLoginPage.dart';
 import 'package:university_project/pages/patient/EditPatientProfilePage.dart' hide baseUrl;
 import 'dart:convert';
 import '../../core/config/app_config.dart';

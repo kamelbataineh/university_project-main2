@@ -14,7 +14,7 @@ import '../appointments/doctor_appointments_page.dart';
 import '../profile/profile_doctor.dart';
 import '../../../core/config/theme.dart';
 import '../records/DoctorRecordsPage.dart';
-import 'YoutubeVideoPage.dart';
+import '../../patient/YoutubeVideoPage.dart';
 ////
 //
 //

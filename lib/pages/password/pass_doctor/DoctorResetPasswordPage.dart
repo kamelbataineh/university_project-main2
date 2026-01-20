@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:university_project/pages/auth/PatientLoginPage.dart';
+import 'package:university_project/pages/patient/PatientLoginPage.dart';
 import 'package:university_project/pages/doctor/auth/LoginDoctorPage.dart';
 import '../../../core/config/app_config.dart';
 
@@ -112,7 +112,13 @@ class _DoctorresetpasswordpageState extends State<Doctorresetpasswordpage> {
     String pass = _newPassController.text;
 
     return Scaffold(
-      appBar: AppBar(title: Text('Reset Password')),
+      appBar: AppBar(
+        iconTheme: IconThemeData(
+          color: Colors.black,
+        ),
+        backgroundColor: Colors.white,
+        title:  Text("Reset Password",style: TextStyle(color: Colors.black),),),
+
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: Column(

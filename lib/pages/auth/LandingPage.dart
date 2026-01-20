@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:university_project/pages/admin/admin_login_page.dart';
-import 'package:university_project/pages/auth/PatientLoginPage.dart';
-import 'package:university_project/pages/auth/RegisterPatientPage.dart';
+import 'package:university_project/pages/patient/PatientLoginPage.dart';
+import 'package:university_project/pages/patient/RegisterPatientPage.dart';
 import 'package:university_project/pages/doctor/home/doctor_choice_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 

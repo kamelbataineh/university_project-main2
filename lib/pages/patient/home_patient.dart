@@ -11,7 +11,7 @@ import '../../core/config/app_config.dart';
 import '../../core/config/app_font.dart';
 import '../../core/config/theme.dart';
 import '../components/chats_list_page.dart';
-import '../doctor/home/YoutubeVideoPage.dart';
+import 'YoutubeVideoPage.dart';
 import 'MyMedicalRecordsPage.dart';
 import 'book_appointment_page.dart';
 import 'doctors_list_page.dart';

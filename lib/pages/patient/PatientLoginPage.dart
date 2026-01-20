@@ -7,9 +7,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/config/app_config.dart';
 import '../../core/config/app_font.dart';
 import '../../core/config/theme.dart';
-import '../patient/home_patient.dart';
+import 'home_patient.dart';
 import '../password/pass_patient/PatientForgotPasswordPage.dart';
-import 'LandingPage.dart';
+import '../auth/LandingPage.dart';
 import 'RegisterPatientPage.dart';
 
 class PatientLoginPage extends StatefulWidget {
