@@ -181,15 +181,7 @@ class _ChatsListPageState extends State<ChatsListPage> {
                             ),
                             const SizedBox(width: 6),
                             // النقطة الزرقاء بجانب الاسم
-                            if (hasNewMessageFromOther)
-                              Container(
-                                width: 10,
-                                height: 10,
-                                decoration: const BoxDecoration(
-                                  color: Colors.blue,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
+
                           ],
                         ),
                         const SizedBox(height: 4),
@@ -207,9 +199,7 @@ class _ChatsListPageState extends State<ChatsListPage> {
                   ),
                   Icon(
                     Icons.chat_bubble,
-                    color: lastMessageSenderId != widget.userId
-                        ? Colors.green.shade400
-                        : Colors.grey.shade400,
+                    color: Colors.grey.shade400,
                   ),
                 ],
               ),

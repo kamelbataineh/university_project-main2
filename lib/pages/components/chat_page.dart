@@ -43,8 +43,8 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   // لون الرسائل المرسلة (أنا) → زهري
   final LinearGradient senderColor = const LinearGradient(
     colors: [
-      Color(0xFFF472B6), // زهري واضح
-      Color(0xFFFBCFE8), // زهري فاتح
+      Colors.white,
+      Colors.white,
     ],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
@@ -101,8 +101,13 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   }
 
   void sendMessageWS() {
-    final text = _controller.text.trim();
+    String text = _controller.text.trim();
     if (text.isEmpty) return;
+
+    // إذا الدكتور → نضيف Dr: قبل النص المرسل
+    if (_role == "doctor") {
+      text = "Dr: $text";
+    }
 
     final payload = {
       "receiver_id": widget.otherId,
@@ -295,68 +300,50 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                   )
 
               ),
-
-              // ===== Messages List =====
+// ===== Messages List =====
               Expanded(
                 child: ListView.builder(
                   controller: _scrollController,
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(8),
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     final msg = messages[index];
-                    final bool isSender = msg["isSender"] == true;
-                    bool usePinkColor;
-
-                    if (_role == "patient") {
-                      // عند المريض: رسالته زهري
-                      usePinkColor = isSender;
-                    } else {
-                      // عند الدكتور: رسالة المريض زهري
-                      usePinkColor = !isSender;
-                    }
-
                     final bool isImage = msg["type"] == "image";
 
                     String formattedTime = "";
                     try {
-                      formattedTime = DateFormat('hh:mm a')
-                          .format(DateTime.parse(msg["time"]));
+                      formattedTime = DateFormat('hh:mm a').format(DateTime.parse(msg["time"]));
                     } catch (e) {
                       formattedTime = "";
                     }
 
                     return AnimatedContainer(
-                      duration:  Duration(milliseconds: 200),
-                      alignment: isSender
-                          ? Alignment.centerRight
-                          : Alignment.centerLeft,
-                      margin:  EdgeInsets.symmetric(vertical: 10),
+                      duration: const Duration(milliseconds: 200),
+                      alignment: Alignment.centerLeft, // كل الرسائل على اليسار
+                      margin: const EdgeInsets.symmetric(vertical: 4),
                       child: Container(
-                        padding:  EdgeInsets.all(8),
-                        constraints:  BoxConstraints(  maxWidth: 280,
-                          minWidth: 180,),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        constraints: const BoxConstraints(
+                          maxWidth: 220,
+                          minWidth: 100,
+                        ),
                         decoration: BoxDecoration(
-
-                          gradient: usePinkColor ? senderColor : receiverColor,
-                          borderRadius: BorderRadius.circular(20),
+                          color: const Color(0xFFF472B6), // نفس اللون لكل الرسائل (زهري)
+                          borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: usePinkColor
-                                  ? const Color(0xFFF472B6).withOpacity(0.35)
-                                  : Colors.black.withOpacity(0.08),
-
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
+                              color: const Color(0xFFF472B6).withOpacity(0.35),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
                             ),
                           ],
                         ),
-
                         child: isImage
                             ? ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(12),
                           child: Image.network(
                             baseUrl + msg["text"],
-                            width: 200,
+                            width: 150,
                           ),
                         )
                             : Column(
@@ -364,42 +351,26 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                           children: [
                             Text(
                               msg["text"],
-                              style: TextStyle(
-                                color: usePinkColor ? Colors.white : Colors.black87,
-                                fontSize: 15,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
                               ),
                             ),
-
                             const SizedBox(height: 4),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Text(
-                                  formattedTime,
-                                  style: TextStyle(
-                                    color: Colors.black45,
-                                    fontSize: 10,
-                                  ),
+                            Align(
+                              alignment: Alignment.bottomRight,
+                              child: Text(
+                                formattedTime,
+                                style: const TextStyle(
+                                  color: Colors.black45,
+                                  fontSize: 9,
                                 ),
-                                const SizedBox(width: 4),
-                                // if (isMe)
-                                //   Icon(
-                                //     msg["delivered"] == true
-                                //         ? Icons.check_circle
-                                //         : Icons.check_circle_outline,
-                                //     size: 14,
-                                //     color: msg["delivered"] == true
-                                //         ? Colors.green
-                                //         : Colors.grey,
-                                //   ),
-                              ],
+                              ),
                             ),
                           ],
                         ),
                       ),
                     );
-
                   },
                 ),
               ),
@@ -421,8 +392,9 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                     Expanded(
                       child: TextField(
                         controller: _controller,
-                        decoration: const InputDecoration(
-                          hintText: "   Write ...",
+                        decoration: InputDecoration(
+                          prefixText: _role == "doctor" ? "Dr: " : null, // إذا دور الدكتور → Dr: ثابت
+                          hintText: "Write ...",
                           border: InputBorder.none,
                         ),
                         minLines: 1,
@@ -430,7 +402,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                       ),
                     ),
 
-                        IconButton(
+                    IconButton(
                           icon: const Icon(Icons.send_rounded, color: Colors.pinkAccent),
                           onPressed: sendMessageWS,
                         )
