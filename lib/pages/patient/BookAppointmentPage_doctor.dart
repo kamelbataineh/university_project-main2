@@ -35,36 +35,62 @@ class _BookAppointmentPageDoctorState extends State<BookAppointmentPageDoctor> {
   }
   Future<void> pickDate() async {
     final now = DateTime.now();
-    final tomorrow = now.add(const Duration(days: 1)); // البداية من الغد
+    final tomorrow = now.add(const Duration(days: 1));
 
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: tomorrow,
-      firstDate: tomorrow, // ممنوع اليوم
-      lastDate: now.add(const Duration(days: 60)),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: Colors.pinkAccent,
-              onPrimary: Colors.white,
-              onSurface: Colors.black87,
+    DateTime? picked;
+    bool validDate = false;
+
+    while (!validDate) {
+      picked = await showDatePicker(
+        context: context,
+        initialDate: tomorrow,
+        firstDate: tomorrow,
+        lastDate: now.add(const Duration(days: 60)),
+        builder: (context, child) {
+          return Theme(
+            data: Theme.of(context).copyWith(
+              colorScheme: ColorScheme.light(
+                primary: Colors.pinkAccent,
+                onPrimary: Colors.white,
+                onSurface: Colors.black87,
+              ),
             ),
-          ),
-          child: child!,
-        );
-      },
-    );
+            child: child!,
+          );
+        },
+      );
 
-    if (picked != null) {
-      setState(() {
-        selectedDate = picked;
-        selectedTime = null;
-        availableTimes = [];
-      });
-      fetchAvailableTimes();
+      if (picked == null) return; // المستخدم ألغى الاختيار
+
+      // تمنع الجمعة فقط
+      if (picked.weekday == DateTime.friday || picked.weekday == DateTime.saturday) {
+        await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text("Invalid Date"),
+            content: const Text("Appointments are not allowed on Fridays."),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text("OK"),
+              ),
+            ],
+          ),
+        );
+        continue; // يرجع يفتح الـ DatePicker مرة ثانية
+      } else {
+        validDate = true;
+      }
     }
+
+    setState(() {
+      selectedDate = picked;
+      selectedTime = null;
+      availableTimes = [];
+    });
+    fetchAvailableTimes();
   }
+
 
 
   Future<void> fetchAvailableTimes() async {

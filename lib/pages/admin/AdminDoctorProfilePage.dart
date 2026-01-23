@@ -42,7 +42,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
 
     try {
       final response = await http.get(
-        Uri.parse("http://192.168.8.31:8000/admin/doctor"),
+        Uri.parse("$baseUrl1/admin/doctor"),
         headers: {"Authorization": "Bearer $token"},
       );
 
@@ -75,7 +75,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
     if (isApproved != null) body["is_approved"] = isApproved;
 
     final response = await http.put(
-      Uri.parse("http://192.168.8.31:8000/admin/doctor/update/$id"),
+      Uri.parse("$baseUrl1/admin/doctor/update/$id"),
       headers: {
         "Authorization": "Bearer $token",
         "Content-Type": "application/json"

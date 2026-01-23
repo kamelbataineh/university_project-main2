@@ -120,6 +120,13 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
     scrollToBottom();
   }
 
+  DateTime parseServerTime(String time) {
+    // إذا ما فيه timezone → اعتبره UTC
+    if (!time.contains('Z') && !time.contains('+')) {
+      time = '${time}Z';
+    }
+    return DateTime.parse(time).toLocal();
+  }
 
 
   void scrollToBottom() {
@@ -312,7 +319,9 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
 
                     String formattedTime = "";
                     try {
-                      formattedTime = DateFormat('hh:mm a').format(DateTime.parse(msg["time"]));
+                      formattedTime = DateFormat('hh:mm a')
+                          .format(parseServerTime(msg["time"]));
+
                     } catch (e) {
                       formattedTime = "";
                     }

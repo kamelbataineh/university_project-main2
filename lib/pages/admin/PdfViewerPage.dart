@@ -63,7 +63,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
             color: Colors.black,
           ),
           backgroundColor: Colors.white,
-          title: const Text("عرض الملف",style: TextStyle(color: Colors.black),)),
+          title: const Text("View the CV",style: TextStyle(color: Colors.black),)),
       body: loading
           ? const Center(child: CircularProgressIndicator())
           : isPdf
