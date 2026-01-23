@@ -6,9 +6,9 @@ import 'DoctorPatientFullRecordPage.dart';
 
 class DoctorRecordsPage extends StatefulWidget {
   final String token;
+  final String userId; // ← أضف هذا
 
-  const DoctorRecordsPage({Key? key, required this.token}) : super(key: key);
-
+  const DoctorRecordsPage({Key? key, required this.token, required this.userId}) : super(key: key);
   @override
   State<DoctorRecordsPage> createState() => _DoctorRecordsPageState();
 }
@@ -259,12 +259,13 @@ class _DoctorRecordsPageState extends State<DoctorRecordsPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) =>
-                                DoctorPatientFullRecordPage(
-                                  token: widget.token,
-                                  patientId: patientId,
-                                  patientName: record['patient_name'],
-                                ),
+                            builder: (_) => DoctorPatientFullRecordPage(
+                              token: widget.token,
+                              patientId: patientId,
+                              userId: widget.userId, // ← مرر userId هنا
+                              patientName: record['patient_name'],
+                            ),
+
                           ),
                         );
                       },

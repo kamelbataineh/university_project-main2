@@ -528,9 +528,13 @@ class _HomeDoctorPageState extends State<HomeDoctorPage>
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => DoctorRecordsPage(token: widget.token),
+                  builder: (_) => DoctorRecordsPage(
+                    token: widget.token,
+                    userId: widget.userId, // ← أضف userId هنا
+                  ),
                 ),
               );
+
             }
           },
           child: Container(

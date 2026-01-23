@@ -10,12 +10,14 @@ import 'EditRecordPage.dart';
 class DoctorPatientFullRecordPage extends StatefulWidget {
   final String patientId;
   final String token;
+  final String userId; // ← أضف هذا
   final String? patientName;
 
   const DoctorPatientFullRecordPage({
     Key? key,
     required this.patientId,
     required this.token,
+    required this.userId, // ← أضف هذا
     this.patientName,
   }) : super(key: key);
 
@@ -23,6 +25,7 @@ class DoctorPatientFullRecordPage extends StatefulWidget {
   State<DoctorPatientFullRecordPage> createState() =>
       _DoctorPatientFullRecordPageState();
 }
+
 
 class _DoctorPatientFullRecordPageState
     extends State<DoctorPatientFullRecordPage> {
@@ -44,18 +47,29 @@ class _DoctorPatientFullRecordPageState
     try {
       final response = await http.get(
         Uri.parse(
-          "$baseUrl1/api/v1/doctor/patients/${widget.patientId}/medical_records?page=1&limit=1",
+          "$baseUrl1/api/v1/doctor/patients/${widget.patientId}/medical_records?page=1&limit=100",
         ),
         headers: {"Authorization": "Bearer ${widget.token}"},
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+
         if (data['records'] is List && data['records'].isNotEmpty) {
-          setState(() {
-            record = data['records'][0];  // تحديث الـ UI هنا
-            patientName = widget.patientName ?? "Unknown";
-          });
+          // 🔹 ابحث عن سجل هذا الدكتور فقط
+          final myRecord = (data['records'] as List).firstWhere(
+                (r) => r['doctor_id'] == widget.userId, // صاحب السجل
+            orElse: () => null,
+          );
+
+          if (myRecord != null) {
+            setState(() {
+              record = myRecord;
+              patientName = widget.patientName ?? "Unknown";
+            });
+          } else {
+            setState(() => record = null); // ما عنده سجل خاص فيه
+          }
         } else {
           setState(() => record = null);
         }
@@ -67,6 +81,7 @@ class _DoctorPatientFullRecordPageState
       setState(() => loading = false);
     }
   }
+
 
   // ================= SAFE GET =================
   String safeGet(dynamic map, List<String> path,

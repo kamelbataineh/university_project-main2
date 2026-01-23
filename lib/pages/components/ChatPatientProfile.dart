@@ -44,28 +44,33 @@ class _ChatPatientProfileState extends State<ChatPatientProfile> {
     try {
       final response = await http.get(
         Uri.parse(
-            "$baseUrl1/api/v1/doctor/patients/${widget.patientId}/medical_records?page=1&limit=1"),
+            "$baseUrl1/api/v1/doctor/patients/${widget.patientId}/medical_records?page=1&limit=100"),
         headers: {"Authorization": "Bearer ${widget.token}"},
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
 
-        // ✅ تحقق من وجود 'records' واحتوائها على سجلات
         if (data['records'] != null && data['records'].isNotEmpty) {
-          setState(() {
-            record = data['records'][0]; // أول سجل
-            recordExists = true;
+          // ابحث عن سجل هذا الدكتور فقط
+          final myRecord = (data['records'] as List).firstWhere(
+                (r) => r['doctor_id'] == widget.userId, // فحص صاحب السجل
+            orElse: () => null,
+          );
 
-            // الحصول على recordId بشكل آمن
-            if (record!['_id'] != null) {
-              if (record!['_id'] is Map && record!['_id']['\$oid'] != null) {
-                recordId = record!['_id']['\$oid'];
-              } else {
-                recordId = record!['_id'].toString();
+          if (myRecord != null) {
+            setState(() {
+              record = myRecord;
+              recordExists = true;
+              if (record!['_id'] != null) {
+                if (record!['_id'] is Map && record!['_id']['\$oid'] != null) {
+                  recordId = record!['_id']['\$oid'];
+                } else {
+                  recordId = record!['_id'].toString();
+                }
               }
-            }
-          });
+            });
+          }
         }
       } else {
         print("Failed to fetch records: ${response.statusCode}");
@@ -76,6 +81,7 @@ class _ChatPatientProfileState extends State<ChatPatientProfile> {
       setState(() => loadingRecord = false);
     }
   }
+
 
 
   Future<void> fetchPatient() async {
@@ -227,50 +233,58 @@ class _ChatPatientProfileState extends State<ChatPatientProfile> {
                 patient!['phone_number']),
 
             const SizedBox(height: 20),
-            SizedBox(
-              height: 38,
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.medical_services, color: Colors.white),
-                label: const Text(
-                  "Patient Records",
-                  style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
-                ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.indigo.shade400,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  elevation: 3,
-                  shadowColor: Colors.white,
-                  minimumSize: const Size(0, 38),
-                ),
-                onPressed: () {
-                  if (patient != null) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => DoctorPatientFullRecordPage(
-                          token: widget.token,
-                          patientId: patientId,
-                          patientName: fullName,
-                        ),
-                      ),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("❌ Patient not found, cannot display records"),
-                      ),
-                    );
-                  }
-                },
+        SizedBox(
+          height: 38,
+          child: ElevatedButton.icon(
+            icon: const Icon(Icons.medical_services, color: Colors.white),
+            label: const Text(
+              "Patient Records",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
               ),
             ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: recordExists
+                  ? Colors.indigo.shade400  // الزر مفعل إذا عنده سجل
+                  : Colors.grey,             // الزر معطّل إذا ما عنده سجل
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              elevation: 3,
+              shadowColor: Colors.white,
+              minimumSize: const Size(0, 38),
+            ),
+            onPressed: recordExists  // الشرط: فقط إذا عنده سجل
+                ? () {
+              if (patient != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => DoctorPatientFullRecordPage(
+                      token: widget.token,
+                      patientId: patientId,
+                      userId: widget.userId, // ← مرره هنا
+                      patientName: fullName,
+                    ),
+                  ),
+                );
+
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                        "❌ Patient not found, cannot display records"),
+                  ),
+                );
+              }
+            }
+                : null, // null يعني الزر معطّل
+          ),
+        ),
+
 
             SizedBox(height: 20,),
             SizedBox(
@@ -287,17 +301,16 @@ class _ChatPatientProfileState extends State<ChatPatientProfile> {
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
                   ),
+                ),  style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.indigo.shade400,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.indigo.shade400,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  elevation: 3,
-                  shadowColor: Colors.white,
-                  minimumSize: const Size(0, 38), // العرض ديناميكي حسب النص
-                ),
+                elevation: 3,
+                shadowColor: Colors.white,
+                minimumSize: const Size(0, 38),
+              ),
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -320,17 +333,16 @@ class _ChatPatientProfileState extends State<ChatPatientProfile> {
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
                   ),
+                ),  style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.indigo.shade400,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.indigo.shade400,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  elevation: 3,
-                  shadowColor: Colors.white,
-                  minimumSize: const Size(0, 38), // العرض ديناميكي حسب النص
-                ),
+                elevation: 3,
+                shadowColor: Colors.white,
+                minimumSize: const Size(0, 38),
+              ),
                 onPressed: () {
                   Navigator.push(
                     context,
